@@ -17,7 +17,8 @@ def restructure_json(filename_1,filename_2):
     ndvi_1 = fetchData(filename_1)
     ndvi_2 = fetchData(filename_2)
 
-    ndvi_data = [['NDVI_1','NDVI_2','Month','Year']]
+    #ndvi data is structured without factoring in time (same dates)
+    ndvi_data_1 = [['NDVI_1','NDVI_2','Month','Year']]
     for i in range(len(ndvi_1)):
         raw_time = str(ndvi_1[i][0][0])
         time = datetime.strptime(raw_time,'%Y-%m-%d')
@@ -26,15 +27,31 @@ def restructure_json(filename_1,filename_2):
         ndvi_index_1 = ndvi_1[i][1]['percent_inside_threshold']
         ndvi_index_2 = ndvi_2[i][1]['percent_inside_threshold']
         ndvi_array = [ndvi_index_1,ndvi_index_2,int(month),int(year)]
-        ndvi_data.append(ndvi_array)
+        ndvi_data_1.append(ndvi_array)
 
-    #print(ndvi_data)
+    print(ndvi_data_1)
 
-    with open('ndvi_file.csv', mode='w') as csv_file:
+    #ndvi data is structured to arrange ndvi(2) 3 months later
+    ndvi_data_2 = [['NDVI_1','NDVI_2 (+3months)','Month','Year']]
+    for i in range(len(ndvi_1)):
+        raw_time = str(ndvi_1[i][0][0])
+        time = datetime.strptime(raw_time,'%Y-%m-%d')
+        month = datetime.strftime(time,'%m')
+        year = datetime.strftime(time,'%Y')
+        if i < (len(ndvi_1) - 1):
+            ndvi_index_1 = ndvi_1[i][1]['percent_inside_threshold']
+            ndvi_index_2 = ndvi_2[i+1][1]['percent_inside_threshold']
+            ndvi_array = [ndvi_index_1, ndvi_index_2, int(month), int(year)]
+            ndvi_data_2.append(ndvi_array)
+
+    print("\n\n Next Data \n\n")
+    print(ndvi_data_2)
+
+    with open('PyCharm/ndvi_file.csv', mode='w') as csv_file:
         csv_writer = csv.writer(csv_file, delimiter=' ', quotechar='"', quoting=csv.QUOTE_MINIMAL)
-        for data in ndvi_data:
+        for data in ndvi_data_2:
             csv_writer.writerow(data)
         csv_file.close()
 
 
-restructure_json("karura2012_2017.json","mtKenya2012_2017.json")
+restructure_json("PyCharm/karura2012_2017.json","PyCharm/mtKenya2012_2017.json")
