@@ -57,7 +57,7 @@ def gen_cells(macro_cells):
     #0.2 x 0.2 degrees
     print("Total Macro Cells: "+ str(len(macro_cells)))
     #print("Macro Cells:" + str(macro_cells))
-    cell_arr = []
+    cell_arr = [['Latitude-1','Latitude-2','Longitude-1','Longitude-2']]
     for i in range(len(macro_cells)):
         m_lat_1 = macro_cells[i][0]
         m_lat_2 = macro_cells[i][1]
@@ -73,26 +73,18 @@ def gen_cells(macro_cells):
         lon_2 = round((lon_center + 0.1),4)
         cell = [lat_1,lat_2,lon_1,lon_2]
         cell_arr.append(cell)
-    #print("Total 0.2x0.2 Cells: "+str(len(cell_arr)))
+    print("Total 0.2x0.2 Cells: "+str(len(cell_arr)))
     #print("0.2x0.2 Cells: "+ str(cell_arr))
     return cell_arr
 
-def gen_csv(cell_arr):
-    cell_data = [['Latitude-1','Latitude-2','Longitude-1','Longitude-2']]
-
-    with open('PyCharm/kenya_coordinates.csv', mode='w') as csv_file:
-        csv_writer = csv.writer(csv_file, delimiter=' ', quotechar='"', quoting=csv.QUOTE_MINIMAL)
-        for data in cell_arr:
-            csv_writer.writerow(data)
-        csv_file.close()
 
 def main():
-    macro_cells = gen_macro_cells(2,4)
+    macro_cells = gen_macro_cells(20,25)
 
-    cell_data = [['Latitude-1', 'Latitude-2', 'Longitude-1', 'Longitude-2']]
-    cell_data.append(gen_cells(macro_cells))
+    cell_data = gen_cells(macro_cells)
+    #print(cell_data)
 
-    with open('PyCharm/kenya_coordinates.csv', mode='w') as csv_file:
+    with open('kenya_coordinates.csv', mode='w') as csv_file:
         csv_writer = csv.writer(csv_file, delimiter=' ', quotechar='"', quoting=csv.QUOTE_MINIMAL)
         for data in cell_data:
             csv_writer.writerow(data)

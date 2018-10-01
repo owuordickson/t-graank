@@ -33,7 +33,7 @@ def restructure_json(filename_1,filename_2):
     print(ndvi_data_1)
 
     #ndvi data is structured to arrange ndvi(2) 3 months later
-    ndvi_data_2 = [['NDVI_1','NDVI_2 (+3months)','Month','Year']]
+    ndvi_data_2 = [['NDVI_1','NDVI_2(+3months)','Month','Year']]
     for i in range(len(ndvi_1)):
         raw_time = str(ndvi_1[i][0][0])
         time = datetime.strptime(raw_time,'%Y-%m-%d')
@@ -49,7 +49,7 @@ def restructure_json(filename_1,filename_2):
     print(ndvi_data_2)
 
     # ndvi data is structured to arrange ndvi(2) 6 months later
-    ndvi_data_3 = [['NDVI_1', 'NDVI_2 (+6months)', 'Month', 'Year']]
+    ndvi_data_3 = [['NDVI_1', 'NDVI_2(+6months)', 'Month', 'Year']]
     for i in range(len(ndvi_1)):
         raw_time = str(ndvi_1[i][0][0])
         time = datetime.strptime(raw_time, '%Y-%m-%d')
@@ -65,7 +65,7 @@ def restructure_json(filename_1,filename_2):
     print(ndvi_data_3)
 
     # ndvi data is structured to arrange ndvi(1) 3 months later
-    ndvi_data_4 = [['NDVI_1 (+3months)', 'NDVI_2', 'Month', 'Year']]
+    ndvi_data_4 = [['NDVI_1(+3months)', 'NDVI_2', 'Month', 'Year']]
     for i in range(len(ndvi_1)):
         raw_time = str(ndvi_1[i][0][0])
         time = datetime.strptime(raw_time, '%Y-%m-%d')
@@ -81,7 +81,7 @@ def restructure_json(filename_1,filename_2):
     print(ndvi_data_4)
 
     # ndvi data is structured to arrange ndvi(1) 6 months later
-    ndvi_data_5 = [['NDVI_1 (+6months)', 'NDVI_2', 'Month', 'Year']]
+    ndvi_data_5 = [['NDVI_1(+6months)', 'NDVI_2', 'Month', 'Year']]
     for i in range(len(ndvi_1)):
         raw_time = str(ndvi_1[i][0][0])
         time = datetime.strptime(raw_time, '%Y-%m-%d')
@@ -98,7 +98,7 @@ def restructure_json(filename_1,filename_2):
 
     with open('PyCharm/ndvi_file.csv', mode='w') as csv_file:
         csv_writer = csv.writer(csv_file, delimiter=' ', quotechar='"', quoting=csv.QUOTE_MINIMAL)
-        for data in ndvi_data_5:
+        for data in ndvi_data_4:
             csv_writer.writerow(data)
         csv_file.close()
 
