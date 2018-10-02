@@ -34,6 +34,25 @@ def get_lattitudes(diff):
             lat_arr.append(LATITUDE_B)
     return lat_arr
 
+def remove_ocean(lat,lon):
+    x = (41.9923 - 38.3643)
+    y = (-0.5054 - (-4.9990))
+    m = x/y
+    #print(m)
+
+    if lat<-0.5054 and lon>38.3643:
+        if lon >= 41.9923:
+            return 0
+        else:
+            lon_x = (41.9923 - lon)
+            lat_y = -((lon_x*m)+0.5054)#(4.9990 + lat)
+            #cal_m = lon_x/lat_y
+            #print(lat_y)
+            if lat < lat_y:
+                return 0
+    return 1
+
+
 def gen_macro_cells(columns, rows):
     #20 columns and 25 rows
     lon_diff = ((LONGITUDE_R - LONGITUDE_L) / columns)
@@ -67,19 +86,23 @@ def gen_cells(macro_cells):
         lat_center = ((m_lat_1+m_lat_2)/2)
         lon_center = ((m_lon_1+m_lon_2)/2)
 
-        lat_1 = round((lat_center - 0.1),4)
-        lat_2 = round((lat_center + 0.1),4)
-        lon_1 = round((lon_center - 0.1),4)
-        lon_2 = round((lon_center + 0.1),4)
-        cell = [lat_1,lat_2,lon_1,lon_2]
-        cell_arr.append(cell)
+        if lat_center>LATITUDE_B and lon_center<LONGITUDE_R:
+            check = remove_ocean(lat_center,lon_center)
+            if check == 1:
+                lat_1 = round((lat_center - 0.1),4)
+                lat_2 = round((lat_center + 0.1),4)
+                lon_1 = round((lon_center - 0.1),4)
+                lon_2 = round((lon_center + 0.1),4)
+
+                cell = [lat_1,lat_2,lon_1,lon_2]
+                cell_arr.append(cell)
     print("Total 0.2x0.2 Cells: "+str(len(cell_arr)))
     #print("0.2x0.2 Cells: "+ str(cell_arr))
     return cell_arr
 
 
 def main():
-    macro_cells = gen_macro_cells(20,25)
+    macro_cells = gen_macro_cells(15,18)
 
     cell_data = gen_cells(macro_cells)
     #print(cell_data)
@@ -91,3 +114,5 @@ def main():
     csv_file.close()
 
 main()
+#n = remove_ocean(-4.9989,38.3644)
+#print(n)
