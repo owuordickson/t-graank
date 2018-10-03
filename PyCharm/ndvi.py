@@ -26,8 +26,9 @@ def restructure_json(filename_1,filename_2):
         year = datetime.strftime(time,'%Y')
         ndvi_index_1 = ndvi_1[i][1]['percent_inside_threshold']
         ndvi_index_2 = ndvi_2[i][1]['percent_inside_threshold']
-        ndvi_array = [ndvi_index_1,ndvi_index_2,int(month),int(year)]
-        ndvi_data_1.append(ndvi_array)
+        if ndvi_index_1 <= 100 and ndvi_index_2 <= 100:
+            ndvi_array = [ndvi_index_1,ndvi_index_2,int(month),int(year)]
+            ndvi_data_1.append(ndvi_array)
 
     print("\n\n First Data Set \n\n")
     print(ndvi_data_1)
@@ -42,8 +43,9 @@ def restructure_json(filename_1,filename_2):
         if i < (len(ndvi_1) - 1):
             ndvi_index_1 = ndvi_1[i][1]['percent_inside_threshold']
             ndvi_index_2 = ndvi_2[i+1][1]['percent_inside_threshold']
-            ndvi_array = [ndvi_index_1, ndvi_index_2, int(month), int(year)]
-            ndvi_data_2.append(ndvi_array)
+            if ndvi_index_1 <= 100 and ndvi_index_2 <= 100:
+                ndvi_array = [ndvi_index_1, ndvi_index_2, int(month), int(year)]
+                ndvi_data_2.append(ndvi_array)
 
     print("\n\n Second Data Set \n\n")
     print(ndvi_data_2)
@@ -58,8 +60,9 @@ def restructure_json(filename_1,filename_2):
         if i < (len(ndvi_1) - 2):
             ndvi_index_1 = ndvi_1[i][1]['percent_inside_threshold']
             ndvi_index_2 = ndvi_2[i + 2][1]['percent_inside_threshold']
-            ndvi_array = [ndvi_index_1, ndvi_index_2, int(month), int(year)]
-            ndvi_data_3.append(ndvi_array)
+            if ndvi_index_1 <= 100 and ndvi_index_2 <= 100:
+                ndvi_array = [ndvi_index_1, ndvi_index_2, int(month), int(year)]
+                ndvi_data_3.append(ndvi_array)
 
     print("\n\n Third Data Set \n\n")
     print(ndvi_data_3)
@@ -74,8 +77,9 @@ def restructure_json(filename_1,filename_2):
         if i < (len(ndvi_1) - 1):
             ndvi_index_1 = ndvi_1[i + 1][1]['percent_inside_threshold']
             ndvi_index_2 = ndvi_2[i][1]['percent_inside_threshold']
-            ndvi_array = [ndvi_index_1, ndvi_index_2, int(month), int(year)]
-            ndvi_data_4.append(ndvi_array)
+            if ndvi_index_1 <= 100 and ndvi_index_2 <= 100:
+                ndvi_array = [ndvi_index_1, ndvi_index_2, int(month), int(year)]
+                ndvi_data_4.append(ndvi_array)
 
     print("\n\n Fourth Data Set \n\n")
     print(ndvi_data_4)
@@ -90,8 +94,9 @@ def restructure_json(filename_1,filename_2):
         if i < (len(ndvi_1) - 2):
             ndvi_index_1 = ndvi_1[i + 2][1]['percent_inside_threshold']
             ndvi_index_2 = ndvi_2[i][1]['percent_inside_threshold']
-            ndvi_array = [ndvi_index_1, ndvi_index_2, int(month), int(year)]
-            ndvi_data_5.append(ndvi_array)
+            if ndvi_index_1 <= 100 and ndvi_index_2 <=100:
+                ndvi_array = [ndvi_index_1, ndvi_index_2, int(month), int(year)]
+                ndvi_data_5.append(ndvi_array)
 
     print("\n\n Fifth Data Set \n\n")
     print(ndvi_data_5)
@@ -102,5 +107,37 @@ def restructure_json(filename_1,filename_2):
             csv_writer.writerow(data)
         csv_file.close()
 
+def restructure_data(filename_1,filename_2):
+    ndvi_1 = fetchData(filename_1)
+    ndvi_2 = fetchData(filename_2)
 
-restructure_json("PyCharm/karura2012_2017.json","PyCharm/mtKenya2012_2017.json")
+    # ndvi data is structured without factoring in time (same dates)
+    ndvi_data = [['Year','Month','NDVI_1', 'NDVI_2','NDVI_1(+3months)','NDVI_2(+3months)','NDVI_1(+6months)','NDVI_2(+6months)']]
+    for i in range(len(ndvi_1)):
+        raw_time = str(ndvi_1[i][0][0])
+        time = datetime.strptime(raw_time, '%Y-%m-%d')
+        month = datetime.strftime(time, '%m')
+        year = datetime.strftime(time, '%Y')
+        ndvi_index_1 = ndvi_1[i][1]['percent_inside_threshold']
+        ndvi_index_2 = ndvi_2[i][1]['percent_inside_threshold']
+        if i < (len(ndvi_1) - 1):
+            ndvi_index_1_3 = ndvi_1[i + 1][1]['percent_inside_threshold']
+            ndvi_index_2_3 = ndvi_2[i + 1][1]['percent_inside_threshold']
+        if i < (len(ndvi_1) - 2):
+            ndvi_index_1_6 = ndvi_1[i + 2][1]['percent_inside_threshold']
+            ndvi_index_2_6 = ndvi_2[i + 2][1]['percent_inside_threshold']
+
+            if ndvi_index_1 <= 100 and ndvi_index_2 <= 100:
+                ndvi_array = [int(year), int(month),ndvi_index_1,ndvi_index_2,ndvi_index_1_3,ndvi_index_2_3,ndvi_index_1_6,ndvi_index_2_6]
+                ndvi_data.append(ndvi_array)
+
+    print("Data Set \n")
+    print(ndvi_data)
+
+    with open('PyCharm/ndvi_file.csv', mode='w') as csv_file:
+        csv_writer = csv.writer(csv_file, delimiter=' ', quotechar='"', quoting=csv.QUOTE_MINIMAL)
+        for data in ndvi_data:
+            csv_writer.writerow(data)
+        csv_file.close()
+
+restructure_data("PyCharm/karura2012_2017.json","PyCharm/mtKenya2012_2017.json")
