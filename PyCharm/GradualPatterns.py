@@ -16,7 +16,7 @@ def Trad(fileName):
     with open(fileName, 'r') as f:
         reader = csv.reader(f,delimiter=' ')
         temp = list(reader)
-    print(temp)
+    #print(temp)
     if temp[0][0].replace('.','',1).isdigit() or temp[0][0].isdigit():
         return [[float(temp[j][i]) for j in range(len(temp))] for i in range(len(temp[0]))]
     else:

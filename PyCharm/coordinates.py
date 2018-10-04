@@ -1,4 +1,17 @@
-#author: Dickson Owuor
+"""
+
+
+
+
+@author: "Dickson Owuor"
+@copyright: "Copyright (c) 2018 Université de Montpellier"
+@credits: "Anne Laurent, Joseph Orero"
+@license: "MIT"
+@version: "1.0"
+@maintainer: "Dickson Owuor"
+@email: "owuordickson@gmail.com"
+
+"""
 
 import decimal
 import csv

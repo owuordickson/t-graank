@@ -1,4 +1,12 @@
-# author: Dickson Owuor
+
+__author__ = "Dickson Owuor"
+__copyright__ = "Copyright (c) 2018 Université de Montpellier"
+__credits__ = ["Anne Laurent", "Joseph Orero"]
+__license__ = "MIT"
+__version__ = "1.0"
+__maintainer__ = "Dickson Owuor"
+__email__ = "owuordickson@gmail.com"
+
 
 import json
 import csv
@@ -112,7 +120,8 @@ def restructure_data(filename_1,filename_2):
     ndvi_2 = fetchData(filename_2)
 
     # ndvi data is structured without factoring in time (same dates)
-    ndvi_data = [['Year','Month','NDVI_1', 'NDVI_2','NDVI_1(+3months)','NDVI_2(+3months)','NDVI_1(+6months)','NDVI_2(+6months)']]
+    #ndvi_data = [['Year','Month','NDVI_1', 'NDVI_2','NDVI_1(+3months)','NDVI_2(+3months)','NDVI_1(+6months)','NDVI_2(+6months)']]
+    ndvi_data = [[ 'NDVI_1', 'NDVI_2', 'NDVI_1(+3months)', 'NDVI_2(+3months)', 'NDVI_1(+6months)','NDVI_2(+6months)']]
     for i in range(len(ndvi_1)):
         raw_time = str(ndvi_1[i][0][0])
         time = datetime.strptime(raw_time, '%Y-%m-%d')
@@ -128,7 +137,8 @@ def restructure_data(filename_1,filename_2):
             ndvi_index_2_6 = ndvi_2[i + 2][1]['percent_inside_threshold']
 
             if ndvi_index_1 <= 100 and ndvi_index_2 <= 100:
-                ndvi_array = [int(year), int(month),ndvi_index_1,ndvi_index_2,ndvi_index_1_3,ndvi_index_2_3,ndvi_index_1_6,ndvi_index_2_6]
+                #ndvi_array = [int(year), int(month),ndvi_index_1,ndvi_index_2,ndvi_index_1_3,ndvi_index_2_3,ndvi_index_1_6,ndvi_index_2_6]
+                ndvi_array = [ndvi_index_1, ndvi_index_2, ndvi_index_1_3, ndvi_index_2_3,ndvi_index_1_6, ndvi_index_2_6]
                 ndvi_data.append(ndvi_array)
 
     print("Data Set \n")
