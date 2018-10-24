@@ -151,23 +151,19 @@ def algorithm_init(filename,ref_item,minsup,minrep):
                 data = transform_data(ref_item, step, dataset,multi_dataset)
                 #print(data)
 
-                # execute GRAANK for each transformation - D1, S1 = Graank(Trad(dataset), supmin1, eq)
-                execute_graank(list(data),minsup)
+                #Execute GRAANK for each transformation - D1, S1 = Graank(Trad(dataset), supmin1, eq)
+                D1, S1 = Graank(Trad(list(data)), minsup, eq=False)
+                print('Pattern : Support')
+                for i in range(len(D1)):
+                    # D is the Gradual Patterns, and S is the support
+                    print(str(D1[i]) + ' : ' + str(S1[i]))
 
                 # estimate timelag
                 approx_timelag(step,dataset)
+                
                 print("---------------------------------------------------------")
     else:
         print("Error: " + dataset)
-
-
-def execute_graank(dataset,minsup):
-    D1, S1 = Graank(Trad(dataset), minsup, eq=False)
-    #print('D1 : ' + filename1)
-    print('D1 : ')
-    for i in range(len(D1)):
-        #D is the Gradual Patterns, and S is the support
-        print(str(D1[i]) + ' : ' + str(S1[i]))
 
 
 def main(filename,ref_item,minsup,minrep):
