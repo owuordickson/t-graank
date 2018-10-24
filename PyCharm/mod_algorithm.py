@@ -88,8 +88,8 @@ def transform_data(ref_column,step,dataset,multi_dataset):
             init_array = [ref_item[j]]
 
             for i in range(len(gradual_items)):
-                if i<(len(gradual_items)-1):
-                    gradual_item = gradual_items[i+1];
+                if i<len(gradual_items) and i!=ref_column:
+                    gradual_item = gradual_items[i];
                     temp = [gradual_item[j+step]]
                     temp_array = np.append(init_array,temp,axis=0)
                     init_array = temp_array
@@ -136,14 +136,14 @@ def algorithm_init(filename,ref_item,minsup,minrep):
         #print(dataset)
 
         #GET MAXIMUM TRANSFORMATION STEP
-        max_step = 1#get_max_step(dataset,minrep)
+        max_step = get_max_step(dataset,minrep)
         #print("Transformation Step (max): "+str(step))
         multi_dataset = split_dataset(dataset)
 
 
         #TRANSFORM DATA
         for s in range(max_step):
-            step = s+3 #because for-loop is not inclusive from range: 0 - max_step
+            step = s+1 #because for-loop is not inclusive from range: 0 - max_step
             chk_rep,rep_info = get_representativity(step, dataset)
             print(rep_info)
 
@@ -156,9 +156,9 @@ def algorithm_init(filename,ref_item,minsup,minrep):
 
                 # estimate timelag
                 approx_timelag(step,dataset)
+                print("---------------------------------------------------------")
     else:
         print("Error: " + dataset)
-        #return True;
 
 
 def execute_graank(dataset,minsup):
@@ -171,8 +171,7 @@ def execute_graank(dataset,minsup):
 
 
 def main(filename,ref_item,minsup,minrep):
-    algorithm_init(filename,ref_item,minsup,minrep);
-    #print("the result")
+    algorithm_init(filename,ref_item,minsup,minrep)
 
 
-main("ndvi_test.csv",0,0.5,0.8)
+main("ndvi_test.csv",1,0.5,0.8)
