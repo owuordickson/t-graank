@@ -74,6 +74,8 @@ def transform_data(ref_column,step,dataset,multi_dataset):
     for c in range(no_columns):
         title_row[c] = first_row[c+1]
 
+    ref_name = str(title_row[ref_column])
+    title_row[ref_column] = ref_name+"**"
     new_dataset = [title_row]
 
     #Split the original dataset into gradual items
@@ -160,7 +162,7 @@ def algorithm_init(filename,ref_item,minsup,minrep):
 
                 # estimate timelag
                 approx_timelag(step,dataset)
-                
+
                 print("---------------------------------------------------------")
     else:
         print("Error: " + dataset)

@@ -28,7 +28,7 @@ def Trad(dataset):
             return [[float(temp[j][i]) for j in range(len(temp))] for i in range(1, len(temp[0]))]
         else:
             for i in range(len(temp[0])):
-                print(str(i + 1) + ' : ' + temp[0][i])
+                print(str(i) + ' : ' + temp[0][i])
             return [[float(temp[j][i]) for j in range(1, len(temp))] for i in range(len(temp[0]))]
 
 
