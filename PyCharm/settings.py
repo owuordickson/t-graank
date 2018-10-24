@@ -1,0 +1,7 @@
+__author__ = "Dickson Owuor"
+__copyright__ = "Copyright (c) 2018 Université de Montpellier"
+__credits__ = "Anne Laurent, Joseph Orero"
+__license__ = "MIT"
+__version__ = "1.0"
+__maintainer__ = "Dickson Owuor"
+__email__ = "owuordickson@gmail.com"

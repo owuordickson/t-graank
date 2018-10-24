@@ -8,7 +8,6 @@
 @credits: "Anne Laurent, Joseph Orero"
 @license: "MIT"
 @version: "1.0"
-@maintainer: "Dickson Owuor"
 @email: "owuordickson@gmail.com"
 
 """
