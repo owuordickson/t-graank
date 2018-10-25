@@ -15,11 +15,7 @@ import gc
 
 
 def Trad(dataset):
-    #temp = []
-    #with open(fileName, 'r') as f:
-        #reader = csv.reader(f, delimiter=' ')
-        #temp = list(reader)
-    # print(temp)
+
     temp = dataset
     if temp[0][0].replace('.', '', 1).isdigit() or temp[0][0].isdigit():
         return [[float(temp[j][i]) for j in range(len(temp))] for i in range(len(temp[0]))]
@@ -196,13 +192,6 @@ def Graank(T, a, eq=False):
     return res, res2
 
 
-#def main(filename1, supmin1, eq=False):
-#    D1, S1 = Graank(Trad(filename1), supmin1, eq)
-#    print('D1 : ' + filename1)
-#    for i in range(len(D1)):
-#        print(str(D1[i]) + ' : ' + str(S1[i]))
-
-
 def fuse(L):
     Res = L[0][:][:4000]
     for j in range(len(L[0])):
@@ -271,5 +260,3 @@ def getSupp(T, s, eq=False):
             res = res + temp + tempinv
     return float(res) / float(n * (n - 1.0) / 2.0)
 
-
-#main('ndvi_file.csv', 0.5, False)
