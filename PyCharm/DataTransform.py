@@ -10,8 +10,7 @@
 
 import csv
 from datetime import datetime
-from PyCharm.graank import *
-import numpy as np
+from PyCharm.ModifiedGRAANK import *
 
 
 def test_dataset(filename):
@@ -34,13 +33,13 @@ def test_dataset(filename):
             chk_time = datetime.strptime(raw_time, '%H:%M:%S')
         except ValueError:
             #print("No timestamp found")
-            return False,"No timestamp found"
+            return False,None,"No timestamp found"
         else:
             #print(chk_time)
-            return True,temp;
+            return True,"time",temp;
     else:
         #print(chk_time)
-        return True,temp;
+        return True,"date",temp;
 
 
 def split_dataset(dataset):
@@ -83,7 +82,7 @@ def transform_data(ref_column,step,dataset,multi_dataset):
     gradual_items = multi_dataset
 
     for j in range(len(dataset)):
-        time_diff = 0
+        #time_diff = 0
         ref_item = gradual_items[ref_column]
 
         if j<len(ref_item)-step:
@@ -102,7 +101,7 @@ def transform_data(ref_column,step,dataset,multi_dataset):
 
 
 def get_representativity(step,dataset):
-    all_rows = len(dataset)
+    all_rows = (len(dataset)-1) #removing the title row
     sel_rows = (all_rows-step)
     if sel_rows > 0:
         rep = (sel_rows/all_rows)
@@ -123,53 +122,3 @@ def get_max_step(dataset,minrep):
         else:
             return 0
 
-
-def approx_timelag(dataset,step):
-    #approximate timelag using fuzzy logic
-    timelag = 0;
-    return timelag;
-
-
-def algorithm_init(filename,ref_item,minsup,minrep):
-
-    #TEST DATASET
-    chk_data, dataset = test_dataset(filename)
-    if chk_data:
-        #print(dataset)
-
-        #GET MAXIMUM TRANSFORMATION STEP
-        max_step = get_max_step(dataset,minrep)
-        #print("Transformation Step (max): "+str(step))
-        multi_dataset = split_dataset(dataset)
-
-
-        #TRANSFORM DATA
-        for s in range(max_step):
-            step = s+1 #because for-loop is not inclusive from range: 0 - max_step
-            chk_rep,rep_info = get_representativity(step, dataset)
-            print(rep_info)
-
-            if chk_rep:
-                data = transform_data(ref_item, step, dataset,multi_dataset)
-                #print(data)
-
-                #Execute GRAANK for each transformation - D1, S1 = Graank(Trad(dataset), supmin1, eq)
-                D1, S1 = Graank(Trad(list(data)), minsup, eq=False)
-                print('Pattern : Support')
-                for i in range(len(D1)):
-                    # D is the Gradual Patterns, and S is the support
-                    print(str(D1[i]) + ' : ' + str(S1[i]))
-
-                # estimate timelag
-                approx_timelag(step,dataset)
-
-                print("---------------------------------------------------------")
-    else:
-        print("Error: " + dataset)
-
-
-def main(filename,ref_item,minsup,minrep):
-    algorithm_init(filename,ref_item,minsup,minrep)
-
-
-main("ndvi_test.csv",1,0.5,0.8)
