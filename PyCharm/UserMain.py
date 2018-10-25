@@ -14,12 +14,9 @@ from PyCharm.TimeLag import *
 
 def algorithm_init(filename,ref_item,minsup,minrep):
 
-    #TEST DATASET
-    chk_data, time_type, orig_dataset = DataSet.test_dataset(filename)
-    if chk_data:
+    try:
+        dataset = DataSet(filename)
         #print(dataset)
-
-        dataset = DataSet(orig_dataset)
 
         #GET MAXIMUM TRANSFORMATION STEP
         max_step = dataset.get_max_step(minrep)
@@ -36,7 +33,7 @@ def algorithm_init(filename,ref_item,minsup,minrep):
                 data = dataset.transform_data(ref_item, step)
                 #print(data)
 
-                #Execute GRAANK for each transformation - D1, S1 = Graank(Trad(dataset), supmin1, eq)
+                #Execute GRAANK for each transformation
                 D1, S1 = Graank(Trad(list(data)), minsup, eq=False)
                 print('Pattern : Support')
                 for i in range(len(D1)):
@@ -44,18 +41,21 @@ def algorithm_init(filename,ref_item,minsup,minrep):
                     print(str(D1[i]) + ' : ' + str(S1[i]))
 
                 # estimate timelag
-                approx_timelag(step,dataset)
+                time_lags = get_time_diffs(dataset, step)
+                t_lag,t_sup = approx_timelag(time_lags,dataset,minsup,step)
+                print("~ +"+str(t_lag)+" (Support: "+str(t_sup)+")")
 
                 print("---------------------------------------------------------")
-    else:
-        print("Error: " + orig_dataset)
+    except Exception as error:
+        print(error)
 
 
 def main(filename,ref_item,minsup,minrep):
     algorithm_init(filename,ref_item,minsup,minrep)
-    #chk_data, time_type, dataset = test_dataset(filename)
+    #dataset = DataSet(filename)
     #print(dataset)
-    #print(get_time_diffs(dataset,time_type,step=3))
+    #time_lags = get_time_diffs(dataset, 3)
+    #approx_timelag(time_lags, dataset, minsup, 3)
 
 
 main("ndvi_test.csv",0,0.5,0.8)

@@ -15,36 +15,44 @@ from PyCharm.ModifiedGRAANK import *
 
 class DataSet:
 
-    def __init__(self,dataset):
-        self.dataset = dataset
-        self.multi_dataset = self.split_dataset()
+    def __init__(self,filename):
+
+        #1. Test dataset
+        ok,time_type,data = self.test_dataset(filename)
+
+        if ok:
+            print("Dataset Ok")
+            self.data = data
+            self.time_type = time_type
+            self.multi_data = self.split_dataset()
+        else:
+            raise Exception(data)
 
     def split_dataset(self):
-        # ignore first row and first column
+        #NB: Creates an (array) item for each column
+        #NB: ignore first row and first column
 
-        # get No. of columns (ignore 1st column)
-        no_columns = (len(self.dataset[0]) - 1)
+        #1. get No. of columns (ignore 1st column)
+        no_columns = (len(self.data[0]) - 1)
 
-        # Create arrays for each gradual column item
-        multi_dataset = [None] * (no_columns)
-        # print(multi_dataset)
+        #2. Create arrays for each gradual column item
+        multi_data = [None] * (no_columns)
         for c in range(no_columns):
-            multi_dataset[c] = []
-            for i in range(1, len(self.dataset)):
-                item = self.dataset[i][c + 1]  # because time is the first column in dataset (it is ignored)
-                multi_dataset[c].append(item)
+            multi_data[c] = []
+            for i in range(1, len(self.data)):
+                item = self.data[i][c + 1]  # because time is the first column in dataset (it is ignored)
+                multi_data[c].append(item)
 
         # print(multi_dataset)
-        return multi_dataset
+        return multi_data
 
     def transform_data(self,ref_column, step):
-        # restructure dataset
-        # new_dataset = []
+        #NB: Restructure dataset based on reference item
 
-        # LOADING TITLES
-        first_row = self.dataset[0]
+        #1. Load all the titles
+        first_row = self.data[0]
 
-        # Creating titles without time column
+        #2. Creating titles without time column
         no_columns = (len(first_row) - 1)
         title_row = [None] * no_columns
         for c in range(no_columns):
@@ -54,11 +62,11 @@ class DataSet:
         title_row[ref_column] = ref_name + "**"
         new_dataset = [title_row]
 
-        # Split the original dataset into gradual items
-        # gradual_items = split_dataset(dataset)
-        gradual_items = self.multi_dataset
+        #3. Split the original dataset into gradual items
+        gradual_items = self.multi_data
 
-        for j in range(len(self.dataset)):
+        #4. Transform the data using (row) n+step
+        for j in range(len(self.data)):
             # time_diff = 0
             ref_item = gradual_items[ref_column]
 
@@ -72,13 +80,19 @@ class DataSet:
                         temp_array = np.append(init_array, temp, axis=0)
                         init_array = temp_array
                 new_dataset.append(list(init_array))
-                # return new_dataset
+                #return new_dataset
 
         return new_dataset;
 
     def get_representativity(self, step):
-        all_rows = (len(self.dataset) - 1)  # removing the title row
+
+        #1. Get all rows minus the title row
+        all_rows = (len(self.data) - 1)
+
+        #2. Get selected rows
         sel_rows = (all_rows - step)
+
+        #3. Calculate representativity
         if sel_rows > 0:
             rep = (sel_rows / all_rows)
             info = {"Transformation n+": step, "Representativity": rep, "Selected Rows": sel_rows,
@@ -88,8 +102,10 @@ class DataSet:
             return False, "Representativity is 0%"
 
     def get_max_step(self, minrep):
+        #1. count the number of steps each time comparing the
+        #calculated representativity with minimum representativity
 
-        for i in range(len(self.dataset)):
+        for i in range(len(self.data)):
             check, info = self.get_representativity(i + 1)
             if check:
                 rep = info['Representativity']
@@ -99,20 +115,22 @@ class DataSet:
                 return 0
 
 
-    def test_dataset(filename):
-        #test the dataset attributes: time|item_1|item_2|...|item_n
-        #return true if it ok, return (list)dataset
+    def test_dataset(self,filename):
+        #NB: test the dataset attributes: time|item_1|item_2|...|item_n
+        #return true and (list)dataset if it is ok
 
-        #retrieve dataset from file
+        #1. retrieve dataset from file
         with open(filename, 'r') as f:
             reader = csv.reader(f, delimiter=' ')
             temp = list(reader)
         f.close()
 
+        #2. Retrieve time in the first location
         raw_time = str(temp[1][0])
 
-        #check if dataset has time in the first column
+        #3. check if the retrieved time is valid
         try:
+            #to be changed to a more thorough function
             chk_time = datetime.strptime(raw_time, '%Y-%m-%d')
         except ValueError:
             try:
