@@ -15,35 +15,37 @@ from PyCharm.TimeLag import *
 def algorithm_init(filename,ref_item,minsup,minrep):
 
     try:
+        #1. Load dataset into program
         dataset = DataSet(filename)
         #print(dataset)
 
-        #GET MAXIMUM TRANSFORMATION STEP
+        #2. Get maximum transformation step
         max_step = dataset.get_max_step(minrep)
         #print("Transformation Step (max): "+str(step))
 
 
-        #TRANSFORM DATA
+        #TRANSFORM DATA (for each step)
         for s in range(max_step):
             step = s+1 #because for-loop is not inclusive from range: 0 - max_step
+            #3. Calculate representativity
             chk_rep,rep_info = dataset.get_representativity(step)
             print(rep_info)
 
             if chk_rep:
+                #4. Transform data
                 data = dataset.transform_data(ref_item, step)
                 #print(data)
 
-                #Execute GRAANK for each transformation
-                D1, S1 = Graank(Trad(list(data)), minsup, eq=False)
+                #5. Execute GRAANK for each transformation
+                D1, S1, I1 = Graank(Trad(list(data)), minsup, eq=False)
                 print('Pattern : Support')
                 for i in range(len(D1)):
                     # D is the Gradual Patterns, and S is the support
                     print(str(D1[i]) + ' : ' + str(S1[i]))
 
-                # estimate timelag
-                time_lags = get_time_diffs(dataset, step)
-                t_lag,t_sup = approx_timelag(time_lags,dataset,minsup,step)
-                print("~ +"+str(t_lag)+" (Support: "+str(t_sup)+")")
+                    #6. Estimate time lag
+                    t_lag, t_sup = approx_timelag(I1, dataset, minsup, step)
+                    print("~ +" + str(t_lag) + " (Support: " + str(t_sup) + ")")
 
                 print("---------------------------------------------------------")
     except Exception as error:
@@ -52,10 +54,7 @@ def algorithm_init(filename,ref_item,minsup,minrep):
 
 def main(filename,ref_item,minsup,minrep):
     algorithm_init(filename,ref_item,minsup,minrep)
-    #dataset = DataSet(filename)
-    #print(dataset)
-    #time_lags = get_time_diffs(dataset, 3)
-    #approx_timelag(time_lags, dataset, minsup, 3)
 
 
-main("ndvi_test.csv",0,0.5,0.8)
+#main("ndvi_test.csv",0,0.5,0.8)
+main("test.csv",0,0.5,0.6)

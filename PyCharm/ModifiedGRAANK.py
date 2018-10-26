@@ -31,13 +31,13 @@ def Trad(dataset):
 def GraankInit(T, eq=False):
     res = []
     n = len(T[0])
-    # print T
+    #print(T)
     for i in range(len(T)):
         npl = str(i + 1) + '+'
         nm = str(i + 1) + '-'
         tempp = np.zeros((n, n), dtype='bool')
         tempm = np.zeros((n, n), dtype='bool')
-        # print i
+        #print(i)
         for j in range(n):
             for k in range(j + 1, n):
                 if T[i][j] > T[i][k]:
@@ -56,8 +56,9 @@ def GraankInit(T, eq=False):
                             tempm[k][j] = 1
         res.append((set([npl]), tempp))
         res.append((set([nm]), tempm))
-    # print res
-    # print "a"
+    #print(npl)
+    #print(res)
+    #print("a")
     return res
 
 
@@ -135,19 +136,22 @@ def APRIORIgen(R, a, n):
 def Graank(T, a, eq=False):
     res = []
     res2 = []
+    indices = []
     temp = 0
     n = len(T[0])
     G = GraankInit(T, eq)
     # print G
     for i in G:
+        #print(i[0])
         temp = float(np.sum(i[1])) / float(n * (n - 1.0) / 2.0)
+        #print(temp)
         if temp < a:
             G.remove(i)
     #        else:
     #            res.append(i[0])
     while G != []:
         G = APRIORIgen(G, a, n)
-        # print G
+        #print(G)
         i = 0
         while i < len(G) and G != []:
             temp = float(np.sum(G[i][1])) / float(n * (n - 1.0) / 2.0)
@@ -165,6 +169,8 @@ def Graank(T, a, eq=False):
                         z = z + 1
                 res.append(G[i][0])
                 res2.append(temp)
+                #return fetch indices (array) of G[1] where True
+                indices.append(getPattenIndices(G[i][1]))
                 i += 1
                 # print G
                 # res=SetMax(res)
@@ -189,7 +195,7 @@ def Graank(T, a, eq=False):
     #                    continue
     #                j+=1
     # print res
-    return res, res2
+    return res, res2, indices
 
 
 def fuse(L):
@@ -260,3 +266,16 @@ def getSupp(T, s, eq=False):
             res = res + temp + tempinv
     return float(res) / float(n * (n - 1.0) / 2.0)
 
+
+def getPattenIndices(D):
+    #print(D)
+    indices = []
+    t_rows = len(D)
+    t_columns = len(D[0])
+    for r in range(t_rows):
+        for c in range(t_columns):
+            if D[c][r] == 1:
+                index = [r,c]
+                indices.append(index)
+    #print(indices)
+    return indices
