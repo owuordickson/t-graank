@@ -24,115 +24,173 @@ def get_time_diffs(dataset,step):
             temp_1 = dataset.data[i][0]
             temp_2 = dataset.data[i+step][0]
 
-            #to be changed to a more thorough function
-            if dataset.time_type == "date":
-                stamp_1 = time.mktime(datetime.strptime(temp_1, "%Y-%m-%d").timetuple())
-                stamp_2 = time.mktime(datetime.strptime(temp_2, "%Y-%m-%d").timetuple())
-            elif dataset.time_type == "time":
-                stamp_1 = time.mktime(datetime.strptime(temp_1, "%H:%M:%S").timetuple())
-                stamp_2 = time.mktime(datetime.strptime(temp_2, "%H:%M:%S").timetuple())
-            else:
-                stamp_1 = temp_1
-                stamp_2 = temp_2
+            stamp_1 = get_timestamp(temp_1)
+            stamp_2 = get_timestamp(temp_2)
+
+            if stamp_1==False or stamp_2==False:
+                return False,[i+1,i+step+1]
 
             time_diff = (stamp_2 - stamp_1)
             time_diffs.append(time_diff)
 
     #print(time_lags)
-    return time_diffs
+    return True,time_diffs
 
 
 def get_time_lags(indices,dataset):
 
     indxs = get_unique_index(indices)
-    #print(indxs)
 
     time_lags = []
     for index in indxs:
-        r1 = index[0]+1#including the title row
+        r1 = index[0]+1 #including the title row
         r2 = index[1]+1
-        #print(r1)
-        temp_1 = dataset.data[r1][0]
-        temp_2 = dataset.data[r2][0]
 
-        # to be changed to a more thorough function
-        if dataset.time_type == "date":
-            stamp_1 = time.mktime(datetime.strptime(temp_1, "%Y-%m-%d").timetuple())
-            stamp_2 = time.mktime(datetime.strptime(temp_2, "%Y-%m-%d").timetuple())
-        elif dataset.time_type == "time":
-            stamp_1 = time.mktime(datetime.strptime(temp_1, "%H:%M:%S").timetuple())
-            stamp_2 = time.mktime(datetime.strptime(temp_2, "%H:%M:%S").timetuple())
+        if r1>r2:
+            temp_1 = dataset.data[r2][0]
+            temp_2 = dataset.data[r1][0]
         else:
-            stamp_1 = temp_1
-            stamp_2 = temp_2
+            temp_1 = dataset.data[r1][0]
+            temp_2 = dataset.data[r2][0]
 
-        time_lag = abs(stamp_2 - stamp_1)
+        stamp_1 = get_timestamp(temp_1)
+        stamp_2 = get_timestamp(temp_2)
+
+        time_lag = (stamp_2 - stamp_1)
         time_lags.append(time_lag)
 
     #print(time_lags)
     return time_lags
 
 def get_unique_index(indices):
+
     indxs = []
-    if indices != []:
+    if indices:
         inds = indices[0]
         for i in range(len(inds)):
             index = inds[i]
-            # print(index)
             r = index[0]
             c = index[1]
-            if indxs == []:
+            if not indxs:
                 indxs.append([r, c])
             elif r != inds[i - 1][0]:
                 r = index[0]
                 c = index[1]
                 indxs.append([r+1, c+1])
+
     #print(indxs)
     return indxs
 
 def approx_timelag(indices,dataset,minsup,step):
     #approximate timelag using fuzzy logic
 
-    #1. Get time differences
-    time_diffs = get_time_diffs(dataset,step)
+    if dataset.time_ok:
 
-    #2. Sort the time lags
-    time_diffs.sort()
+        #1. Get time differences
+        ok,time_diffs = get_time_diffs(dataset,step)
+        if ok==False:
+            msg = "Time in row "+ str(time_diffs[0])+" or row "+str(time_diffs[1])+" is not valid."
+            return msg
 
-    #3. Get the boundaries of membership function
-    min = time_diffs[0] #to be changed to quartile 1
-    med = statistics.median(time_diffs)
-    max = time_diffs[(len(time_diffs)-1)] #to be changed to quartile 3
-    boundaries = [min,med,max]
-    #print(boundaries)
+        #2. Sort the time lags
+        time_diffs.sort()
+        #print(time_diffs)
 
-    #4. Get time lags for the path
-    time_lags = get_time_lags(indices,dataset)
+        #3. Get the boundaries of membership function
+        min = np.min(time_diffs) #to be changed to quartile 1
+        q_1 = np.percentile(time_diffs, 25)  # Q1
+        med = np.percentile(time_diffs, 50)
+        q_3 = np.percentile(time_diffs, 75)
+        max = np.max(time_diffs) #to be changed to quartile 3
+        boundaries = [q_1,med,q_3]
+        extremes = [min,max]
+        #print(boundaries)
 
-    #5. Calculate membership of frequent path
-    memberships = fuzzy.membership.trimf(np.array(time_lags),np.array(boundaries))
-    #print(memberships)
+        #4. Get time lags for the path
+        time_lags = get_time_lags(indices,dataset)
+        print(time_lags)
 
-    #6. Calculate support
-    sup = calculate_support(memberships)
+        time_lag,sup = optimize_timelag(minsup,time_lags,boundaries,extremes)
 
-    if sup >= minsup:
-        return med,sup
+        if sup != False:
+            lag_msg = get_time_lag_format(time_lag)
+            msg = (lag_msg + " (Support: " + str(sup) + ")")
+            return msg
+        else:
+            msg = "Unable to estimate time lag"
+            return msg
     else:
-        #7. Slide to the left to change boundaries
-        print()
-        #8. Slide to the right to change boundaries
+        msg = "Time format in 1st column could not be processed"
+        return msg
 
-        #9. Expand quartiles and repeat 5. and 6.
 
-    return med,sup
+def optimize_timelag(minsup,timelags,orig_boundaries,extremes):
+
+    boundaries = orig_boundaries
+
+    timelag = sup = 0
+    slide_left = slide_right = expand = False
+    slice = (0.1*int(orig_boundaries[1]))
+    sample = timelags[0]
+
+    a = boundaries[0]
+    b = boundaries[1]
+    c = boundaries[2]
+    min = extremes[0]
+    max = extremes[1]
+
+    while(sup <= minsup):
+
+        boundaries[0] = a
+        boundaries[1] = b
+        boundaries[2] = c
+
+        # Calculate membership of frequent path
+        memberships = fuzzy.membership.trimf(np.array(timelags), np.array(boundaries))
+        # print(memberships)
+
+        # Calculate support
+        sup = calculate_support(memberships)
+        #print(sup)
+
+        if sup >= minsup:
+            return b,sup
+        else:
+            if slide_left == False:
+                # 7. Slide to the left to change boundaries
+                #if extreme is reached - then slide right
+                if sample < b:
+                    #print("left: "+str(b))
+                    a = a - slice
+                    b = b - slice
+                    c = c - slice
+                else:
+                    slide_left = True
+            elif slide_right == False:
+                # 8. Slide to the right to change boundaries
+                # if extreme is reached - then slide right
+                if sample > b:
+                    #print("right: "+str(b))
+                    a = a + slice
+                    b = b + slice
+                    c = c + slice
+                else:
+                    slide_right = True
+            elif expand == False:
+                # 9. Expand quartiles and repeat 5. and 6.
+                #print("expand: "+str(b))
+                boundaries = [min,orig_boundaries[1],max]
+                slide_left = slide_right = False
+                expand = True
+            else:
+                return False,False
 
 
 def calculate_support(memberships):
 
+    #print(memberships)
     support = 0
-
-    if memberships != []:
+    if memberships:
         sup_count = 0
         total = len(memberships)
         for i in range(total):
@@ -140,8 +198,69 @@ def calculate_support(memberships):
                 sup_count = sup_count + 1
         support = sup_count / total
 
-    #print("Support Count: " + str(sup_count))
-    #print("Total Count: " + str(len(memberships)))
-    #print("Support: "+ str(support))
-
     return support
+
+
+def get_timestamp(time_data):
+
+    try:
+        ok,stamp = test_time(time_data)
+    except ValueError:
+        return False
+    else:
+        return stamp
+
+
+def test_time(time_data):
+
+    #add all the possible formats
+    time_formats = ('%Y-%m-%d', '%d.%m.%Y', '%d/%m/%Y',"%H:%M:%S")
+
+    for fmt in time_formats:
+        try:
+            return True,time.mktime(datetime.strptime(time_data, fmt).timetuple())
+        except ValueError:
+            pass
+    raise ValueError('no valid date format found')
+
+
+def get_time_lag_format(median):
+
+    if median < 0:
+        sign = "-"
+    else:
+        sign = "+"
+
+    t_lag, t_type = round_time(abs(median))
+    msg = ("~ " + sign + str(t_lag) + " " + str(t_type))
+    return msg
+
+
+def round_time(seconds):
+
+    years = seconds/3.154e+7
+    months = seconds/2.628e+6
+    weeks = seconds/604800
+    days = seconds/86400
+    hours = seconds/3600
+    minutes = seconds/60
+
+    if int(years) <= 0:
+        if int(months) <= 0:
+            if int(weeks) <= 0:
+                if int(days) <= 0:
+                    if int(hours) <= 0:
+                        if int(minutes) <= 0:
+                            return seconds,"seconds"
+                        else:
+                            return minutes,"minutes"
+                    else:
+                        return hours,"hours"
+                else:
+                    return days,"days"
+            else:
+                return weeks,"weeks"
+        else:
+            return months,"months"
+    else:
+        return years,"years"

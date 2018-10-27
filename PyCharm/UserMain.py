@@ -9,8 +9,9 @@
 """
 
 
-from PyCharm.DataTransform import *
-from PyCharm.TimeLag import *
+from PyCharm.DataTransform import DataSet
+from PyCharm.TimeLag import approx_timelag
+from PyCharm.ModifiedGRAANK import *
 
 def algorithm_init(filename,ref_item,minsup,minrep):
 
@@ -44,8 +45,8 @@ def algorithm_init(filename,ref_item,minsup,minrep):
                     print(str(D1[i]) + ' : ' + str(S1[i]))
 
                     #6. Estimate time lag
-                    t_lag, t_sup = approx_timelag(I1, dataset, minsup, step)
-                    print("~ +" + str(t_lag) + " (Support: " + str(t_sup) + ")")
+                    sup_msg = approx_timelag(I1, dataset, minsup, step)
+                    print(sup_msg)
 
                 print("---------------------------------------------------------")
     except Exception as error:

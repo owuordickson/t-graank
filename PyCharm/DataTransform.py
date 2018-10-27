@@ -9,24 +9,26 @@
 """
 
 import csv
-from datetime import datetime
-from PyCharm.ModifiedGRAANK import *
-
+from PyCharm.TimeLag import test_time
+import numpy as np
 
 class DataSet:
 
     def __init__(self,filename):
 
         #1. Test dataset
-        ok,time_type,data = self.test_dataset(filename)
+        ok,data = self.test_dataset(filename)
 
         if ok:
             print("Dataset Ok")
             self.data = data
-            self.time_type = time_type
+            self.time_ok = ok
             self.multi_data = self.split_dataset()
         else:
-            raise Exception(data)
+            print("Dataset Error")
+            self.data = data
+            self.time_ok = ok
+            self.multi_data = self.split_dataset()
 
     def split_dataset(self):
         #NB: Creates an (array) item for each column
@@ -130,17 +132,8 @@ class DataSet:
 
         #3. check if the retrieved time is valid
         try:
-            #to be changed to a more thorough function
-            chk_time = datetime.strptime(raw_time, '%Y-%m-%d')
+            time_ok,t_stamp = test_time(raw_time)
         except ValueError:
-            try:
-                chk_time = datetime.strptime(raw_time, '%H:%M:%S')
-            except ValueError:
-                #print("No timestamp found")
-                return False,None,"No timestamp found"
-            else:
-                #print(chk_time)
-                return True,"time",temp;
+            return False,temp
         else:
-            #print(chk_time)
-            return True,"date",temp;
+            return time_ok,temp
