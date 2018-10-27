@@ -13,6 +13,7 @@ import time
 import statistics
 import skfuzzy as fuzzy
 import numpy as np
+from scipy import stats
 
 
 def get_time_diffs(dataset,step):
@@ -132,14 +133,16 @@ def optimize_timelag(minsup,timelags,orig_boundaries,extremes):
     slice = (0.1*int(orig_boundaries[1]))
     sup = sup1 = 0
     slide_left = slide_right = expand = False
-    sample = np.percentile(timelags, 50)
+    #sample = np.percentile(timelags, 50)
+    mode = stats.mode(timelags)
+    sample = int(mode[0])
 
     a = boundaries[0]
     b = b1 = boundaries[1]
     c = boundaries[2]
     min_a = extremes[0]
     max_c = extremes[1]
-    #print(sample)
+    #print(mode)
 
     while(sup <= minsup):
 
@@ -161,7 +164,7 @@ def optimize_timelag(minsup,timelags,orig_boundaries,extremes):
             if slide_left == False:
                 # 7. Slide to the left to change boundaries
                 #if extreme is reached - then slide right
-                if sample < b:
+                if sample <= b:
                     #print("left: "+str(b))
                     a = a - slice
                     b = b - slice
@@ -172,7 +175,7 @@ def optimize_timelag(minsup,timelags,orig_boundaries,extremes):
             elif slide_right == False:
                 # 8. Slide to the right to change boundaries
                 # if extreme is reached - then slide right
-                if sample > b:
+                if sample >= b:
                     #print("right: "+str(b))
                     a = a + slice
                     b = b + slice

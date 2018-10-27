@@ -17,6 +17,6 @@ for j in range(n):
         tempp[j][k] = 1
         tempm[k][j] = 1
 
-x,y = optimize_timelag(0.5,[4001],[4000,4567,5000],[2000,5000])
-print(x)
-print(y)
+a = [1,2,3,4,5]
+mode = stats.mode(a)
+print(mode)
