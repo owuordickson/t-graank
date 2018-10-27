@@ -57,5 +57,5 @@ def main(filename,ref_item,minsup,minrep):
     algorithm_init(filename,ref_item,minsup,minrep)
 
 
-#main("ndvi_test.csv",0,0.5,0.8)
-main("test.csv",0,0.5,0.6)
+main("ndvi_test.csv",1,0.5,0.8)
+#main("test.csv",0,0.5,0.6)

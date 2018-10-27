@@ -65,15 +65,17 @@ def get_time_lags(indices,dataset):
 def get_unique_index(indices):
 
     indxs = []
-    if indices:
+    if len(indices)>0:
         inds = indices[0]
+        #print(inds)
         for i in range(len(inds)):
             index = inds[i]
             r = index[0]
             c = index[1]
             if not indxs:
-                indxs.append([r, c])
-            elif r != inds[i - 1][0]:
+                indxs.append([r+1, c+1])
+            #elif r != inds[i - 1][0]:
+            else:
                 r = index[0]
                 c = index[1]
                 indxs.append([r+1, c+1])
@@ -108,7 +110,7 @@ def approx_timelag(indices,dataset,minsup,step):
 
         #4. Get time lags for the path
         time_lags = get_time_lags(indices,dataset)
-        print(time_lags)
+        #print(time_lags)
 
         time_lag,sup = optimize_timelag(minsup,time_lags,boundaries,extremes)
 
@@ -127,23 +129,22 @@ def approx_timelag(indices,dataset,minsup,step):
 def optimize_timelag(minsup,timelags,orig_boundaries,extremes):
 
     boundaries = orig_boundaries
-
-    timelag = sup = 0
-    slide_left = slide_right = expand = False
     slice = (0.1*int(orig_boundaries[1]))
-    sample = timelags[0]
+    sup = sup1 = 0
+    slide_left = slide_right = expand = False
+    sample = np.percentile(timelags, 50)
 
     a = boundaries[0]
     b = boundaries[1]
     c = boundaries[2]
-    min = extremes[0]
-    max = extremes[1]
+    min_a = extremes[0]
+    max_c = extremes[1]
+    #print(sample)
 
     while(sup <= minsup):
 
-        boundaries[0] = a
-        boundaries[1] = b
-        boundaries[2] = c
+        if sup > sup1:
+            sup1 = sup
 
         # Calculate membership of frequent path
         memberships = fuzzy.membership.trimf(np.array(timelags), np.array(boundaries))
@@ -151,7 +152,7 @@ def optimize_timelag(minsup,timelags,orig_boundaries,extremes):
 
         # Calculate support
         sup = calculate_support(memberships)
-        #print(sup)
+        #print("Support"+str(sup))
 
         if sup >= minsup:
             return b,sup
@@ -164,6 +165,7 @@ def optimize_timelag(minsup,timelags,orig_boundaries,extremes):
                     a = a - slice
                     b = b - slice
                     c = c - slice
+                    boundaries = [a,b,c]
                 else:
                     slide_left = True
             elif slide_right == False:
@@ -174,23 +176,27 @@ def optimize_timelag(minsup,timelags,orig_boundaries,extremes):
                     a = a + slice
                     b = b + slice
                     c = c + slice
+                    boundaries = [a, b, c]
                 else:
                     slide_right = True
             elif expand == False:
                 # 9. Expand quartiles and repeat 5. and 6.
-                #print("expand: "+str(b))
-                boundaries = [min,orig_boundaries[1],max]
+                a = min_a
+                b = orig_boundaries[1]
+                c = max_c
+                boundaries = [a, b, c]
                 slide_left = slide_right = False
                 expand = True
+                #print("expand: " + str(b))
             else:
-                return False,False
+                return b,sup1
 
 
 def calculate_support(memberships):
 
     #print(memberships)
     support = 0
-    if memberships:
+    if len(memberships)>0:
         sup_count = 0
         total = len(memberships)
         for i in range(total):
