@@ -135,7 +135,7 @@ def optimize_timelag(minsup,timelags,orig_boundaries,extremes):
     sample = np.percentile(timelags, 50)
 
     a = boundaries[0]
-    b = boundaries[1]
+    b = b1 = boundaries[1]
     c = boundaries[2]
     min_a = extremes[0]
     max_c = extremes[1]
@@ -145,6 +145,7 @@ def optimize_timelag(minsup,timelags,orig_boundaries,extremes):
 
         if sup > sup1:
             sup1 = sup
+            b1 = b
 
         # Calculate membership of frequent path
         memberships = fuzzy.membership.trimf(np.array(timelags), np.array(boundaries))
@@ -189,7 +190,7 @@ def optimize_timelag(minsup,timelags,orig_boundaries,extremes):
                 expand = True
                 #print("expand: " + str(b))
             else:
-                return b,sup1
+                return b1,sup1
 
 
 def calculate_support(memberships):
