@@ -120,7 +120,7 @@ def main():
     cell_data = gen_cells(macro_cells)
     #print(cell_data)
 
-    with open('kenya_coordinates.csv', mode='w') as csv_file:
+    with open('data/kenya_coordinates.csv', mode='w') as csv_file:
         csv_writer = csv.writer(csv_file, delimiter=' ', quotechar='"', quoting=csv.QUOTE_MINIMAL)
         for data in cell_data:
             csv_writer.writerow(data)
