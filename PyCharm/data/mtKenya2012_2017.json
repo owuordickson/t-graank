@@ -1,0 +1,118 @@
+{
+	"Data": [
+		[
+			["2012-01-01", "2012-03-01"], {
+				"percent_outside_threshold": 0.0,
+				"percent_inside_threshold": 100.0,
+				"percent_clouds": 0.0
+			}
+		],
+		[
+			["2012-06-01", "2012-09-01"], {
+				"percent_outside_threshold": 99.46605644546148,
+				"percent_inside_threshold": 0.5339435545385203,
+				"percent_clouds": 0.0
+			}
+		],
+		[
+			["2012-10-01", "2012-12-31"], {
+				"percent_outside_threshold": 14.054157131960334,
+				"percent_inside_threshold": 85.94584286803966,
+				"percent_clouds": 0.0
+			}
+		],
+		[
+			["2013-01-01", "2013-03-01"], {
+				"percent_outside_threshold": 1.3729977116704806,
+				"percent_inside_threshold": 98.62700228832952,
+				"percent_clouds": 0.0
+			}
+		],
+		[
+			["2013-06-01", "2013-09-01"], {
+				"percent_outside_threshold": 100.0,
+				"percent_inside_threshold": 0.0,
+				"percent_clouds": 0.0
+			}
+		],
+		[
+			["2013-10-01", "2013-12-31"], {
+				"percent_outside_threshold": 51.60183066361556,
+				"percent_inside_threshold": 48.39816933638444,
+				"percent_clouds": 0.0
+			}
+		],
+		[
+			["2014-01-01", "2014-03-01"], {
+				"percent_outside_threshold": 1.5636918382913807,
+				"percent_inside_threshold": 98.43630816170862,
+				"percent_clouds": 0.0
+			}
+		],
+		[
+			["2014-06-01", "2014-09-01"], {
+				"percent_outside_threshold": 1.4683447749809306,
+				"percent_inside_threshold": 98.53165522501907,
+				"percent_clouds": 0.0
+			}
+		],
+		[
+			["2014-10-01", "2014-12-31"], {
+				"percent_outside_threshold": 9.858886346300535,
+				"percent_inside_threshold": 90.14111365369946,
+				"percent_clouds": 0.0
+			}
+		],
+		[
+			["2015-01-01", "2015-03-01"], {
+				"percent_outside_threshold": 0.0,
+				"percent_inside_threshold": 100.0,
+				"percent_clouds": 0.0
+			}
+		],
+		[
+			["2015-06-01", "2015-09-01"], {
+				"percent_outside_threshold": 71.54843630816171,
+				"percent_inside_threshold": 28.451563691838295,
+				"percent_clouds": 0.0
+			}
+		],
+		[
+			["2015-10-01", "2015-12-31"], {
+				"percent_outside_threshold": 71.91075514874143,
+				"percent_inside_threshold": 28.08924485125858,
+				"percent_clouds": 0.0
+			}
+		],
+		[
+			["2016-01-01", "2016-03-01"], {
+				"percent_outside_threshold": 6.445461479786423,
+				"percent_inside_threshold": 93.55453852021358,
+				"percent_clouds": 0.0
+			}
+		],
+		[
+			["2016-06-01", "2016-09-01"], {
+				"percent_outside_threshold": 99.12280701754386,
+				"percent_inside_threshold": 0.8771929824561403,
+				"percent_clouds": 0.0
+			}
+		],
+		[
+			["2016-10-01", "2016-12-31"], {
+				"percent_outside_threshold": 0.11441647597254005,
+				"percent_inside_threshold": 99.88558352402745,
+				"percent_clouds": 0.0
+			}
+		]
+	],
+	"Latitudes": [{
+		"lat_1": -0.3454,
+		"lat_2": -0.3302
+	}],
+	"Longitudes": [{
+		"lon_1": 37.462,
+		"lon_2": 37.4866
+	}],
+	"Area": "Mount Kenya National Park"
+}
