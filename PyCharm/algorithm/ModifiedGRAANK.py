@@ -6,6 +6,9 @@ Created on Fri Jun 12 14:31:16 2015
 
 Modified on Tue Oct 23 2018 by Dickson Owuor
 
+This code (originally) correlates gradual patterns using concordant pairs
+We added a method that returns all the concordant pairs found - not just the patterns
+
 """
 
 #import bisect
