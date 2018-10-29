@@ -6,6 +6,10 @@
 @version: "1.0"
 @email: "owuordickson@gmail.com"
 
+This code builds a triangular fuzzy membership function using (step-time-difference)
+It fetches the time lags between all the concordant pairs
+Approximates a time lag by running concordant time lags in the membership function
+
 """
 
 from datetime import datetime
