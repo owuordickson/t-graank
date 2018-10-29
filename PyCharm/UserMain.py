@@ -6,6 +6,8 @@
 @version: "1.0"
 @email: "owuordickson@gmail.com"
 
+This code fetched user preferences and executes algorithm and returns results
+
 """
 
 
