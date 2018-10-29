@@ -61,4 +61,4 @@ def main(filename,ref_item,minsup,minrep):
 
 
 main("data/ndvi_test.csv",0,0.5,0.8)
-#main("test.csv",0,0.5,0.6)
+#main("data/test.csv",0,0.5,0.6)
