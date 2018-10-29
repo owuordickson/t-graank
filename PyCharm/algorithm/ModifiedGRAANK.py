@@ -11,8 +11,6 @@ We added a method that returns all the concordant pairs found - not just the pat
 
 """
 
-#import bisect
-#import time
 import numpy as np
 import gc
 
