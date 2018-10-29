@@ -85,7 +85,7 @@ class DataSet:
                         init_array = temp_array
                 new_dataset.append(list(init_array))
                 #return new_dataset
-
+        #print(new_dataset)
         return new_dataset;
 
     def get_representativity(self, step):
