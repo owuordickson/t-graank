@@ -6,6 +6,8 @@
 @version: "1.0"
 @email: "owuordickson@gmail.com"
 
+This class prepares a dataset to be transformed by any step
+
 """
 
 import csv
