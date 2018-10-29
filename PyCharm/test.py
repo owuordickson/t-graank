@@ -1,7 +1,4 @@
-
-import numpy as np
-import skfuzzy as fuzzy
-from PyCharm.TimeLag import *
+from PyCharm.algorithm.TimeLag import *
 
 #x = [True,False,False]
 #print(x)

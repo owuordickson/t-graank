@@ -10,7 +10,6 @@
 
 from datetime import datetime
 import time
-import statistics
 import skfuzzy as fuzzy
 import numpy as np
 from scipy import stats
@@ -75,8 +74,8 @@ def get_unique_index(indices):
             c = index[1]
             if not indxs:
                 indxs.append([r+1, c+1])
-            #elif r != inds[i - 1][0]:
-            else:
+            #elif r != inds[i - 1][0]: #for unique concordant pairs
+            else:#returns all concordant pairs
                 r = index[0]
                 c = index[1]
                 indxs.append([r+1, c+1])

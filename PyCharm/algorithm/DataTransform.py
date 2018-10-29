@@ -9,7 +9,7 @@
 """
 
 import csv
-from PyCharm.TimeLag import test_time
+from PyCharm.algorithm.TimeLag import test_time
 import numpy as np
 
 class DataSet:

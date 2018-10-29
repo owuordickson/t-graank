@@ -9,9 +9,9 @@
 """
 
 
-from PyCharm.DataTransform import DataSet
-from PyCharm.TimeLag import approx_timelag
-from PyCharm.ModifiedGRAANK import *
+from PyCharm.algorithm.DataTransform import DataSet
+from PyCharm.algorithm.TimeLag import approx_timelag
+from PyCharm.algorithm.ModifiedGRAANK import *
 
 def algorithm_init(filename,ref_item,minsup,minrep):
 
@@ -57,5 +57,5 @@ def main(filename,ref_item,minsup,minrep):
     algorithm_init(filename,ref_item,minsup,minrep)
 
 
-main("ndvi_test.csv",0,0.5,0.8)
+main("data/ndvi_test.csv",0,0.5,0.8)
 #main("test.csv",0,0.5,0.6)
