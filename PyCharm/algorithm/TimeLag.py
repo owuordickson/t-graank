@@ -41,51 +41,75 @@ def get_time_diffs(dataset,step):
     return True,time_diffs
 
 
-def get_time_lags(indices,dataset):
+#def get_time_lags(indices,dataset):
+#
+#   indxs = get_unique_index(indices)
+#
+#    time_lags = []
+#    for index in indxs:
+#        r1 = index[0]+1 #including the title row
+#        r2 = index[1]+1
+#
+#        if r1>r2:
+#            temp_1 = dataset.data[r2][0]
+#            temp_2 = dataset.data[r1][0]
+#        else:
+#            temp_1 = dataset.data[r1][0]
+#            temp_2 = dataset.data[r2][0]
+#
+#        stamp_1 = get_timestamp(temp_1)
+#        stamp_2 = get_timestamp(temp_2)
+#
+#        time_lag = (stamp_2 - stamp_1)
+#        time_lags.append(time_lag)
+#
+#    #print(time_lags)
+#    return time_lags
 
-    indxs = get_unique_index(indices)
+#def get_unique_index(indices):
+#
+#    indxs = []
+#    if len(indices)>0:
+#        inds = indices[0]
+#        #print(inds)
+#        for i in range(len(inds)):
+#            index = inds[i]
+#            r = index[0]
+#            c = index[1]
+#            if not indxs:
+#                indxs.append([r+1, c+1])
+#            #elif r != inds[i - 1][0]: #for unique concordant pairs
+#            else:#returns all concordant pairs
+#                r = index[0]
+#                c = index[1]
+#                indxs.append([r+1, c+1])
+#
+#    #print(indxs)
+#    return indxs
+
+def get_time_lags(indices,time_diffs):
 
     time_lags = []
-    for index in indxs:
-        r1 = index[0]+1 #including the title row
-        r2 = index[1]+1
+    indxs = get_unique_index(indices)
+    for i in indxs:
+        if i>=0 and i<len(time_diffs):
+            time_lags.append(time_diffs[i])
 
-        if r1>r2:
-            temp_1 = dataset.data[r2][0]
-            temp_2 = dataset.data[r1][0]
-        else:
-            temp_1 = dataset.data[r1][0]
-            temp_2 = dataset.data[r2][0]
-
-        stamp_1 = get_timestamp(temp_1)
-        stamp_2 = get_timestamp(temp_2)
-
-        time_lag = (stamp_2 - stamp_1)
-        time_lags.append(time_lag)
-
+    #print(time_diffs)
+    #print()
     #print(time_lags)
     return time_lags
+
 
 def get_unique_index(indices):
 
     indxs = []
     if len(indices)>0:
-        inds = indices[0]
-        #print(inds)
-        for i in range(len(inds)):
-            index = inds[i]
-            r = index[0]
-            c = index[1]
-            if not indxs:
-                indxs.append([r+1, c+1])
-            #elif r != inds[i - 1][0]: #for unique concordant pairs
-            else:#returns all concordant pairs
-                r = index[0]
-                c = index[1]
-                indxs.append([r+1, c+1])
-
-    #print(indxs)
+        indxs = np.unique(indices[0])
+        #print(indxs)
+        #print(indices)
     return indxs
+
 
 def approx_timelag(indices,dataset,minsup,step):
     #approximate timelag using fuzzy logic
@@ -113,7 +137,8 @@ def approx_timelag(indices,dataset,minsup,step):
         #print(boundaries)
 
         #4. Get time lags for the path
-        time_lags = get_time_lags(indices,dataset)
+        #time_lags = get_time_lags(indices,dataset)
+        time_lags = get_time_lags(indices,time_diffs)
         #print(time_lags)
 
         time_lag,sup = optimize_timelag(minsup,time_lags,boundaries,extremes)
@@ -136,9 +161,9 @@ def optimize_timelag(minsup,timelags,orig_boundaries,extremes):
     slice = (0.1*int(orig_boundaries[1]))
     sup = sup1 = 0
     slide_left = slide_right = expand = False
-    #sample = np.percentile(timelags, 50)
-    mode = stats.mode(timelags)
-    sample = int(mode[0])
+    sample = np.percentile(timelags, 50)
+    #mode = stats.mode(timelags)
+    #sample = int(mode[0])
 
     a = boundaries[0]
     b = b1 = boundaries[1]
@@ -168,6 +193,7 @@ def optimize_timelag(minsup,timelags,orig_boundaries,extremes):
                 # 7. Slide to the left to change boundaries
                 #if extreme is reached - then slide right
                 if sample <= b:
+                #if min_a >= b:
                     #print("left: "+str(b))
                     a = a - slice
                     b = b - slice
@@ -179,6 +205,7 @@ def optimize_timelag(minsup,timelags,orig_boundaries,extremes):
                 # 8. Slide to the right to change boundaries
                 # if extreme is reached - then slide right
                 if sample >= b:
+                #if max_c <= b:
                     #print("right: "+str(b))
                     a = a + slice
                     b = b + slice
