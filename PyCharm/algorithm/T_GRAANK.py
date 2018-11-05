@@ -7,12 +7,14 @@ Created on Fri Jun 12 14:31:16 2015
 Modified on Tue Oct 23 2018 by Dickson Owuor
 
 This code (originally) correlates gradual patterns using concordant pairs
-We added a method that returns all the concordant pairs found - not just the patterns
-
+We added a functionality that allows for retrieval of time lags from concordant
+indices, and approximation using a fuzzy membership function
+T-GRAANK - denotes Temporal GRAANK (GRAdual rANKing)
 """
 
 import numpy as np
 import gc
+from PyCharm.algorithm.FuzzyTemporal import init_fuzzy_support
 
 
 def Trad(dataset):
@@ -25,7 +27,7 @@ def Trad(dataset):
             return [[float(temp[j][i]) for j in range(len(temp))] for i in range(1, len(temp[0]))]
         else:
             for i in range(len(temp[0])):
-                print(str(i) + ' : ' + temp[0][i])
+                print(str(i+1) + ' : ' + temp[0][i])
             return [[float(temp[j][i]) for j in range(1, len(temp))] for i in range(len(temp[0]))]
 
 
@@ -134,10 +136,10 @@ def APRIORIgen(R, a, n):
     return res
 
 
-def Graank(T, a, eq=False):
+def Graank(T, a, t_diffs, eq=False):
     res = []
     res2 = []
-    indices = []
+    res3 = []
     temp = 0
     n = len(T[0])
     G = GraankInit(T, eq)
@@ -171,8 +173,17 @@ def Graank(T, a, eq=False):
                 res.append(G[i][0])
                 res2.append(temp)
                 #return fetch indices (array) of G[1] where True
-                indices.append(getPattenIndices(G[i][1]))
+                t_lag = calculateTimeLag(getPattenIndices(G[i][1]), t_diffs, a)
+                res3.append(t_lag)
                 i += 1
+                #print(res3)
+                #print("---Space---")
+                #print(res)
+                #print("---Space---")
+                #print(res2)
+                #print("---Space---")
+                #print(indices)
+                #print("------")
                 # print G
                 # res=SetMax(res)
     #                j=0
@@ -196,7 +207,7 @@ def Graank(T, a, eq=False):
     #                    continue
     #                j+=1
     # print res
-    return res, res2, indices
+    return res, res2, res3
 
 
 def fuse(L):
@@ -267,6 +278,19 @@ def getSupp(T, s, eq=False):
             res = res + temp + tempinv
     return float(res) / float(n * (n - 1.0) / 2.0)
 
+#-------------- NEW CODE -----------------------------
+
+
+def calculateTimeLag(indices, time_diffs, minsup):
+    time_lags = getTimeLags(indices,time_diffs)
+    time_lag, sup = init_fuzzy_support(time_lags, time_diffs, minsup)
+    if sup:
+        msg = ("~ " + time_lag[0] + str(time_lag[1]) + " " + str(time_lag[2]) + " : " + str(sup))
+        return msg
+    else:
+        msg = ("~ " + time_lag[0] + str(time_lag[1]) + " " + str(time_lag[2]) + " : < " + str(minsup))
+        return msg
+
 
 def getPattenIndices(D):
     #print(D)
@@ -280,3 +304,18 @@ def getPattenIndices(D):
                 indices.append(index)
     #print(indices)
     return indices
+
+
+def getTimeLags(indices,time_diffs):
+    if len(indices)>0:
+        indxs = np.unique(indices[0])
+        time_lags = []
+        for i in indxs:
+            if i>=0 and i<len(time_diffs):
+                time_lags.append(time_diffs[i])
+        #print(time_diffs)
+        #print()
+        #print(time_lags)
+        return time_lags
+    else:
+        raise Exception("Error: No pattern found for fetching time-lags")

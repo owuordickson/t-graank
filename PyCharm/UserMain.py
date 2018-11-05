@@ -12,21 +12,19 @@ returns results to the user
 """
 
 
-from PyCharm.algorithm.DataTransform import DataSet
-from PyCharm.algorithm.TimeLag import approx_timelag
-from PyCharm.algorithm.ModifiedGRAANK import *
+from PyCharm.algorithm.DataTransform import DataTransform
+from PyCharm.algorithm.T_GRAANK import *
+
 
 def algorithm_init(filename,ref_item,minsup,minrep):
-
     try:
         #1. Load dataset into program
-        dataset = DataSet(filename)
+        dataset = DataTransform(filename)
         #print(dataset)
 
         #2. Get maximum transformation step
         max_step = dataset.get_max_step(minrep)
         #print("Transformation Step (max): "+str(step))
-
 
         #TRANSFORM DATA (for each step)
         for s in range(max_step):
@@ -37,21 +35,19 @@ def algorithm_init(filename,ref_item,minsup,minrep):
 
             if chk_rep:
                 #4. Transform data
-                data = dataset.transform_data(ref_item, step)
+                data,time_diffs = dataset.transform_data(ref_item, step)
                 #print(data)
 
                 #5. Execute GRAANK for each transformation
-                D1, S1, I1 = Graank(Trad(list(data)), minsup, eq=False)
+                D1, S1, T1 = Graank(Trad(list(data)), minsup, time_diffs, eq=False)
+
                 print('Pattern : Support')
                 for i in range(len(D1)):
-                    # D is the Gradual Patterns, and S is the support
-                    print(str(D1[i]) + ' : ' + str(S1[i]))
-
-                    #6. Estimate time lag
-                    sup_msg = approx_timelag(I1, dataset, minsup, step)
-                    print(sup_msg)
-
+                    # D is the Gradual Patterns, S is the support for D and T is time lag
+                    if (str(ref_item+1)+'+' in D1[i]) or (str(ref_item+1)+'-' in D1[i]):
+                        print(str(D1[i]) + ' : ' + str(S1[i]) + ' | ' + str(T1[i]))
                 print("---------------------------------------------------------")
+
     except Exception as error:
         print(error)
 
@@ -60,5 +56,6 @@ def main(filename,ref_item,minsup,minrep):
     algorithm_init(filename,ref_item,minsup,minrep)
 
 
-main("data/ndvi_test.csv",0,0.5,0.8)
-#main("data/test.csv",0,0.5,0.6)
+#main("data/test.csv",0,0.1,0.6)
+#main("data/ndvi_test.csv",0,0.5,0.8)
+main("data/ndvi_kenya.csv",1,0.5,0.8)
