@@ -21,18 +21,16 @@ def init_fuzzy_support(test_members, all_members, minsup):
 
 
 def get_membership_boundaries(members):
-    #approximate timelag using fuzzy logic
-
-    #1. Sort the time lags
+    # 1. Sort the members in ascending order
     members.sort()
     #print(time_diffs)
 
-    #2. Get the boundaries of membership function
-    min = np.min(members) #to be changed to quartile 1
-    q_1 = np.percentile(members, 25)  # Q1
+    # 2. Get the boundaries of membership function
+    min = np.min(members)
+    q_1 = np.percentile(members, 25)  # Quartile 1
     med = np.percentile(members, 50)
     q_3 = np.percentile(members, 75)
-    max = np.max(members) #to be changed to quartile 3
+    max = np.max(members)
     boundaries = [q_1,med,q_3]
     extremes = [min,max]
     #print(boundaries)
@@ -77,7 +75,7 @@ def approximate_fuzzy_support(minsup, timelags, orig_boundaries, extremes):
         else:
             if slide_left == False:
                 # 7. Slide to the left to change boundaries
-                #if extreme is reached - then slide right
+                # if extreme is reached - then slide right
                 if sample <= b:
                 #if min_a >= b:
                     #print("left: "+str(b))
