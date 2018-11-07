@@ -6,7 +6,7 @@ __license__ = "MIT"
 __version__ = "1.0"
 __email__ = "owuordickson@gmail.com"
 
-#This code converts NDVI json data into a csv format for pattern mining
+# This code converts NDVI json data into a csv format for pattern mining
 
 
 import json
@@ -33,19 +33,21 @@ def save_to_csv(new_file,new_data):
 def restructure_data_1(filename):
     raw_data = fetch_data(filename)
 
-    #setting up the titles
+    # setting up the titles
     #ndvi_data = []
     init_arr = ['Date']
-    for i in range(0,len(raw_data),30): #5):
+    #for i in range(0,len(raw_data),30): #5):
+    for i in range(0, len(raw_data)):
         temp = [raw_data[i]['Area']]
         temp_arr = np.append(init_arr, temp, axis=0)
         init_arr = temp_arr
     ndvi_data = [init_arr]
     #print(ndvi_data)
 
-    #extracting all NDVI indices and dates of all areas
+    # extracting all NDVI indices and dates of all areas
     temp_data = []
-    for i in range(0,len(raw_data),30): #5):
+    #for i in range(0,len(raw_data),30): #5):
+    for i in range(0, len(raw_data)):
         ndvi_arr = raw_data[i]['Data']
         temp_arr = []
         for j in range(len(ndvi_arr)):
@@ -55,7 +57,7 @@ def restructure_data_1(filename):
         temp_data.append(temp_arr)
     #print(temp_data)
 
-    #formating NDVI in raw format
+    # formating NDVI in raw format
     for i in range(len(temp_data[0])): #rows
         init_arr = []
         for j in range(len(temp_data)): #columns
@@ -71,9 +73,8 @@ def restructure_data_1(filename):
         if len(init_arr) > 0:
             ndvi_data.append(init_arr)
 
-    #ndvi_data = np.array(ndvi_data)
-    #print(ndvi_data)
-    save_to_csv("data/ndvi_kenya.csv", ndvi_data)
+    #save_to_csv("data/ndvi_kenya.csv", ndvi_data)
+    save_to_csv("data/ndvi_towns.csv", ndvi_data)
 
 
 def restructure_data_2(filename_1,filename_2):
@@ -87,7 +88,7 @@ def restructure_data_2(filename_1,filename_2):
         ndvi_index_1 = ndvi_1[i][1]['percent_inside_threshold']
         ndvi_index_2 = ndvi_2[i][1]['percent_inside_threshold']
 
-        #the whole data in csv
+        # the whole data in csv
         ndvi_array = [raw_time, ndvi_index_1, ndvi_index_2]
         ndvi_data.append(ndvi_array)
 
@@ -97,4 +98,5 @@ def restructure_data_2(filename_1,filename_2):
 
 
 #restructure_data_2("data/karura2012_2017.json","data/mtKenya2012_2017.json")
-restructure_data_1("data/kenya2007_2017.json")
+#restructure_data_1("data/kenya2007_2017.json")
+restructure_data_1("data/towns2013_2015.json")
