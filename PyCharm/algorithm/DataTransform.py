@@ -21,6 +21,7 @@ class DataTransform:
     def __init__(self,filename):
         # 1. Test dataset
         ok,data = DataTransform.test_dataset(filename)
+        #print(data)
 
         if ok:
             print("Dataset Ok")
@@ -158,6 +159,7 @@ class DataTransform:
 
         # 2. Retrieve time in the first location
         raw_time = str(temp[1][0])
+        #print(raw_time)
 
         # 3. check if the retrieved time is valid
         try:
@@ -179,7 +181,7 @@ class DataTransform:
     @staticmethod
     def test_time(time_data):
         # add all the possible formats
-        time_formats = ('%Y-%m-%d', '%d.%m.%Y', '%d/%m/%Y', "%H:%M:%S")
+        time_formats = ('%Y-%m-%d', '%m-%Y', '%d.%m.%Y', '%d/%m/%Y', "%H:%M:%S")
 
         for fmt in time_formats:
             try:
