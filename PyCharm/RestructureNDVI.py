@@ -72,7 +72,6 @@ def restructure_data_1(filename):
         #print(temp_arr)
         if len(init_arr) > 0:
             ndvi_data.append(init_arr)
-
     #save_to_csv("data/ndvi_kenya.csv", ndvi_data)
     save_to_csv("data/ndvi_towns.csv", ndvi_data)
 
@@ -91,7 +90,6 @@ def restructure_data_2(filename_1,filename_2):
         # the whole data in csv
         ndvi_array = [raw_time, ndvi_index_1, ndvi_index_2]
         ndvi_data.append(ndvi_array)
-
     print("Data Set \n")
     print(ndvi_data)
     save_to_csv("data/ndvi_test.csv",ndvi_data)
