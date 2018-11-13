@@ -26,9 +26,12 @@ def Trad(dataset):
         if temp[0][1].replace('.', '', 1).isdigit() or temp[0][1].isdigit():
             return [[float(temp[j][i]) for j in range(len(temp))] for i in range(1, len(temp[0]))]
         else:
+            title = []
             for i in range(len(temp[0])):
-                print(str(i+1) + ' : ' + temp[0][i])
-            return [[float(temp[j][i]) for j in range(1, len(temp))] for i in range(len(temp[0]))]
+                #print(str(i+1) + ' : ' + temp[0][i])
+                sub = (str(i+1) + ' : ' + temp[0][i])
+                title.append(sub)
+            return title, [[float(temp[j][i]) for j in range(1, len(temp))] for i in range(len(temp[0]))]
 
 
 def GraankInit(T, eq=False):
@@ -136,7 +139,9 @@ def APRIORIgen(R, a, n):
     return res
 
 
-def Graank(T, a, t_diffs, eq=False):
+def Graank(D_in, a, t_diffs, eq=False):
+    title = D_in[0]
+    T = D_in[1]
     res = []
     res2 = []
     res3 = []
@@ -170,11 +175,13 @@ def Graank(T, a, t_diffs, eq=False):
                         del res2[z]
                     else:
                         z = z + 1
-                res.append(G[i][0])
-                res2.append(temp)
+
                 #return fetch indices (array) of G[1] where True
                 t_lag = calculateTimeLag(getPattenIndices(G[i][1]), t_diffs, a)
-                res3.append(t_lag)
+                if t_lag != False:
+                    res.append(G[i][0])
+                    res2.append(temp)
+                    res3.append(t_lag)
                 i += 1
                 #print(res3)
                 #print("---Space---")
@@ -207,7 +214,7 @@ def Graank(T, a, t_diffs, eq=False):
     #                    continue
     #                j+=1
     # print res
-    return res, res2, res3
+    return title, res, res2, res3
 
 
 def fuse(L):
@@ -284,12 +291,12 @@ def getSupp(T, s, eq=False):
 def calculateTimeLag(indices, time_diffs, minsup):
     time_lags = getTimeLags(indices,time_diffs)
     time_lag, sup = init_fuzzy_support(time_lags, time_diffs, minsup)
-    if sup:
+    if sup >= minsup:
         msg = ("~ " + time_lag[0] + str(time_lag[1]) + " " + str(time_lag[2]) + " : " + str(sup))
         return msg
     else:
-        msg = ("~ " + time_lag[0] + str(time_lag[1]) + " " + str(time_lag[2]) + " : < " + str(minsup))
-        return msg
+        #msg = ("~ " + time_lag[0] + str(time_lag[1]) + " " + str(time_lag[2]) + " : < " + str(minsup))
+        return False
 
 
 def getPattenIndices(D):
