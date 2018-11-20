@@ -2,7 +2,7 @@
 Université de Montpellier<br>
 Montpellier, France
 
-Strathmore University
+Strathmore University<br>
 Nairobi, Kenya
 
 ## Team:
