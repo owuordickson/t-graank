@@ -2,6 +2,9 @@
 Université de Montpellier<br>
 Montpellier, France
 
+Strathmore University
+Nairobi, Kenya
+
 ## Team:
 Dickson Owuor<br>
 Prof. Anne Laurent<br>
