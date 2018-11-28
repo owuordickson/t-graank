@@ -5,7 +5,7 @@ We first generate NDVI data from LANDSAT 7 images over Kenya through a novel too
 
 ### Institutions:
 1. LIRMM <i>Université de Montpellier 2</i>, CNRS, Montpellier, France<br>
-  2. Faculty of IT, <i>Strathmore University</i>, Nairobi, Kenya
+2. Faculty of IT, <i>Strathmore University</i>, Nairobi, Kenya
 
 ### Team:
 1. Dickson Owuor<br>
