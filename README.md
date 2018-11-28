@@ -1,4 +1,4 @@
-## Mining NDVI data Using Fuzzy-temporal Gradual Patterns: case of Kenya
+## Mining NDVI data for Fuzzy-temporal Gradual Patterns: case of Kenya
 
 ### Description:
 We first generate NDVI data from LANDSAT 7 images over Kenya through a novel tool known as <strong>data-cube</strong>. The <em>data-cube</em> is a great tool for the expanded use of satellite data in an Open Source framework, see https://www.opendatacube.org. Then, we apply our algorithm on the NDVI data to extract the fuzzy-temporal gradual patterns.
