@@ -13,4 +13,4 @@ We first generate NDVI data from LANDSAT 7 images over Kenya through a novel too
 3. Dr. Joseph Orero<br>
 
 ### Acknowledgment:
-We thank the <strong>Co-operation and Cultural Service, Embassy of France in Kenya</strong> for supporting this project.
+We thank the <strong>Co-operation and Cultural Service, Embassy of France in Kenya</strong> for their support.
