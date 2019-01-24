@@ -12,8 +12,8 @@ returns results to the user
 """
 
 
-from PyCharm.algorithm.DataTransform import DataTransform
-from PyCharm.algorithm.T_GRAANK import *
+from python.algorithm.DataTransform import DataTransform
+from python.algorithm.T_GRAANK import *
 
 
 def algorithm_init(filename,ref_item,minsup,minrep):

@@ -14,7 +14,7 @@ T-GRAANK - denotes Temporal GRAANK (GRAdual rANKing)
 
 import numpy as np
 import gc
-from PyCharm.algorithm.FuzzyTemporal import init_fuzzy_support
+from python.algorithm.FuzzyTemporal import init_fuzzy_support
 
 
 def Trad(dataset):
