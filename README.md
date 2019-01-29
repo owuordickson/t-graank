@@ -8,10 +8,6 @@ Example Python program (file: UserMain.py)<br>
 from python.algorithm.UserMain import *
 main("data/test.csv", 0, 0.1, 0.98)
 ```
-The input parameters are: <i>main(file, referenceItem, minimumSupport, minimumRepresentativity).</i> You are required to choose <strong>file</strong> in csv format, make sure the timestamp column is the first. You specify:
-* <strong>reference item</strong> - column\attribute that is the base of the temporal transformations
-* <strong>minimum support</strong> - the threshold count of frequent FtGPs
-* <strong>mimimum representativity item</strong> - the threshold of the number of transfomations on the data-set
 
 Output:
 ```
@@ -24,6 +20,11 @@ Pattern : Support
 {'2-', '1+'} : 0.1870748299319728 | ~ +1.4 days : 1.0
 ---------------------------------------------------------
 ```
+
+The input parameters are: ```main(fileName.csv, referenceItem, minimumSupport, minimumRepresentativity)```. You are required to choose <strong>file</strong> in csv format, make sure the <i>timestamp column</i> is the first column. You specify:
+* <strong>reference item</strong> - column\attribute that is the base of the temporal transformations
+* <strong>minimum support</strong> - the threshold count of frequent FtGPs
+* <strong>mimimum representativity item</strong> - the threshold of the number of transformations on the data-set
 
 ### Credits:
 1. Prof. Anne Laurent - LIRMM <i>Université de Montpellier 2</i><br>
