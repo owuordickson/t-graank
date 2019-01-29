@@ -1,16 +1,35 @@
-## Mining NDVI data for Fuzzy-temporal Gradual Patterns: case of Kenya
+## T-GRAANK
+A python implementation of the <i>Temporal-GRAdual rANKing</i> algorithm.<br>
+<!-- Research paper published at FuzzIEEE 2019 International Conference on Fuzzy Systems (New Orleans): link<br> -->
 
-### Description:
-We first generate NDVI data from LANDSAT 7 images over Kenya through a novel tool known as <strong>data-cube</strong>. The <em>data-cube</em> is a great tool for the expanded use of satellite data in an Open Source framework, see https://www.opendatacube.org. Then, we apply our algorithm on the NDVI data to extract the fuzzy-temporal gradual patterns.
+### Getting Started:
+Example Python program (file: Main.py)<br>
+```python
+from python.algorithm.UserMain import *
+main("data/test.csv", 0, 0.1, 0.98)
+```
 
-### Institutions:
-1. LIRMM <i>Université de Montpellier 2</i>, CNRS, Montpellier, France<br>
-2. Faculty of IT, <i>Strathmore University</i>, Nairobi, Kenya
+Output:
+```
+Dataset Ok
+{'Transformation': 'n+1', 'Representativity': 0.98, 'Included Rows': 49, 'Total Rows': 50}
+1 : exercise_hours**
+2 : stress_level
+Pattern : Support
+{'1+', '2+'} : 0.2814625850340136 | ~ +2.0 days : 1.0
+{'2-', '1+'} : 0.1870748299319728 | ~ +1.4 days : 1.0
+---------------------------------------------------------
+```
 
-### Team:
-1. Dickson Owuor<br>
-2. Prof. Anne Laurent<br>
-3. Dr. Joseph Orero<br>
+The input parameters are: ```main(fileName.csv, referenceItem, minimumSupport, minimumRepresentativity)```. You are required to use a <strong>file</strong> in csv format and make sure the <i>timestamp column</i> is the first column in the file. You specify:
+* <strong>reference item</strong> - column\attribute that is the base of the temporal transformations
+* <strong>minimum support</strong> - the threshold count of frequent FtGPs
+* <strong>mimimum representativity item</strong> - the threshold count of transformations to be performed on the data-set
 
-### Acknowledgment:
-We thank the <strong>Co-operation and Cultural Service, Embassy of France in Kenya</strong> for their support.
+### Credits:
+1. Prof. Anne Laurent - LIRMM <i>Université de Montpellier 2</i>
+2. Dr. Joseph Orero - Faculty of IT, <i>Strathmore University</i>
+3. Office of the <strong>Co-operation and Cultural Service</strong>, Embassy of France in Kenya
+  
+### License:
+MIT
