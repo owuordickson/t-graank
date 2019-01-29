@@ -1,6 +1,6 @@
 ## T-GRAANK
 A python implementation of the <i>Temporal-GRAdual rANKing</i> algorithm.<br>
-<!--Research paper published at FuzzIEEE 2019 International Conference on Fuzzy Systems (New Orleans): link<br>--!>
+<!-- Research paper published at FuzzIEEE 2019 International Conference on Fuzzy Systems (New Orleans): link<br> --!>
 
 ### Getting Started:
 Example Python program (file: UserMain.py)<br>
