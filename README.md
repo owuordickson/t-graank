@@ -3,7 +3,7 @@ A python implementation of the <i>Temporal-GRAdual rANKing</i> algorithm.<br>
 <!-- Research paper published at FuzzIEEE 2019 International Conference on Fuzzy Systems (New Orleans): link<br> -->
 
 ### Getting Started:
-Example Python program (file: UserMain.py)<br>
+Example Python program (file: Main.py)<br>
 ```python
 from python.algorithm.UserMain import *
 main("data/test.csv", 0, 0.1, 0.98)
@@ -21,10 +21,10 @@ Pattern : Support
 ---------------------------------------------------------
 ```
 
-The input parameters are: ```main(fileName.csv, referenceItem, minimumSupport, minimumRepresentativity)```. You are required to choose <strong>file</strong> in csv format, make sure the <i>timestamp column</i> is the first column. You specify:
+The input parameters are: ```main(fileName.csv, referenceItem, minimumSupport, minimumRepresentativity)```. You are required to use a <strong>file</strong> in csv format and make sure the <i>timestamp column</i> is the first column in the file. You specify:
 * <strong>reference item</strong> - column\attribute that is the base of the temporal transformations
 * <strong>minimum support</strong> - the threshold count of frequent FtGPs
-* <strong>mimimum representativity item</strong> - the threshold of the number of transformations on the data-set
+* <strong>mimimum representativity item</strong> - the threshold count of transformations to be performed on the data-set
 
 ### Credits:
 1. Prof. Anne Laurent - LIRMM <i>Université de Montpellier 2</i><br>
