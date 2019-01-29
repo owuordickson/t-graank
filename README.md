@@ -6,18 +6,17 @@ A python implementation of the <i>Temporal-GRAdual rANKing</i> algorithm. The al
 Example Python program (file: Main.py)<br>
 ```python
 from python.algorithm.UserMain import *
-main("data/test.csv", 0, 0.1, 0.98)
+main("data/test.csv", 0, 0.5, 0.5)
 ```
 
 Output:
 ```
 Dataset Ok
-{'Transformation': 'n+1', 'Representativity': 0.98, 'Included Rows': 49, 'Total Rows': 50}
+{'Transformation': 'n+3', 'Representativity': 0.94, 'Included Rows': 47, 'Total Rows': 50}
 1 : exercise_hours**
 2 : stress_level
 Pattern : Support
-{'1+', '2+'} : 0.2814625850340136 | ~ +2.0 days : 1.0
-{'2-', '1+'} : 0.1870748299319728 | ~ +1.4 days : 1.0
+{'1+', '2+'} : 0.5060129509713228 | ~ +6.0 days : 1.0
 ---------------------------------------------------------
 ```
 
