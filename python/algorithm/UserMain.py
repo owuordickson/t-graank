@@ -77,5 +77,5 @@ def check_for_pattern(ref_item, R):
         return False
 
 
-def main(filename,ref_item,minsup,minrep):
+def main(filename, ref_item, minsup, minrep):
     algorithm_init(filename,ref_item,minsup,minrep)
