@@ -33,3 +33,6 @@ The input parameters are: ```main(fileName.csv, referenceItem, minimumSupport, m
   
 ### License:
 * MIT
+
+### Reference:
+* Anne Laurent, Marie-Jeanne Lesot, and Maria Rifqi. 2009. GRAANK: Exploiting Rank Correlations for Extracting Gradual Itemsets. In Proceedings of the 8th International Conference on Flexible Query Answering Systems (FQAS '09), Troels Andreasen, Ronald R. Yager, Henrik Bulskov, Henning Christiansen, and Henrik Legind Larsen (Eds.). Springer-Verlag, Berlin, Heidelberg, 382-393.
