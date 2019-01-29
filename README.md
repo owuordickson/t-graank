@@ -18,7 +18,7 @@ Dataset Ok
 Pattern : Support
 {'1+', '2+'} : 0.5060129509713228 | ~ +6.0 days : 1.0
 -------------------------------------------------------------------------------------------
-# interpreted as: the more exercise_hours, the more stress_level almost 6 days later
+# can be interpreted as: the more exercise_hours, the more stress_level almost 6 days later
 ```
 
 The input parameters are: ```main(fileName.csv, referenceItem, minimumSupport, minimumRepresentativity)```. You are required to use a <strong>file</strong> in csv format and make sure the <i>timestamp column</i> is the first column in the file. You specify:
