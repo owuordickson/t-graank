@@ -32,4 +32,4 @@ The input parameters are: ```main(fileName.csv, referenceItem, minimumSupport, m
 3. Office of the <strong>Co-operation and Cultural Service</strong>, Embassy of France in Kenya
   
 ### License:
-MIT
+*MIT
