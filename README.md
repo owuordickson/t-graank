@@ -23,8 +23,8 @@ Pattern : Support
 
 The input parameters are: ```main(fileName.csv, referenceItem, minimumSupport, minimumRepresentativity)```. You are required to use a <strong>file</strong> in csv format and make sure the <i>timestamp column</i> is the first column in the file. You specify:
 * <strong>reference item</strong> - column\attribute that is the base of the temporal transformations
-* <strong>minimum support</strong> - the threshold count of frequent FtGPs
-* <strong>mimimum representativity item</strong> - the threshold count of transformations to be performed on the data-set
+* <strong>minimum support</strong> - threshold count of frequent FtGPs
+* <strong>mimimum representativity item</strong> - threshold count of transformations to be performed on the data-set
 
 ### Credits:
 1. Prof. Anne Laurent - LIRMM, <i>Université de Montpellier</i>
