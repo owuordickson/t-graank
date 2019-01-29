@@ -29,7 +29,7 @@ The input parameters are: ```main(fileName.csv, referenceItem, minimumSupport, m
 ### Credits:
 1. Prof. Anne Laurent - LIRMM <i>Université de Montpellier 2</i><br>
 2. Dr. Joseph Orero - Faculty of IT, <i>Strathmore University<br>
-3. Office of <strong>Co-operation and Cultural Service</strong> Embassy of France in Kenya<br>
+3. Office of the <strong>Co-operation and Cultural Service</strong>, Embassy of France in Kenya<br>
   
 ### License:
 MIT
