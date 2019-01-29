@@ -1,16 +1,17 @@
-## Mining NDVI data for Fuzzy-temporal Gradual Patterns: case of Kenya
+## T-GRAANK
+A python implementation of the <i>Temporal-GRAdual rANKing</i> algorithm.<br>
+<!--Research paper published at FuzzIEEE 2019 International Conference on Fuzzy Systems (New Orleans): link<br>--!>
 
-### Description:
-We first generate NDVI data from LANDSAT 7 images over Kenya through a novel tool known as <strong>data-cube</strong>. The <em>data-cube</em> is a great tool for the expanded use of satellite data in an Open Source framework, see https://www.opendatacube.org. Then, we apply our algorithm on the NDVI data to extract the fuzzy-temporal gradual patterns.
+### Getting Started:
+Example Python program (file: UserMain.py)<br>
+```python
+from python.algorithm.UserMain import *
+main("data/test.csv",0,0.1,0.5)
+```
 
-### Institutions:
-1. LIRMM <i>Université de Montpellier 2</i>, CNRS, Montpellier, France<br>
-2. Faculty of IT, <i>Strathmore University</i>, Nairobi, Kenya
-
-### Team:
-1. Dickson Owuor<br>
-2. Prof. Anne Laurent<br>
-3. Dr. Joseph Orero<br>
-
-### Acknowledgment:
-We thank the <strong>Co-operation and Cultural Service, Embassy of France in Kenya</strong> for their support.
+### Credits:
+1. Prof. Anne Laurent - LIRMM <i>Université de Montpellier 2</i><br>
+2. Dr. Joseph Orero - Faculty of IT, <i>Strathmore University<br>
+ 
+### License:
+MIT
