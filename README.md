@@ -12,7 +12,7 @@ A python implementation of the <i>Temporal-GRAdual rANKing</i> algorithm. The al
 
 ### Usage:
 Run following program in the terminal:
-```python
+```
 $python t_graank.py -f fileName.csv -c refColumn -s minSupport  -r minRepresentativity
 ```
 
@@ -22,7 +22,7 @@ The input parameters are: ```fileName.csv, refColumn, minSupport, minRepresentat
 * <strong>mimimum representativity item</strong> - threshold count of transformations to be performed on the data-set
 
 Example with data-set and specified values<br>
-```python
+```
 $python t_graank.py -f DATASET.csv -c 0 -s 0.5 -r 0.5
 ```
 
