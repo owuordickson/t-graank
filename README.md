@@ -2,10 +2,19 @@
 A python implementation of the <i>Temporal-GRAdual rANKing</i> algorithm. The algorithm extends the <i>GRAANK</i> algorithm to the case of temporal gradual tendencies.<br>
 <!-- Research paper published at FuzzIEEE 2019 International Conference on Fuzzy Systems (New Orleans): link<br> -->
 
+### List of Files:
+1. README.md (this file)
+2. main.py
+3. run_tgraank.py
+4. tgraank.py
+5. fuzzy_temporal.py
+6. data_transform.py
+7. test.csv
+
 ### Getting Started:
-Example Python program (file: Main.py)<br>
+Example Python program (file: main.py)<br>
 ```python
-from python.algorithm.UserMain import *
+from python.algorithm.run_tgraank import *
 main("data/test.csv", 0, 0.5, 0.5)
 ```
 
