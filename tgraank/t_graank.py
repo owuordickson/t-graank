@@ -6,15 +6,24 @@ Created on Fri Jun 12 14:31:16 2015
 
 Modified on Tue Oct 23 2018 by Dickson Owuor
 
-This code (originally) correlates gradual patterns using concordant pairs
-We added a functionality that allows for retrieval of time lags from concordant
-indices, and approximation using a fuzzy membership function
-T-GRAANK - denotes Temporal GRAANK (GRAdual rANKing)
+
+
+Description     : This code (originally) correlates gradual patterns using concordant pairs
+                    We added a functionality that allows for retrieval of time lags from concordant
+                    indices, approximation using a fuzzy membership function
+                    T-GRAANK - denotes Temporal GRAANK (GRAdual rANKing) and User interface
+Usage:
+    $python t_graank.py -f DATASET.csv -c refColumn -s minSupport  -r minRepresentativity
+    $python t_graank.py -f test.csv -c 0 -s 0.5 -r 0.5
+
 """
 
+import sys
 import numpy as np
 import gc
-from .fuzzy_temporal import init_fuzzy_support
+from optparse import OptionParser
+from fuzzy_temporal import init_fuzzy_support
+from data_transform import DataTransform
 
 
 def Trad(dataset):
@@ -326,3 +335,109 @@ def getTimeLags(indices,time_diffs):
         return time_lags
     else:
         raise Exception("Error: No pattern found for fetching time-lags")
+
+# --------------------- USER INTERFACE ----------------------------------------------
+
+def algorithm_init(filename,ref_item,minsup,minrep):
+    try:
+        # 1. Load dataset into program
+        dataset = DataTransform(filename)
+        #print(dataset)
+
+        # 2. Get maximum transformation step
+        max_step = dataset.get_max_step(minrep)
+        #print("Transformation Step (max): "+str(step))
+
+        # TRANSFORM DATA (for each step)
+        patterns = 0
+        for s in range(max_step):
+            step = s+1 # because for-loop is not inclusive from range: 0 - max_step
+            # 3. Calculate representativity
+            chk_rep,rep_info = dataset.get_representativity(step)
+            #print(rep_info)
+
+            if chk_rep:
+                # 4. Transform data
+                data,time_diffs = dataset.transform_data(ref_item, step)
+                #print(data)
+
+                # 5. Execute GRAANK for each transformation
+                title, D1, S1, T1 = Graank(Trad(list(data)), minsup, time_diffs, eq=False)
+
+                pattern_found = check_for_pattern(ref_item,D1)
+                if pattern_found == True:
+                    print(rep_info)
+                    for line in title:
+                        print(line)
+                    print('Pattern : Support')
+                    for i in range(len(D1)):
+                        # D is the Gradual Patterns, S is the support for D and T is time lag
+                        if (str(ref_item+1)+'+' in D1[i]) or (str(ref_item+1)+'-' in D1[i]):
+                            # select only relevant patterns w.r.t *reference item
+                            print(str(D1[i]) + ' : ' + str(S1[i]) + ' | ' + str(T1[i]))
+                            patterns = patterns + 1
+                    print("---------------------------------------------------------")
+
+        if patterns == 0:
+            print("Oops! no relevant pattern was found")
+            print("---------------------------------------------------------")
+
+    except Exception as error:
+        print(error)
+
+
+def check_for_pattern(ref_item, R):
+    pr = 0
+    for i in range(len(R)):
+        # D is the Gradual Patterns, S is the support for D and T is time lag
+        if (str(ref_item + 1) + '+' in R[i]) or (str(ref_item + 1) + '-' in R[i]):
+            # select only relevant patterns w.r.t *reference item
+            pr = pr + 1
+    if pr > 0:
+        return True
+    else:
+        return False
+
+
+if __name__ == "__main__":
+
+    optparser = OptionParser()
+    optparser.add_option('-f', '--inputFile',
+                         dest='file',
+                         help='path to file containing csv',
+                         default='DATASET.csv',
+                         type='string')
+    optparser.add_option('-c', '--refColumn',
+                         dest='refCol',
+                         help='reference column',
+                         default=0,
+                         type='int')
+    optparser.add_option('-s', '--minSupport',
+                         dest='minSup',
+                         help='minimum support value',
+                         default=0.5,
+                         type='float')
+    optparser.add_option('-r', '--minRepresentativity',
+                         dest='minRep',
+                         help='minimum representativity',
+                         default=0.5,
+                         type='float')
+
+    (options, args) = optparser.parse_args()
+
+    inFile = None
+    if options.file is None:
+        inFile = sys.stdin
+    elif options.file is not None:
+        inFile = options.file
+    else:
+        print
+        'No dataset filename specified, system with exit\n'
+        sys.exit('System will exit')
+
+    file_name = inFile
+    ref_column = options.refCol
+    min_sup = options.minSup
+    min_rep = options.minRep
+
+    algorithm_init(file_name, ref_column, min_sup, min_rep)
