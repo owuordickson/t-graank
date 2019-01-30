@@ -15,7 +15,7 @@ with open('HISTORY.rst') as history_file:
 
 requirements = [
     # TODO: put package requirements here
-    'skfuzzy','numpy','gc'
+    'scikit-fuzzy','numpy'
 ]
 
 test_requirements = [
