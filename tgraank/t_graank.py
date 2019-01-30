@@ -435,8 +435,8 @@ if __name__ == "__main__":
         inFile = options.file
 
     file_name = inFile
-    ref_column = options.refCol
+    ref_col = options.refCol
     min_sup = options.minSup
     min_rep = options.minRep
 
-    algorithm_init(file_name, ref_column, min_sup, min_rep)
+    algorithm_init(file_name, ref_col, min_sup, min_rep)
