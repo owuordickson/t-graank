@@ -5,13 +5,13 @@ A python implementation of the <i>Temporal-GRAdual rANKing</i> algorithm. The al
 
 ### List of Files:
 1. README.md (this file)
-2. tgraank.py
+2. t_graank.py
 3. fuzzy_temporal.py
 4. data_transform.py
 5. DATASET.csv
 
 ### Usage:
-Run following program in the terminal:
+Use it a the command line program with a local package:
 ```
 $python t_graank.py -f fileName.csv -c refColumn -s minSupport  -r minRepresentativity
 ```
@@ -21,7 +21,7 @@ The input parameters are: ```fileName.csv, refColumn, minSupport, minRepresentat
 * <strong>minimum support</strong> - threshold count of frequent FtGPs
 * <strong>mimimum representativity item</strong> - threshold count of transformations to be performed on the data-set
 
-Example with data-set and specified values<br>
+Example with a data-set and specified values<br>
 ```
 $python t_graank.py -f DATASET.csv -c 0 -s 0.5 -r 0.5
 ```
