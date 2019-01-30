@@ -1,4 +1,4 @@
-from python.algorithm.UserMain import *
+from python.algorithm.run_tgraank import main
 
 import time
 start_time = time.time()

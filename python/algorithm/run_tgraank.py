@@ -6,14 +6,14 @@
 @version: "1.0"
 @email: "owuordickson@gmail.com"
 
-This code fetched user preferences and executes algorithm and
+This code fetches user preferences and executes algorithm and
 returns results to the user
 
 """
 
 
-from python.algorithm.DataTransform import DataTransform
-from python.algorithm.T_GRAANK import *
+from python.algorithm.data_transform import DataTransform
+from python.algorithm.tgraank import *
 
 
 def algorithm_init(filename,ref_item,minsup,minrep):
