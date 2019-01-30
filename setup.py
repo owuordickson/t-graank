@@ -3,7 +3,7 @@
 
 
 try:
-    from setuptools import setup
+    from setuptools import setup, find_packages
 except ImportError:
     from distutils.core import setup
 
@@ -30,11 +30,8 @@ setup(
     author="Dickson Owuor",
     author_email='owuordickson@gmail.com',
     url='https://github.com/owuordickson/tgraank',
-    packages=[
-        'tgraank',
-    ],
-    package_dir={'tgraank':
-                 'tgraank'},
+    packages=find_packages(),
+    #package_dir={'tgraank':'tgraank'},
     include_package_data=True,
     install_requires=requirements,
     license="MIT",
