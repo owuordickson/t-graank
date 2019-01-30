@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-
 try:
     from setuptools import setup, find_packages
 except ImportError:
@@ -29,7 +28,7 @@ setup(
     description="A Python implementation of the Temporal GRAdual rANKing algorithm.",
     long_description=readme + '\n\n' + history,
     author="Dickson Owuor",
-    author_email='owuordickson@gmail.com',
+    author_email='owuordickson@ieee.org',
     url='https://github.com/owuordickson/tgraank',
     packages=find_packages(),
     #package_dir={'tgraank':'tgraank'},
