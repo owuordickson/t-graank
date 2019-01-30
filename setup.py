@@ -20,7 +20,6 @@ requirements = [
 
 test_requirements = [
     # TODO: put package test requirements here
-    'tests/test.csv'
 ]
 
 
