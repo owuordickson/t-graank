@@ -12,8 +12,8 @@ returns results to the user
 """
 
 
-from python.algorithms.data_transform import DataTransform
-from python.algorithms.tgraank import *
+from tgraank.algorithms.data_transform import DataTransform
+from tgraank.algorithms.tgraank import *
 
 
 def algorithm_init(filename,ref_item,minsup,minrep):
