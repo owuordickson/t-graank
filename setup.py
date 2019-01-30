@@ -15,6 +15,7 @@ with open('HISTORY.rst') as history_file:
 
 requirements = [
     # TODO: put package requirements here
+    'skfuzzy','numpy','gc'
 ]
 
 test_requirements = [
@@ -50,6 +51,6 @@ setup(
         'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3.7',
     ],
-    test_suite='tests'
-    #tests_require=test_requirements
+    test_suite='tests',
+    tests_require=test_requirements
 )
