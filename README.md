@@ -11,7 +11,7 @@ A python implementation of the <i>Temporal-GRAdual rANKing</i> algorithm. The al
 5. DATASET.csv
 
 ### Usage:
-Use it a the command line program with a local package:
+Use it a command line program with the local package:
 ```
 $python t_graank.py -f fileName.csv -c refColumn -s minSupport  -r minRepresentativity
 ```
