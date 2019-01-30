@@ -41,7 +41,7 @@ setup(
     classifiers=[
         'Development Status :: 1 - Production/Stable',
         'Intended Audience :: Developers',
-        'License :: OSI Approved :: Massachusetts Institute of Technology License (MIT)',
+        'License :: OSI Approved :: Massachusetts Institute of Technology (MIT) License',
         'Natural Language :: English',
         'Programming Language :: Python :: 2.7',
         'Programming Language :: Python :: 3',
