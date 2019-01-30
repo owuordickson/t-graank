@@ -5,18 +5,25 @@ A python implementation of the <i>Temporal-GRAdual rANKing</i> algorithm. The al
 
 ### List of Files:
 1. README.md (this file)
-2. main.py
-3. test_tgraank.py
-4. tgraank.py
-5. fuzzy_temporal.py
-6. data_transform.py
-7. test.csv
+2. tgraank.py
+3. fuzzy_temporal.py
+4. data_transform.py
+5. DATASET.csv
 
-### Getting Started:
-Example Python program (file: main.py)<br>
+### Usage:
+Run following program in the terminal:
 ```python
-from tests.test_tgraank import main
-main("data/test.csv", 0, 0.5, 0.5)
+$python t_graank.py -f fileName.csv -c refColumn -s minSupport  -r minRepresentativity
+```
+
+The input parameters are: ```fileName.csv, refColumn, minSupport, minRepresentativity```. You are required to use a <strong>file</strong> in csv format and make sure the <i>timestamp column</i> is the first column in the file. You specify:
+* <strong>reference item</strong> - column\attribute that is the base of the temporal transformations
+* <strong>minimum support</strong> - threshold count of frequent FtGPs
+* <strong>mimimum representativity item</strong> - threshold count of transformations to be performed on the data-set
+
+Example with data-set and specified values<br>
+```python
+$python t_graank.py -f DATASET.csv -c 0 -s 0.5 -r 0.5
 ```
 
 Output:
@@ -31,11 +38,6 @@ Pattern : Support
 # can be interpreted as: the more exercise_hours, the more stress_level almost 6 days later
 ```
 
-The input parameters are: ```main(fileName.csv, referenceItem, minimumSupport, minimumRepresentativity)```. You are required to use a <strong>file</strong> in csv format and make sure the <i>timestamp column</i> is the first column in the file. You specify:
-* <strong>reference item</strong> - column\attribute that is the base of the temporal transformations
-* <strong>minimum support</strong> - threshold count of frequent FtGPs
-* <strong>mimimum representativity item</strong> - threshold count of transformations to be performed on the data-set
-  
 ### License:
 * MIT
 
