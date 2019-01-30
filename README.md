@@ -5,7 +5,7 @@ A python implementation of the <i>Temporal-GRAdual rANKing</i> algorithm. The al
 ### List of Files:
 1. README.md (this file)
 2. main.py
-3. run_tgraank.py
+3. test_tgraank.py
 4. tgraank.py
 5. fuzzy_temporal.py
 6. data_transform.py
@@ -14,7 +14,7 @@ A python implementation of the <i>Temporal-GRAdual rANKing</i> algorithm. The al
 ### Getting Started:
 Example Python program (file: main.py)<br>
 ```python
-from python.algorithm.run_tgraank import *
+from tests.test_tgraank import main
 main("data/test.csv", 0, 0.5, 0.5)
 ```
 
