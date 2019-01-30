@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
 
 __author__ = 'Dickson Owuor'
-__email__ = 'owuordickson@gmail.com'
+__email__ = 'owuordickson@ieee.org'
 __version__ = '1.0'
