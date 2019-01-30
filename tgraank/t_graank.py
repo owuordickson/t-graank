@@ -405,7 +405,7 @@ if __name__ == "__main__":
     optparser.add_option('-f', '--inputFile',
                          dest='file',
                          help='path to file containing csv',
-                         default='DATASET.csv',
+                         default=None,
                          type='string')
     optparser.add_option('-c', '--refColumn',
                          dest='refCol',
@@ -427,13 +427,12 @@ if __name__ == "__main__":
 
     inFile = None
     if options.file is None:
-        inFile = sys.stdin
-    elif options.file is not None:
-        inFile = options.file
-    else:
-        print
-        'No dataset filename specified, system with exit\n'
+        #inFile = sys.stdin
+        print('No data-set filename specified, system with exit')
+        print("Usage: $python t_graank.py -f filename.csv -c refColumn -s minSup  -r minRep")
         sys.exit('System will exit')
+    else:
+        inFile = options.file
 
     file_name = inFile
     ref_column = options.refCol
