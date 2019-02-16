@@ -11,7 +11,7 @@ This class prepares a dataset to be transformed by any step
 
 import csv
 import numpy as np
-from datetime import datetime
+from dateutil.parser import parse
 import time
 
 
@@ -19,36 +19,43 @@ class DataTransform:
 
     def __init__(self, filename):
         # 1. Test dataset
-        ok, data = DataTransform.test_dataset(filename)
+        cols, data = DataTransform.test_dataset(filename)
 
-        if ok:
+        if cols:
             print("Dataset Ok")
             self.data = data
-            self.time_ok = ok
+            self.time_cols = cols
+            self.time_ok = True
             self.multi_data = self.split_dataset()
         else:
             print("Dataset Error")
             self.data = data
-            self.time_ok = ok
+            self.time_cols = []
+            self.time_ok = False
             self.multi_data = self.split_dataset()
 
     def split_dataset(self):
         # NB: Creates an (array) item for each column
-        # NB: ignore first row and first column
-        # 1. get No. of columns (ignore 1st column)
-        no_columns = (len(self.data[0]) - 1)
+        # NB: ignore first row (titles) and date-time columns
+        # 1. get no. of columns (ignore date-time columns)
+        no_columns = (len(self.data[0]) - len(self.time_cols))
 
         # 2. Create arrays for each gradual column item
-        multi_data = [None] * (no_columns)
-        for c in range(no_columns):
-            multi_data[c] = []
-            for i in range(1, len(self.data)):
-                item = self.data[i][c + 1]  # because time is the first column in dataset (it is ignored)
-                multi_data[c].append(item)
-
+        multi_data = [None] * no_columns
+        i = 0
+        for c in range(len(self.data[0])):
+            multi_data[i] = []
+            for r in range(1, len(self.data)):  # ignore title row
+                if c in self.time_cols:
+                    continue  # skip columns with time
+                else:
+                    item = self.data[r][c]
+                    multi_data[i].append(item)
+            if not (c in self.time_cols):
+                i += 1
         return multi_data
 
-    def transform_data(self,ref_column, step):
+    def transform_data(self, ref_column, step):
         # NB: Restructure dataset based on reference item
         if self.time_ok:
             # 1. Calculate time difference using step
@@ -61,10 +68,14 @@ class DataTransform:
                 first_row = self.data[0]
 
                 # 2. Creating titles without time column
-                no_columns = (len(first_row) - 1)
+                no_columns = (len(first_row) - len(self.time_cols))
                 title_row = [None] * no_columns
-                for c in range(no_columns):
-                    title_row[c] = first_row[c + 1]
+                i = 0
+                for c in range(len(first_row)):
+                    if c in self.time_cols:
+                        continue
+                    title_row[i] = first_row[c]
+                    i += 1
 
                 ref_name = str(title_row[ref_column])
                 title_row[ref_column] = ref_name + "**"
@@ -89,7 +100,7 @@ class DataTransform:
                         new_dataset.append(list(init_array))
                 return new_dataset, time_diffs;
         else:
-            msg = "Fatal Error: Time format in 1st column could not be processed"
+            msg = "Fatal Error: Time format in column could not be processed"
             raise Exception(msg)
 
     def get_representativity(self, step):
@@ -124,18 +135,22 @@ class DataTransform:
         time_diffs = []
         for i in range(1, len(self.data)):
             if i < (len(self.data) - step):
-                temp_1 = self.data[i][0]
-                temp_2 = self.data[i + step][0]
+                # temp_1 = self.data[i][0]
+                # temp_2 = self.data[i + step][0]
+                temp_1 = temp_2 = ""
+                for col in self.time_cols:
+                    temp_1 += " "+str(self.data[i][col])
+                    temp_2 += " "+str(self.data[i + step][col])
 
                 stamp_1 = DataTransform.get_timestamp(temp_1)
                 stamp_2 = DataTransform.get_timestamp(temp_2)
 
-                if stamp_1 == False or stamp_2 == False:
+                if (not stamp_1) or (not stamp_2):
                     return False, [i + 1, i + step + 1]
 
                 time_diff = (stamp_2 - stamp_1)
                 time_diffs.append(time_diff)
-
+        #print("Time Diff: " + str(time_diff))
         return True, time_diffs
 
     @staticmethod
@@ -150,34 +165,47 @@ class DataTransform:
             temp = list(reader)
         f.close()
 
-        # 2. Retrieve time in the first location
-        raw_time = str(temp[1][0])
+        # 2. Retrieve time and their columns
+        time_cols = list()
+        for i in range(len(temp[1])):  # check every column for time format
+            row_data = str(temp[1][i])
+            try:
+                time_ok, t_stamp = DataTransform.test_time(row_data)
+                if time_ok:
+                    time_cols.append(i)
+            except ValueError:
+                continue
 
-        # 3. check if the retrieved time is valid
-        try:
-            time_ok, t_stamp = DataTransform.test_time(raw_time)
-        except ValueError:
-            return False,temp
+        if time_cols:
+            return time_cols, temp
         else:
-            return time_ok,temp
+            return False, temp
 
     @staticmethod
     def get_timestamp(time_data):
         try:
             ok, stamp = DataTransform.test_time(time_data)
+            if ok:
+                return stamp
+            else:
+                return False
         except ValueError:
             return False
-        else:
-            return stamp
 
     @staticmethod
-    def test_time(time_data):
+    def test_time(date_str):
         # add all the possible formats
-        time_formats = ('%Y-%m-%d', '%m-%Y', '%d.%m.%Y', '%d/%m/%Y', "%H:%M:%S")
-
-        for fmt in time_formats:
+        try:
+            if type(int(date_str)):
+                return False, False
+        except ValueError:
             try:
-                return True, time.mktime(datetime.strptime(time_data, fmt).timetuple())
+                if type(float(date_str)):
+                    return False, False
             except ValueError:
-                pass
-        raise ValueError('no valid date format found')
+                try:
+                    date_time = parse(date_str)
+                    t_stamp = time.mktime(date_time.timetuple())
+                    return True, t_stamp
+                except ValueError:
+                    raise ValueError('no valid date-time format found')
