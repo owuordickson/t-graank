@@ -427,7 +427,6 @@ if __name__ == "__main__":
 
     inFile = None
     if options.file is None:
-        #inFile = sys.stdin
         print('No data-set filename specified, system with exit')
         print("Usage: $python t_graank.py -f filename.csv -c refColumn -s minSup  -r minRep")
         sys.exit('System will exit')

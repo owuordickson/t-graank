@@ -17,10 +17,9 @@ import time
 
 class DataTransform:
 
-    def __init__(self,filename):
+    def __init__(self, filename):
         # 1. Test dataset
-        ok,data = DataTransform.test_dataset(filename)
-        #print(data)
+        ok, data = DataTransform.test_dataset(filename)
 
         if ok:
             print("Dataset Ok")
@@ -47,7 +46,6 @@ class DataTransform:
                 item = self.data[i][c + 1]  # because time is the first column in dataset (it is ignored)
                 multi_data[c].append(item)
 
-        #print(multi_data)
         return multi_data
 
     def transform_data(self,ref_column, step):
@@ -55,10 +53,9 @@ class DataTransform:
         if self.time_ok:
             # 1. Calculate time difference using step
             ok, time_diffs = self.get_time_diffs(step)
-            if ok == False:
+            if not ok:
                 msg = "Error: Time in row " + str(time_diffs[0]) + " or row " + str(time_diffs[1]) + " is not valid."
                 raise Exception(msg)
-                #return msg
             else:
                 # 1. Load all the titles
                 first_row = self.data[0]
@@ -78,7 +75,6 @@ class DataTransform:
 
                 # 4. Transform the data using (row) n+step
                 for j in range(len(self.data)):
-                    # time_diff = 0
                     ref_item = gradual_items[ref_column]
 
                     if j < len(ref_item) - step:
@@ -91,13 +87,10 @@ class DataTransform:
                                 temp_array = np.append(init_array, temp, axis=0)
                                 init_array = temp_array
                         new_dataset.append(list(init_array))
-                        #return new_dataset
-                #print(new_dataset)
-                return new_dataset,time_diffs;
+                return new_dataset, time_diffs;
         else:
             msg = "Fatal Error: Time format in 1st column could not be processed"
             raise Exception(msg)
-            #return msg
 
     def get_representativity(self, step):
         # 1. Get all rows minus the title row
@@ -143,7 +136,6 @@ class DataTransform:
                 time_diff = (stamp_2 - stamp_1)
                 time_diffs.append(time_diff)
 
-        # print(time_lags)
         return True, time_diffs
 
     @staticmethod
@@ -152,17 +144,18 @@ class DataTransform:
         # return true and (list) dataset if it is ok
         # 1. retrieve dataset from file
         with open(filename, 'r') as f:
-            reader = csv.reader(f, delimiter=' ')
+            dialect = csv.Sniffer().sniff(f.read(1024), delimiters=";,' '\t")
+            f.seek(0)
+            reader = csv.reader(f, dialect)
             temp = list(reader)
         f.close()
 
         # 2. Retrieve time in the first location
         raw_time = str(temp[1][0])
-        #print(raw_time)
 
         # 3. check if the retrieved time is valid
         try:
-            time_ok,t_stamp = DataTransform.test_time(raw_time)
+            time_ok, t_stamp = DataTransform.test_time(raw_time)
         except ValueError:
             return False,temp
         else:
