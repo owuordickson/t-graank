@@ -309,7 +309,6 @@ def calculateTimeLag(indices, time_diffs, minsup):
 
 
 def getPattenIndices(D):
-    #print(D)
     indices = []
     t_rows = len(D)
     t_columns = len(D[0])
@@ -318,7 +317,7 @@ def getPattenIndices(D):
             if D[c][r] == 1:
                 index = [r,c]
                 indices.append(index)
-    #print(indices)
+
     return indices
 
 
@@ -327,45 +326,39 @@ def getTimeLags(indices,time_diffs):
         indxs = np.unique(indices[0])
         time_lags = []
         for i in indxs:
-            if i>=0 and i<len(time_diffs):
+            if (i >= 0) and (i < len(time_diffs)):
                 time_lags.append(time_diffs[i])
-        #print(time_diffs)
-        #print()
-        #print(time_lags)
+
         return time_lags
     else:
         raise Exception("Error: No pattern found for fetching time-lags")
 
 # --------------------- USER INTERFACE ----------------------------------------------
 
-def algorithm_init(filename,ref_item,minsup,minrep):
+
+def algorithm_init(filename, ref_item, minsup, minrep):
     try:
         # 1. Load dataset into program
-        dataset = DataTransform(filename)
-        #print(dataset)
+        dataset = DataTransform(filename, ref_item, minrep)
 
-        # 2. Get maximum transformation step
-        max_step = dataset.get_max_step(minrep)
-        #print("Transformation Step (max): "+str(step))
-
-        # TRANSFORM DATA (for each step)
+        # 2. TRANSFORM DATA (for each step)
         patterns = 0
-        for s in range(max_step):
-            step = s+1 # because for-loop is not inclusive from range: 0 - max_step
+        for s in range(dataset.max_step):
+            step = s+1  # because for-loop is not inclusive from range: 0 - max_step
             # 3. Calculate representativity
-            chk_rep,rep_info = dataset.get_representativity(step)
+            chk_rep, rep_info = dataset.get_representativity(step)
             #print(rep_info)
 
             if chk_rep:
                 # 4. Transform data
-                data,time_diffs = dataset.transform_data(ref_item, step)
+                data, time_diffs = dataset.transform_data(step)
                 #print(data)
 
                 # 5. Execute GRAANK for each transformation
                 title, D1, S1, T1 = Graank(Trad(list(data)), minsup, time_diffs, eq=False)
 
-                pattern_found = check_for_pattern(ref_item,D1)
-                if pattern_found == True:
+                pattern_found = check_for_pattern(ref_item, D1)
+                if pattern_found:
                     print(rep_info)
                     for line in title:
                         print(line)
@@ -374,7 +367,7 @@ def algorithm_init(filename,ref_item,minsup,minrep):
                         # D is the Gradual Patterns, S is the support for D and T is time lag
                         if (str(ref_item+1)+'+' in D1[i]) or (str(ref_item+1)+'-' in D1[i]):
                             # select only relevant patterns w.r.t *reference item
-                            print(str(D1[i]) + ' : ' + str(S1[i]) + ' | ' + str(T1[i]))
+                            print(str(tuple(D1[i])) + ' : ' + str(S1[i]) + ' | ' + str(T1[i]))
                             patterns = patterns + 1
                     print("---------------------------------------------------------")
 

@@ -17,22 +17,23 @@ import time
 
 class DataTransform:
 
-    def __init__(self, filename):
+    def __init__(self, filename, ref_item, min_rep):
         # 1. Test dataset
         cols, data = DataTransform.test_dataset(filename)
 
         if cols:
             print("Dataset Ok")
-            self.data = data
-            self.time_cols = cols
             self.time_ok = True
+            self.time_cols = cols
+            self.ref_item = ref_item
+            self.data = data
+            self.max_step = self.get_max_step(min_rep)
             self.multi_data = self.split_dataset()
         else:
             print("Dataset Error")
-            self.data = data
-            self.time_cols = []
             self.time_ok = False
-            self.multi_data = self.split_dataset()
+            self.time_cols = []
+            raise Exception('No date-time data found')
 
     def split_dataset(self):
         # NB: Creates an (array) item for each column
@@ -55,7 +56,7 @@ class DataTransform:
                 i += 1
         return multi_data
 
-    def transform_data(self, ref_column, step):
+    def transform_data(self, step):
         # NB: Restructure dataset based on reference item
         if self.time_ok:
             # 1. Calculate time difference using step
@@ -64,6 +65,7 @@ class DataTransform:
                 msg = "Error: Time in row " + str(time_diffs[0]) + " or row " + str(time_diffs[1]) + " is not valid."
                 raise Exception(msg)
             else:
+                ref_column = self.ref_item
                 # 1. Load all the titles
                 first_row = self.data[0]
 
@@ -88,7 +90,7 @@ class DataTransform:
                 for j in range(len(self.data)):
                     ref_item = gradual_items[ref_column]
 
-                    if j < len(ref_item) - step:
+                    if j < (len(ref_item) - step):
                         init_array = [ref_item[j]]
 
                         for i in range(len(gradual_items)):
@@ -112,8 +114,8 @@ class DataTransform:
 
         # 3. Calculate representativity
         if incl_rows > 0:
-            rep = (incl_rows / all_rows)
-            info = {"Transformation":"n+"+str(step), "Representativity": rep, "Included Rows": incl_rows,
+            rep = (incl_rows / float(all_rows))
+            info = {"Transformation": "n+"+str(step), "Representativity": rep, "Included Rows": incl_rows,
                     "Total Rows": all_rows}
             return True, info
         else:
@@ -139,8 +141,8 @@ class DataTransform:
                 # temp_2 = self.data[i + step][0]
                 temp_1 = temp_2 = ""
                 for col in self.time_cols:
-                    temp_1 += " "+str(self.data[i][col])
-                    temp_2 += " "+str(self.data[i + step][col])
+                    temp_1 += " "+str(self.data[i][int(col)])
+                    temp_2 += " "+str(self.data[i + step][int(col)])
 
                 stamp_1 = DataTransform.get_timestamp(temp_1)
                 stamp_2 = DataTransform.get_timestamp(temp_2)
@@ -163,7 +165,7 @@ class DataTransform:
             f.seek(0)
             reader = csv.reader(f, dialect)
             temp = list(reader)
-        f.close()
+            f.close()
 
         # 2. Retrieve time and their columns
         time_cols = list()
