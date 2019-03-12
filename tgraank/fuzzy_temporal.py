@@ -22,7 +22,6 @@ def init_fuzzy_support(test_members, all_members, minsup):
 def get_membership_boundaries(members):
     # 1. Sort the members in ascending order
     members.sort()
-    #print(time_diffs)
 
     # 2. Get the boundaries of membership function
     min = np.min(members)
@@ -30,20 +29,17 @@ def get_membership_boundaries(members):
     med = np.percentile(members, 50)
     q_3 = np.percentile(members, 75)
     max = np.max(members)
-    boundaries = [q_1,med,q_3]
-    extremes = [min,max]
-    #print(boundaries)
+    boundaries = [q_1, med, q_3]
+    extremes = [min, max]
 
     return boundaries,extremes
 
 
 def approximate_fuzzy_support(minsup, timelags, orig_boundaries, extremes):
-    slice = (0.1*int(orig_boundaries[1]))
+    slice_gap = (0.1*int(orig_boundaries[1]))
     sup = sup1 = 0
     slide_left = slide_right = expand = False
     sample = np.percentile(timelags, 50)
-    #mode = stats.mode(timelags)
-    #sample = int(mode[0])
 
     a = orig_boundaries[0]
     b = b1 = orig_boundaries[1]
@@ -52,9 +48,8 @@ def approximate_fuzzy_support(minsup, timelags, orig_boundaries, extremes):
     max_c = extremes[1]
     boundaries = np.array(orig_boundaries)
     time_lags = np.array(timelags)
-    #print(mode)
 
-    while(sup <= minsup):
+    while sup <= minsup:
 
         if sup > sup1:
             sup1 = sup
@@ -62,42 +57,37 @@ def approximate_fuzzy_support(minsup, timelags, orig_boundaries, extremes):
 
         # Calculate membership of frequent path
         memberships = fuzzy.membership.trimf(time_lags, boundaries)
-        #print(timelags)
 
         # Calculate support
         sup = calculate_support(memberships)
-        #print("Support"+str(sup))
 
         if sup >= minsup:
             value = get_time_format(b)
             return value, sup
         else:
-            if slide_left == False:
+            if not slide_left:
                 # 7. Slide to the left to change boundaries
                 # if extreme is reached - then slide right
                 if sample <= b:
-                #if min_a >= b:
-                    #print("left: "+str(b))
-                    a = a - slice
-                    b = b - slice
-                    c = c - slice
+                # if min_a >= b:
+                    a = a - slice_gap
+                    b = b - slice_gap
+                    c = c - slice_gap
                     boundaries = np.array([a, b, c])
-                    #print(boundaries)
                 else:
                     slide_left = True
-            elif slide_right == False:
+            elif not slide_right:
                 # 8. Slide to the right to change boundaries
                 # if extreme is reached - then slide right
                 if sample >= b:
                 #if max_c <= b:
-                    #print("right: "+str(b))
-                    a = a + slice
-                    b = b + slice
-                    c = c + slice
+                    a = a + slice_gap
+                    b = b + slice_gap
+                    c = c + slice_gap
                     boundaries = np.array([a, b, c])
                 else:
                     slide_right = True
-            elif expand == False:
+            elif not expand:
                 # 9. Expand quartiles and repeat 5. and 6.
                 a = min_a
                 b = orig_boundaries[1]
@@ -105,25 +95,21 @@ def approximate_fuzzy_support(minsup, timelags, orig_boundaries, extremes):
                 boundaries = np.array([a, b, c])
                 slide_left = slide_right = False
                 expand = True
-                #print("expand: " + str(b))
             else:
                 value = get_time_format(b1)
                 return value, False
 
 
 def calculate_support(memberships):
-    #print(memberships)
     support = 0
     if len(memberships) > 0:
         sup_count = 0
         total = len(memberships)
-        #print(total)
         for member in memberships:
-            #print(member)
-            if float(member) > 0.5:
+            # if float(member) > 0.5:
+            if float(member) > 0:
                 sup_count = sup_count + 1
         support = sup_count / total
-    #print(support)
     return support
 
 
@@ -151,16 +137,16 @@ def round_time(seconds):
                 if int(days) <= 0:
                     if int(hours) <= 0:
                         if int(minutes) <= 0:
-                            return seconds,"seconds"
+                            return seconds, "seconds"
                         else:
-                            return minutes,"minutes"
+                            return minutes, "minutes"
                     else:
-                        return hours,"hours"
+                        return hours, "hours"
                 else:
-                    return days,"days"
+                    return days, "days"
             else:
                 return weeks,"weeks"
         else:
-            return months,"months"
+            return months, "months"
     else:
-        return years,"years"
+        return years, "years"

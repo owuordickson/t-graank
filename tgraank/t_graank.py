@@ -398,8 +398,9 @@ if __name__ == "__main__":
     optparser.add_option('-f', '--inputFile',
                          dest='file',
                          help='path to file containing csv',
-                         #default=None, # 'DATASET.csv',
-                         default='DATASET.csv',
+                         #default='../misc/data/ndvi_towns.csv',
+                         #default='DATASET.csv',
+                         default=None,
                          type='string')
     optparser.add_option('-c', '--refColumn',
                          dest='refCol',
