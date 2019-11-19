@@ -399,7 +399,7 @@ if __name__ == "__main__":
                          dest='file',
                          help='path to file containing csv',
                          #default='../misc/data/ndvi_towns.csv',
-                         #default='DATASET.csv',
+                         #default='../misc/data/DATASET.csv',
                          default=None,
                          type='string')
     optparser.add_option('-c', '--refColumn',
