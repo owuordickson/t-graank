@@ -1,7 +1,7 @@
 [![Build Status](https://travis-ci.org/owuordickson/t-graank.svg?branch=master)](https://travis-ci.org/owuordickson/t-graank)
 ## T-GRAANK
 A python implementation of the <i>Temporal-GRAdual rANKing</i> algorithm. The algorithm extends the <i>GRAANK</i> algorithm to the case of temporal gradual tendencies.<br>
-<!-- Research paper published at FuzzIEEE 2019 International Conference on Fuzzy Systems (New Orleans): link<br> -->
+Research paper appears in the proceedings of Fuzz-IEEE 2019 International Conference on Fuzzy Systems held at New Orleans, USA 23rd-26th June 2019. doi: 10.1109/FUZZ-IEEE.2019.8858883<br>
 
 ### List of Files:
 1. README.md (this file)
