@@ -9,7 +9,7 @@
 
 import numpy as np
 import gc
-from src.algorithms.common.fuzzy_mf_v2 import calculate_time_lag
+from src.algorithms.common.fuzzy_mf import calculate_time_lag
 
 
 def init_graank(T, eq=False):
