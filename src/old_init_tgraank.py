@@ -21,7 +21,7 @@ Description:
 import sys
 from optparse import OptionParser
 from src.algorithms.common.handle_data import HandleData
-from src.algorithms.tgraank.t_graank_v2 import Tgrad
+from src.algorithms.tgraank.t_graank_v1 import Tgrad
 from src.algorithms.common.profile_cpu import Profile
 
 
