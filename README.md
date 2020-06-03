@@ -22,7 +22,7 @@ The input parameters are: ```fileName.csv, refColumn, minSupport, minRepresentat
 
 Example with a data-set and specified values<br>
 ```
-$python src/init_tgraank.py -f ../data/DATASET.csv -c 0 -s 0.5 -r 0.5
+$python src/init_tgraank.py -f data/DATASET.csv -c 0 -s 0.5 -r 0.5
 ```
 
 Output:
