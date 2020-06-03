@@ -12,7 +12,7 @@ A python implementation of the <i>Temporal-GRAdual rANKing</i> algorithm. The al
 ### Usage:
 Use it a command line program with the local package:
 ```
-$python t_graank.py -f fileName.csv -c refColumn -s minSupport  -r minRepresentativity
+$python src/init_tgraank.py -f fileName.csv -c refColumn -s minSupport  -r minRepresentativity
 ```
 
 The input parameters are: ```fileName.csv, refColumn, minSupport, minRepresentativity```. You are required to use a <strong>file</strong> in csv format and make sure the <i>timestamp column</i> is the first column in the file. You specify:
@@ -22,7 +22,7 @@ The input parameters are: ```fileName.csv, refColumn, minSupport, minRepresentat
 
 Example with a data-set and specified values<br>
 ```
-$python t_graank.py -f ../data/DATASET.csv -c 0 -s 0.5 -r 0.5
+$python src/init_tgraank.py -f ../data/DATASET.csv -c 0 -s 0.5 -r 0.5
 ```
 
 Output:
