@@ -22,8 +22,8 @@ import sys
 import numpy as np
 import gc
 from optparse import OptionParser
-from fuzzy_temporal import init_fuzzy_support
-from data_transform import DataTransform
+from src.algorithms.fuzzy_temporal import init_fuzzy_support
+from src.algorithms.data_transform import DataTransform
 
 
 def Trad(dataset):
@@ -398,9 +398,9 @@ if __name__ == "__main__":
     optparser.add_option('-f', '--inputFile',
                          dest='file',
                          help='path to file containing csv',
-                         #default='../misc/data/ndvi_towns.csv',
-                         #default='../misc/data/DATASET.csv',
-                         default=None,
+                         #default='../data/ndvi_towns.csv',
+                         default='../data/DATASET.csv',
+                         #default=None,
                          type='string')
     optparser.add_option('-c', '--refColumn',
                          dest='refCol',
