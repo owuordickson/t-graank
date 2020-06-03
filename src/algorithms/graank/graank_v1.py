@@ -9,7 +9,7 @@
 
 import numpy as np
 import gc
-from src.algorithms.common.fuzzy_mf_v1 import FuzzyMF
+from src.algorithms.common.fuzzy_mf_v2 import calculate_time_lag
 
 
 def init_graank(T, eq=False):
@@ -131,8 +131,8 @@ def graank(T, a, t_diffs=None, eq=False):
                         z = z + 1
                 # return fetch indices (array) of G[1] where True
                 if t_diffs is not None:
-                    # t_lag = calculateTimeLag(getPattenIndices(G[i][1]), t_diffs, a)
-                    t_lag = FuzzyMF.calculate_time_lag(FuzzyMF.get_patten_indices(G[i][1]), t_diffs, a)
+                    # t_lag = FuzzyMF.calculate_time_lag(FuzzyMF.get_patten_indices(G[i][1]), t_diffs, a)
+                    t_lag = calculate_time_lag(G[i][1], t_diffs)
                     if t_lag:
                         res.append(G[i][0])
                         res2.append(temp)

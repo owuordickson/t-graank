@@ -52,7 +52,7 @@ def init_algorithm(f_path, refItem, minSup, minRep, allowPara, eq=False):
         wr_line += "Number of cores: " + str(tgp.cores) + '\n'
         wr_line += "Number of tasks: " + str(tgp.max_step) + '\n\n'
         for txt in d_set.title:
-            col = (int(txt[0]) - 1)
+            col = int(txt[0])
             if col == refItem:
                 wr_line += (str(txt[0]) + '. ' + str(txt[1]) + '**' + '\n')
             else:

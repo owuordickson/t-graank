@@ -10,6 +10,7 @@ Description: updated version that uses aco-graank and parallel multi-processing
 """
 
 # from joblib import Parallel, delayed
+import numpy as np
 import multiprocessing as mp
 from src.algorithms.common.dataset import Dataset
 from src.algorithms.common.profile_cpu import Profile
@@ -63,21 +64,14 @@ class Tgrad:
             return patterns
 
     def fetch_patterns(self, step):
-        step += 1 # because for-loop is not inclusive from range: 0 - max_step
-        # 1. Calculate representativity
-        chk_rep, rep_info = self.get_representativity(step)
-        if chk_rep:
-            # 2. Transform data
-            data, time_diffs = self.transform_data(step)
+        step += 1  # because for-loop is not inclusive from range: 0 - max_step
+        # 1. Transform data
+        data, time_diffs = self.transform_data(step)
 
-            # 3. Execute aco-graank for each transformation
-            D1, S1, T1 = graank(list(data), self.min_sup, time_diffs, eq=False)
-            if len(D1) > 0:
-                return [D1, S1, T1]
-            # ac = GradACO(d_set)
-            # list_gp = ac.run_ant_colony(self.min_sup, time_diffs)
-            # if len(list_gp) > 0:
-            #    return list_gp
+        # 2. Execute aco-graank for each transformation
+        D1, S1, T1 = graank(list(data), self.min_sup, time_diffs, eq=False)
+        if len(D1) > 0:
+            return [D1, S1, T1]
         return False
 
     def transform_data(self, step):
@@ -123,53 +117,25 @@ class Tgrad:
             msg = "Fatal Error: Time format in column could not be processed"
             raise Exception(msg)
 
-    def get_representativity(self, step):
-        # 1. Get all rows minus the title row (already removed)
+    def get_max_step(self, min_rep):
         all_rows = len(self.d_set.data)
+        return all_rows - int(min_rep * all_rows)
 
-        # 2. Get selected rows
-        incl_rows = (all_rows - step)
-
-        # 3. Calculate representativity
-        if incl_rows > 0:
-            rep = (incl_rows / float(all_rows))
-            info = {"Transformation": "n+"+str(step), "Representativity": rep, "Included Rows": incl_rows,
-                    "Total Rows": all_rows}
-            return True, info
-        else:
-            return False, "Representativity is 0%"
-
-    def get_max_step(self, minrep):
-        # 1. count the number of steps each time comparing the
-        # calculated representativity with minimum representativity
-        size = len(self.d_set.data)
-        for i in range(size):
-            check, info = self.get_representativity(i + 1)
-            if check:
-                rep = info['Representativity']
-                if rep < minrep:
-                    return i
-            else:
-                return 0
-
-    def get_time_diffs(self, step):
+    def get_time_diffs(self, step):  # optimized
         data = self.d_set.data
         size = len(data)
         time_diffs = []
         for i in range(size):
             if i < (size - step):
-                # temp_1 = self.data[i][0]
-                # temp_2 = self.data[i + step][0]
-                temp_1 = temp_2 = ""
-                for col in self.time_cols:
-                    temp_1 = " "+str(data[i][int(col)])
-                    temp_2 = " "+str(data[i + step][int(col)])
-                    break
+                # for col in self.time_cols:
+                col = self.time_cols[0]  # use only the first date-time value
+                temp_1 = str(data[i][int(col)])
+                temp_2 = str(data[i + step][int(col)])
                 stamp_1 = Dataset.get_timestamp(temp_1)
                 stamp_2 = Dataset.get_timestamp(temp_2)
                 if (not stamp_1) or (not stamp_2):
                     return False, [i + 1, i + step + 1]
                 time_diff = (stamp_2 - stamp_1)
-                time_diffs.append(time_diff)
-        # print("Time Diff: " + str(time_diff))
-        return True, time_diffs
+                index = tuple([i, i + step])
+                time_diffs.append([time_diff, index])
+        return True, np.array(time_diffs)

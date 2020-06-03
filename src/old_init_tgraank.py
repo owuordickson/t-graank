@@ -62,8 +62,10 @@ def init_algorithm(f_path, refItem, minSup, minRep, allowPara, eq=False):
             wr_line += str("\nPattern : Support" + '\n')
 
             for obj in list_tgp:
-                for i in range(len(obj[0])):
-                    wr_line += (str(obj[0][i]) + ' : ' + str(obj[1][i]) + ' | ' + str(obj[2][i]) + '\n')
+                if obj:
+                    for i in range(len(obj[0])):
+                        wr_line += (str(obj[0][i]) + ' : ' + str(obj[1][i]) +
+                                    ' | ' + obj[2][i].to_string() + '\n')
         return wr_line
     except Exception as error:
         wr_line = "Failed: " + str(error)
