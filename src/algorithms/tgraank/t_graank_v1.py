@@ -46,14 +46,12 @@ class Tgrad:
             else:
                 num_cores = Profile.get_num_cores()
 
-            print("No. of cpu cores found: " + str(num_cores))
-            print("No. of parallel tasks: " + str(self.max_step))
             self.cores = num_cores
             steps = range(self.max_step)
             pool = mp.Pool(num_cores)
             patterns = pool.map(self.fetch_patterns, steps)
-            # patterns = Parallel(n_jobs=num_cores)(delayed(self.fetch_patterns)(s+1) for s in steps)
-            print("Finished extracting patterns")
+            pool.close()
+            pool.join()
             return patterns
         else:
             patterns = list()

@@ -56,7 +56,8 @@ class Tgrad:
             steps = range(self.max_step)
             pool = mp.Pool(num_cores)
             patterns = pool.map(self.fetch_patterns, steps)
-            # patterns = Parallel(n_jobs=num_cores)(delayed(self.fetch_patterns)(s+1) for s in steps)
+            pool.close()
+            pool.join()
             return patterns
         else:
             patterns = list()
@@ -109,17 +110,17 @@ class Tgrad:
                         col_index = k
                         tuples = attr_data[k]
                         n = tuples.size
-                        temp_tuples = np.empty(n, )
-                        temp_tuples[:] = np.NaN
+                        # temp_tuples = np.empty(n, )
+                        # temp_tuples[:] = np.NaN
                         if col_index in self.time_cols:
                             # date-time attribute
                             temp_tuples = tuples[:]
                         elif col_index == ref_col:
                             # reference attribute
-                            temp_tuples[:n - step] = tuples[0: n - step]
+                            temp_tuples = tuples[0: n - step]
                         else:
                             # other attributes
-                            temp_tuples[:n - step] = tuples[step: n]
+                            temp_tuples = tuples[step: n]
                         # print(temp_tuples)
                         new_attr_data.append(temp_tuples)
                     return new_attr_data, time_diffs

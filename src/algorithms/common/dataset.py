@@ -159,9 +159,9 @@ class Dataset:
                 invalid_bins.append(incr)
                 invalid_bins.append(decr)
             else:
-                k = np.count_nonzero(np.isnan(col_data))
-                path_pos = 'gi_' + str(col) + 'pos' + str(k) + '.json'
-                path_neg = 'gi_' + str(col) + 'neg' + str(k) + '.json'
+                # k = np.count_nonzero(np.isnan(col_data))
+                path_pos = 'gi_' + str(col) + 'pos' + str(n) + '.json'
+                path_neg = 'gi_' + str(col) + 'neg' + str(n) + '.json'
                 content_pos = {"gi": [int(col), '+'],
                                "bin": temp_pos.tolist(), "support": supp}
                 content_neg = {"gi": [int(col), '-'],

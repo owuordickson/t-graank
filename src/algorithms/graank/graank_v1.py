@@ -114,8 +114,11 @@ def graank(T, a, t_diffs=None, eq=False):
         temp = float(np.sum(i[1])) / float(n * (n - 1.0) / 2.0)
         if temp < a:
             G.remove(i)
-    while G != []:
+    # while G != []:
+    while len(G) > 0:
+        #print(len(G))
         G = gen_apriori_candidates(G, a, n)
+        #print(G)
         i = 0
         while i < len(G) and G != []:
             temp = float(np.sum(G[i][1])) / float(n * (n - 1.0) / 2.0)

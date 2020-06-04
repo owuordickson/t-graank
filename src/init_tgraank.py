@@ -67,7 +67,7 @@ def init_algorithm(f_path, refItem, minSup, minRep, allowPara, eq=False):
                     wr_line += (str(obj[0][i]) + ' : ' + str(obj[1][i]) +
                                 ' | ' + obj[2][i].to_string() + '\n')
         return wr_line
-    except ArithmeticError as error:
+    except Exception as error:
         wr_line = "Failed: " + str(error)
         print(error)
         return wr_line
@@ -144,6 +144,6 @@ if __name__ == "__main__":
     # wr_text += (Profile.get_quick_mem_use(snapshot) + "\n")
     wr_text += str(res_text)
     f_name = str('res_temp' + str(end).replace('.', '', 1) + '.txt')
-    #write_file(wr_text, f_name)
+    write_file(wr_text, f_name)
     print(wr_text)
 
