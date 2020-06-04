@@ -52,7 +52,7 @@ def init_algorithm(f_path, refItem, minSup, minRep, allowPara, eq=False):
             wr_line += "Number of cores: " + str(tgp.cores) + '\n'
             wr_line += "Number of tasks: " + str(tgp.max_step) + '\n\n'
             for txt in titles:
-                col = (int(txt[0]) - 1)
+                col = int(txt[0])
                 if col == refItem:
                     wr_line += (str(txt[0]) + '. ' + str(txt[1]) + '**' + '\n')
                 else:
@@ -138,5 +138,5 @@ if __name__ == "__main__":
     # wr_text += (Profile.get_quick_mem_use(snapshot) + "\n")
     wr_text += str(res_text)
     f_name = str('res_temp' + str(end).replace('.', '', 1) + '.txt')
-    HandleData.write_file(wr_text, f_name)
+    #HandleData.write_file(wr_text, f_name)
     print(wr_text)

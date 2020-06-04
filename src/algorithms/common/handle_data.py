@@ -54,7 +54,7 @@ class HandleData:
                 for i in range(len(data[0])):
                     # sub = (str(i + 1) + ' : ' + data[0][i])
                     # sub = data[0][i]
-                    sub = [str(i+1), data[0][i]]
+                    sub = [str(i), data[0][i]]
                     title.append(sub)
                 del self.data[0]
                 return title
@@ -65,7 +65,7 @@ class HandleData:
         for i in range(len(self.title)):
             temp_attr = self.title[i]
             indx = int(temp_attr[0])
-            if len(time_cols) > 0 and ((indx-1) in time_cols):
+            if len(time_cols) > 0 and (indx in time_cols):
                 # exclude date-time column
                 continue
             else:
@@ -77,15 +77,6 @@ class HandleData:
         # for k in range(10, len(self.data[0])):
         #    time_cols.append(k)
         # time_cols.append(0)
-        # time_cols.append(1)
-        # time_cols.append(2)
-        # time_cols.append(3)
-        # time_cols.append(4)
-        # time_cols.append(5)
-        # time_cols.append(6)
-        # time_cols.append(7)
-        # time_cols.append(8)
-        # time_cols.append(9)
         for i in range(len(self.data[0])):  # check every column for time format
             row_data = str(self.data[0][i])
             try:

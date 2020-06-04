@@ -95,7 +95,6 @@ class Tgrad:
                 else:
                     # 1. Split the original data-set into column-tuples
                     attr_cols = self.d_set.attr_data
-
                     # 2. Transform the data using (row) n+step
                     new_data = list()
                     size = len(data)
@@ -103,7 +102,7 @@ class Tgrad:
                         col_index = int(obj[0])
                         tuples = obj[1]
                         temp_tuples = list()
-                        if (col_index - 1) == ref_col:
+                        if col_index == ref_col:
                             # reference attribute (skip)
                             for i in range(size-step):
                                 temp_tuples.append(tuples[i])
@@ -136,6 +135,7 @@ class Tgrad:
                 if (not stamp_1) or (not stamp_2):
                     return False, [i + 1, i + step + 1]
                 time_diff = (stamp_2 - stamp_1)
-                index = tuple([i, i + step])
-                time_diffs.append([time_diff, index])
+                # index = tuple([i, i + step])
+                # time_diffs.append([time_diff, index])
+                time_diffs.append([time_diff, i])
         return True, np.array(time_diffs)

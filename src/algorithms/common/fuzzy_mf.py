@@ -19,7 +19,7 @@ from src.algorithms.common.gp import TimeLag
 def calculate_time_lag(bin_data, time_diffs):
     indices = get_indices(bin_data)
     # stamps = np.absolute(np.array(time_diffs[:, 0]))  # get all stamps from 1st column
-    time_lags = get_time_lags(indices, time_diffs)
+    time_lags = get_time_lags_v2(indices, time_diffs)
     time_lag = approximate_fuzzy_support_v2(time_lags)
     return time_lag
 
@@ -33,6 +33,20 @@ def get_time_lags(indices, time_diffs):
         exits1 = pat_indices.intersection(set(index1))
         exits2 = pat_indices.intersection(set(index2))
         if len(exits1) > 0 or len(exits2) > 0:
+            time_lags.append(obj[0])
+    print(pat_indices)
+    print(time_diffs)
+    print(time_lags)
+    print("--- end ---")
+    return np.array(time_lags)
+
+
+def get_time_lags_v2(indices, time_diffs):
+    pat_indices_flat = np.unique(indices.flatten())
+    time_lags = list()
+    for obj in time_diffs:
+        index1 = obj[1]
+        if int(index1) in pat_indices_flat:
             time_lags.append(obj[0])
     return np.array(time_lags)
 

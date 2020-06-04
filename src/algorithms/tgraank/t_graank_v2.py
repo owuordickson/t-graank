@@ -146,6 +146,7 @@ class Tgrad:
                 if (not stamp_1) or (not stamp_2):
                     return False, [i + 1, i + step + 1]
                 time_diff = (stamp_2 - stamp_1)
-                index = tuple([i, i + step])
-                time_diffs.append([time_diff, index])
+                # index = tuple([i, i + step])
+                # time_diffs.append([time_diff, index])
+                time_diffs.append([time_diff, i])
         return True, np.array(time_diffs)
