@@ -21,7 +21,6 @@ Description:
 import sys
 from optparse import OptionParser
 from src.algorithms.tgraank.t_graank_v2 import Tgrad
-from src.algorithms.common.profile_cpu import Profile
 
 
 def init_algorithm(f_path, refItem, minSup, minRep, allowPara, eq=False):
@@ -63,11 +62,11 @@ def init_algorithm(f_path, refItem, minSup, minRep, allowPara, eq=False):
 
         for obj in list_tgp:
             if obj:
-                for i in range(len(obj[0])):
-                    wr_line += (str(obj[0][i]) + ' : ' + str(obj[1][i]) +
-                                ' | ' + obj[2][i].to_string() + '\n')
+                for tgp in obj:
+                    wr_line += (str(tgp.to_string()) + ' : ' + str(tgp.support) +
+                                ' | ' + str(tgp.time_lag.to_string()) + '\n')
         return wr_line
-    except Exception as error:
+    except ArithmeticError as error:
         wr_line = "Failed: " + str(error)
         print(error)
         return wr_line
@@ -144,6 +143,6 @@ if __name__ == "__main__":
     # wr_text += (Profile.get_quick_mem_use(snapshot) + "\n")
     wr_text += str(res_text)
     f_name = str('res_temp' + str(end).replace('.', '', 1) + '.txt')
-    write_file(wr_text, f_name)
+    # write_file(wr_text, f_name)
     print(wr_text)
 

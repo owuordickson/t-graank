@@ -75,10 +75,10 @@ class Tgrad:
 
         # 2. Execute t-graank for each transformation
         d_set.update_attributes(attr_data)
-        D1, S1, T1 = graank(min_sup=self.min_sup, eq=False, t_diffs=time_diffs, d_set=d_set, step=step)
+        tgps = graank(min_sup=self.min_sup, eq=False, t_diffs=time_diffs, d_set=d_set, step=step)
         d_set.clean_memory()
-        if len(D1) > 0:
-            return [D1, S1, T1]
+        if len(tgps) > 0:
+            return tgps
         return False
 
     def transform_data(self, step):  # optimized
