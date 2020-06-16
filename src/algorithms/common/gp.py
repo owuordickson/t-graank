@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
 @author: "Dickson OWUOR"
-@credits: "Anne LAURENT, Joseph ORERO"
+@credits: "Anne LAURENT and Joseph ORERO"
 @version: "3.0"
 @email: "owuordickson@gmail.com"
 @created: "20 May 2020"
@@ -18,7 +18,25 @@ class GI:
     def __init__(self, attr_col, symbol):
         self.attribute_col = attr_col
         self.symbol = symbol
-        self.gradual_item = tuple([attr_col, symbol])
+        # self.gradual_item = tuple([attr_col, symbol])
+        self.gradual_item = np.array((attr_col, symbol), dtype='i, S1')
+        self.tuple = tuple([attr_col, symbol])
+
+    def inv(self):
+        if self.symbol == '+':
+            # temp = tuple([self.attribute_col, '-'])
+            temp = np.array((self.attribute_col, '-'), dtype='i, S1')
+        else:
+            # temp = tuple([self.attribute_col, '+'])
+            temp = np.array((self.attribute_col, '+'), dtype='i, S1')
+        return temp
+
+    def as_string(self):
+        if self.symbol == '+':
+            temp = str(self.attribute_col) + '_pos'
+        else:
+            temp = str(self.attribute_col) + '_neg'
+        return temp
 
     def to_string(self):
         return str(self.attribute_col) + self.symbol
@@ -39,7 +57,13 @@ class GP:
     def get_pattern(self):
         pattern = list()
         for item in self.gradual_items:
-            pattern.append(item.gradual_item)
+            pattern.append(item.gradual_item.tolist())
+        return pattern
+
+    def inv_pattern(self):
+        pattern = list()
+        for gi in self.gradual_items:
+            pattern.append(gi.inv().tolist())
         return pattern
 
     def to_string(self):
