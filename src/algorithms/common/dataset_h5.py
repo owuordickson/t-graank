@@ -3,10 +3,10 @@
 @author: "Dickson Owuor"
 @credits: "Anne Laurent"
 @license: "MIT"
-@version: "2.2"
+@version: "3.0"
 @email: "owuordickson@gmail.com"
 @created: "12 July 2019"
-@modified: "25 May 2020"
+@modified: "20 June 2020"
 
 Changes
 -------
@@ -14,11 +14,10 @@ Changes
    - this frees primary memory from storing nxn matrices
 2. Fetch all binaries during initialization
 3. Replaced loops for fetching binary rank with numpy function
+4. Used HDF5 storage
 
 """
-import csv
-from dateutil.parser import parse
-import time
+
 import numpy as np
 from pathlib import Path
 import h5py
@@ -122,7 +121,7 @@ class Dataset_h5(Dataset):
             grp = h5f.require_group('dataset')
             grp.create_dataset('title', data=self.title)
             data = np.array(self.data.copy()).astype('S')
-            grp.create_dataset('data', data=data)
+            grp.create_dataset('data', data=data, compression="gzip", compression_opts=9)
             grp.create_dataset('time_cols', data=self.time_cols)
             grp.create_dataset('attr_cols', data=self.attr_cols)
             h5f.close()
@@ -141,5 +140,5 @@ class Dataset_h5(Dataset):
         h5f = h5py.File(self.h5_file, 'r+')
         if group in h5f:
             del h5f[group]
-        h5f.create_dataset(group, data=data)
+        h5f.create_dataset(group, data=data, compression="gzip", compression_opts=9)
         h5f.close()
