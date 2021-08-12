@@ -1,6 +1,8 @@
 [![Build Status](https://travis-ci.org/owuordickson/t-graank.svg?branch=master)](https://travis-ci.org/owuordickson/t-graank)
 ## T-GRAANK
-A python implementation of the <i>Temporal-GRAdual rANKing</i> algorithm. The algorithm extends the <i>GRAANK</i> algorithm to the case of temporal gradual tendencies. Research paper appears in the proceedings of Fuzz-IEEE 2019 International Conference on Fuzzy Systems held at New Orleans, USA 23rd-26th June 2019, [doi:10.1109/FUZZ-IEEE.2019.8858883/](https://doi.org/10.1109/FUZZ-IEEE.2019.8858883). We have optimized the implementation of the algorithm by: (1) using Numpy functions for operations that are time consuming, (2) allowed parallel multi-processing and (3) allowed secondary storage of large data in order to free CPU memory during processing through <em><strong>HDF5 storage (enabled gzip compression) and h5py</strong></em>.
+A python implementation of the <i>Temporal-GRAdual rANKing</i> algorithm. The algorithm extends the <i>GRAANK</i> algorithm to the case of temporal gradual tendencies. We have optimized the implementation of the algorithm by: (1) using Numpy functions for operations that are time consuming, (2) allowed parallel multi-processing and (3) allowed secondary storage of large data in order to free CPU memory during processing through <em><strong>HDF5 storage (enabled gzip compression) and h5py</strong></em>. The research paper is available via:
+
+* D. Owuor, A. Laurent and J. Orero, "Mining Fuzzy-Temporal Gradual Patterns," 2019 IEEE International Conference on Fuzzy Systems (FUZZ-IEEE), 2019, pp. 1-6, doi: 10.1109/FUZZ-IEEE.2019.8858883.
 
 ### List of Files:
 1. README.md (this file)
