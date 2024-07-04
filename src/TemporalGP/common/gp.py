@@ -128,15 +128,3 @@ class TimeLag:
         else:
             txt = "No time lag found!"
         return txt
-
-
-class TGP(GP):
-
-    def __init__(self, gp=GP(), t_lag=TimeLag()):
-        super().__init__()
-        self.gradual_items = gp.gradual_items
-        self.support = gp.support
-        self.time_lag = t_lag
-
-    def set_timeLag(self, t_lag):
-        self.time_lag = t_lag

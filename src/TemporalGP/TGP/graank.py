@@ -10,12 +10,24 @@
 
 import gc
 import numpy as np
+from so4gp import DataGP as Dataset
+from so4gp import GI, GP, TimeLag
+
 from .fuzzy_mf import calculate_time_lag
 # from ..common.dataset import Dataset
-from ..common.gp import GI, GP, TGP
-from so4gp import DataGP as Dataset
-# from so4gp import GI, GP, TGP
+# from ..common.gp import GI, GP, TGP
 
+
+class TGP(GP):
+
+    def __init__(self, gp=GP(), t_lag=TimeLag()):
+        super().__init__()
+        self.gradual_items = gp.gradual_items
+        self.support = gp.support
+        self.time_lag = t_lag
+
+    def set_time_lag(self, t_lag):
+        self.time_lag = t_lag
 
 
 def inv(g_item):
