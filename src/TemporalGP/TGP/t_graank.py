@@ -154,6 +154,7 @@ class TGrad:
                 time_diffs.append([time_diff, i])
         return True, np.array(time_diffs)
 
+    # Delete These
     def inv(self, g_item):
         if g_item[1] == '+':
             temp = tuple([g_item[0], '-'])
