@@ -7,15 +7,13 @@
 Description: updated version that uses aco-graank and parallel multiprocessing
 """
 
-import gc
+
 import numpy as np
 import multiprocessing as mp
 from so4gp import DataGP as Dataset
 from so4gp import GI, GP, TimeLag, GRAANK
 
 from .fuzzy_mf import calculate_time_lag
-# from ..common.dataset import Dataset
-# from ..common.gp import GI, GP, TGP
 
 
 class TGP(GP):
@@ -76,10 +74,10 @@ class TGrad(GRAANK):
 
         # 2. Execute t-graank for each transformation
         d_set.update_attributes(attr_data)
-        tgps = self.graank(t_diffs=time_diffs, d_set=d_set)
+        t_gps = self.discover(t_diffs=time_diffs, d_set=d_set)
 
-        if len(tgps) > 0:
-            return tgps
+        if len(t_gps) > 0:
+            return t_gps
         return False
 
     def transform_data(self, step):
@@ -150,18 +148,6 @@ class TGrad(GRAANK):
                 time_diffs.append([time_diff, i])
         return True, np.array(time_diffs)
 
-    @staticmethod
-    def get_timestamp(time_data):
-        """"""
-        try:
-            ok, stamp = Dataset.test_time(time_data)
-            if ok:
-                return stamp
-            else:
-                return False
-        except ValueError:
-            return False
-
     def discover(self, t_diffs=None, d_set=None):
         """"""
 
@@ -207,3 +193,15 @@ class TGrad(GRAANK):
                     i += 1
 
         return gradual_patterns
+
+    @staticmethod
+    def get_timestamp(time_data):
+        """"""
+        try:
+            ok, stamp = Dataset.test_time(time_data)
+            if ok:
+                return stamp
+            else:
+                return False
+        except ValueError:
+            return False
