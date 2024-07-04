@@ -52,8 +52,8 @@ class HandleData:
             else:
                 title = []
                 for i in range(len(data[0])):
-                    # sub = (str(i + 1) + ' : ' + data[0][i])
-                    # sub = data[0][i]
+                    # sub = (str(i + 1) + ' : ' + datasets[0][i])
+                    # sub = datasets[0][i]
                     sub = [str(i), data[0][i]]
                     title.append(sub)
                 del self.data[0]
@@ -74,7 +74,7 @@ class HandleData:
 
     def get_time_cols(self):
         time_cols = list()
-        # for k in range(10, len(self.data[0])):
+        # for k in range(10, len(self.datasets[0])):
         #    time_cols.append(k)
         # time_cols.append(0)
         for i in range(len(self.data[0])):  # check every column for time format
@@ -92,7 +92,7 @@ class HandleData:
 
     def init_attributes(self, eq):
         # (check) implement parallel multiprocessing
-        # re-structure csv data into an array
+        # re-structure csv datasets into an array
         self.equal = eq
         temp = self.data
         cols = self.column_size
@@ -144,7 +144,7 @@ class HandleData:
 
     @staticmethod
     def read_csv(file):
-        # 1. retrieve data-set from file
+        # 1. retrieve datasets-set from file
         with open(file, 'r') as f:
             dialect = csv.Sniffer().sniff(f.readline(), delimiters=";,' '\t")
             f.seek(0)

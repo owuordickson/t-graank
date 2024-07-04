@@ -35,7 +35,7 @@ class Dataset_h5(Dataset):
     def __init__(self, file_path, min_sup=0, eq=False):
         self.h5_file = str(Path(file_path).stem) + str('.h5')
         if os.path.exists(self.h5_file):
-            print("Fetching data from h5 file")
+            print("Fetching datasets from h5 file")
             h5f = h5py.File(self.h5_file, 'r')
             self.title = h5f['dataset/title'][:]
             self.time_cols = h5f['dataset/time_cols'][:]
@@ -56,7 +56,7 @@ class Dataset_h5(Dataset):
                 self.data = np.array([])
                 data = None
                 print("csv file read error")
-                raise Exception("Unable to read csv file or file has no data")
+                raise Exception("Unable to read csv file or file has no datasets")
             else:
                 print("Data fetched from csv file")
                 self.data = np.array([])
@@ -76,7 +76,7 @@ class Dataset_h5(Dataset):
     def init_attributes(self):
         # (check) implement parallel multiprocessing
         if self.data is not None:
-            # transpose csv array data
+            # transpose csv array datasets
             attr_data = self.data.copy().T
             self.attr_size = len(attr_data[self.attr_cols[0]])
             # create h5 groups to store class attributes
@@ -121,7 +121,7 @@ class Dataset_h5(Dataset):
             grp = h5f.require_group('dataset')
             grp.create_dataset('title', data=self.title)
             data = np.array(self.data.copy()).astype('S')
-            grp.create_dataset('data', data=data, compression="gzip", compression_opts=9)
+            grp.create_dataset('datasets', data=data, compression="gzip", compression_opts=9)
             grp.create_dataset('time_cols', data=self.time_cols)
             grp.create_dataset('attr_cols', data=self.attr_cols)
             h5f.close()

@@ -31,7 +31,7 @@ class Dataset:
             self.data = np.array([])
             data = None
             print("csv file read error")
-            raise Exception("Unable to read csv file or file has no data")
+            raise Exception("Unable to read csv file or file has no datasets")
         else:
             print("Data fetched from csv file")
             self.data = np.array([])
@@ -58,7 +58,7 @@ class Dataset:
         return count
 
     def get_title(self, data):
-        # data = self.raw_data
+        # datasets = self.raw_data
         if data[0][0].replace('.', '', 1).isdigit() or data[0][0].isdigit():
             title = self.convert_data_to_array(data)
             return title
@@ -71,14 +71,14 @@ class Dataset:
                 return title
 
     def convert_data_to_array(self, data, has_title=False):
-        # convert csv data into array
+        # convert csv datasets into array
         title = np.array([])
         if has_title:
             keys = np.arange(len(data[0]))
             values = np.array(data[0], dtype='S')
             title = np.rec.fromarrays((keys, values), names=('key', 'value'))
             data = np.delete(data, 0, 0)
-        # convert csv data into array
+        # convert csv datasets into array
         self.data = np.asarray(data)
         return title
 
@@ -90,7 +90,7 @@ class Dataset:
 
     def get_time_cols(self):
         time_cols = list()
-        # for k in range(10, len(self.data[0])):
+        # for k in range(10, len(self.datasets[0])):
         #    time_cols.append(k)
         # time_cols.append(0)
         n = len(self.data[0])
@@ -109,7 +109,7 @@ class Dataset:
 
     def init_attributes(self):
         # (check) implement parallel multiprocessing
-        # transpose csv array data
+        # transpose csv array datasets
         attr_data = self.data.copy().T
         self.attr_size = len(attr_data[self.attr_cols[0]])
         # construct and store 1-item_set valid bins
@@ -157,7 +157,7 @@ class Dataset:
 
     @staticmethod
     def read_csv(file):
-        # 1. retrieve data-set from file
+        # 1. retrieve datasets-set from file
         with open(file, 'r') as f:
             dialect = csv.Sniffer().sniff(f.readline(), delimiters=";,' '\t")
             f.seek(0)

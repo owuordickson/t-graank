@@ -41,7 +41,7 @@ class Tgrad:
             print("Dataset Error")
             self.time_ok = False
             self.time_cols = []
-            raise Exception('No date-time data found')
+            raise Exception('No date-time datasets found')
 
     def get_max_step(self, min_rep):  # optimized
         all_rows = len(self.d_set.data)
@@ -72,7 +72,7 @@ class Tgrad:
 
     def fetch_patterns(self, step):
         step += 1  # because for-loop is not inclusive from range: 0 - max_step
-        # 1. Transform data
+        # 1. Transform datasets
         d_set = self.d_set
         attr_data, time_diffs = self.transform_data(step)
 
@@ -103,10 +103,10 @@ class Tgrad:
                           "0 and " + str(len(self.d_set.title) - 1)
                     raise Exception(msg)
                 else:
-                    # 1. Split the transpose data set into column-tuples
+                    # 1. Split the transpose datasets set into column-tuples
                     attr_data = self.orig_attr_data
 
-                    # 2. Transform the data using (row) n+step
+                    # 2. Transform the datasets using (row) n+step
                     new_attr_data = list()
                     size = len(attr_data)
                     for k in range(size):

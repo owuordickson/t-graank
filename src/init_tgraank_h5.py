@@ -8,7 +8,7 @@
 @created: "19 November 2019"
 
 Usage:
-    $python3 init_tgraank.py -f ../data/DATASET.csv -c 0 -s 0.5 -r 0.5 -p 1
+    $python3 init_tgraank.py -f ../datasets/DATASET.csv -c 0 -s 0.5 -r 0.5 -p 1
 
 Description:
     f -> file path (CSV)
@@ -90,9 +90,9 @@ if __name__ == "__main__":
                              dest='file',
                              help='path to file containing csv',
                              # default=None,
-                             # default='../data/DATASET2.csv',
-                             default='../data/rain_temp2013-2015.csv',
-                             # default='../data/Directio.csv',
+                             # default='../datasets/DATASET2.csv',
+                             default='../datasets/rain_temp2013-2015.csv',
+                             # default='../datasets/Directio.csv',
                              type='string')
         optparser.add_option('-c', '--refColumn',
                              dest='refCol',
@@ -117,7 +117,7 @@ if __name__ == "__main__":
         (options, args) = optparser.parse_args()
         inFile = None
         if options.file is None:
-            print('No data-set filename specified, system with exit')
+            print('No datasets-set filename specified, system with exit')
             print("Usage: $python3 init_tgraank.py -f filename.csv -c refColumn -s minSup  -r minRep")
             sys.exit('System will exit')
         else:

@@ -153,6 +153,6 @@ def main(filename1, supmin1, eq=False):
 
 import time
 start = time.time()
-main('../data/FluTopicData-testsansdate-blank.csv', 0.5, False)
+main('../datasets/FluTopicData-testsansdate-blank.csv', 0.5, False)
 end = time.time()
 print("\n"+str(end-start)+" seconds")

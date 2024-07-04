@@ -36,7 +36,7 @@ class Tgrad:
             print("Dataset Error")
             self.time_ok = False
             self.time_cols = []
-            raise Exception('No date-time data found')
+            raise Exception('No date-time datasets found')
 
     def run_tgraank(self, parallel=False):
         if parallel:
@@ -63,7 +63,7 @@ class Tgrad:
 
     def fetch_patterns(self, step):
         step += 1  # because for-loop is not inclusive from range: 0 - max_step
-        # 1. Transform data
+        # 1. Transform datasets
         data, time_diffs = self.transform_data(step)
 
         # 2. Execute aco-graank for each transformation
@@ -91,9 +91,9 @@ class Tgrad:
                           "0 and "+str(len(self.d_set.title) - 1)
                     raise Exception(msg)
                 else:
-                    # 1. Split the original data-set into column-tuples
+                    # 1. Split the original datasets-set into column-tuples
                     attr_cols = self.d_set.attr_data
-                    # 2. Transform the data using (row) n+step
+                    # 2. Transform the datasets using (row) n+step
                     new_data = list()
                     size = len(data)
                     for obj in attr_cols:
