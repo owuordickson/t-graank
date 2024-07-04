@@ -11,7 +11,7 @@ import gc
 import numpy as np
 import multiprocessing as mp
 from so4gp import DataGP as Dataset
-from so4gp import GI, GP, TimeLag
+from so4gp import GI, GP, TimeLag, GRAANK
 
 from .fuzzy_mf import calculate_time_lag
 # from ..common.dataset import Dataset
@@ -30,31 +30,27 @@ class TGP(GP):
         self.time_lag = t_lag
 
 
-class TGrad:
+class TGrad(GRAANK):
 
-    def __init__(self, f_path, eq, ref_item, min_sup, min_rep, cores):
-        # For tgraank
-        # self.d_set = d_set
-        self.d_set = Dataset(f_path, min_sup=min_sup, eq=eq)
-        cols = self.d_set.time_cols
-        if len(cols) > 0:
+    def __init__(self, f_path, eq, min_sup, ref_item, min_rep, cores):
+        """"""
+
+        super(TGrad, self).__init__(data_source=f_path, min_sup=min_sup, eq=eq)
+        if len(self.time_cols) > 0:
             print("Dataset Ok")
             self.time_ok = True
-            self.time_cols = cols
-            self.min_sup = min_sup
             self.ref_item = ref_item
             self.max_step = self.get_max_step(min_rep)
-            self.orig_attr_data = self.d_set.data.copy().T
+            self.orig_attr_data = self.data.copy().T
             self.cores = cores
         else:
             print("Dataset Error")
             self.time_ok = False
-            self.time_cols = []
             raise Exception('No date-time datasets found')
 
-    def get_max_step(self, min_rep):  # optimized
-        all_rows = len(self.d_set.data)
-        return all_rows - int(min_rep * all_rows)
+    def get_max_step(self, min_rep):
+        """"""
+        return self.row_count - int(min_rep * self.row_count)
 
     def discover_tgp(self, parallel=False):
         if parallel:
@@ -76,7 +72,6 @@ class TGrad:
     def fetch_patterns(self, step):
         step += 1  # because for-loop is not inclusive from range: 0 - max_step
         # 1. Transform datasets
-        d_set = self.d_set
         attr_data, time_diffs = self.transform_data(step)
 
         # 2. Execute t-graank for each transformation
@@ -87,7 +82,8 @@ class TGrad:
             return tgps
         return False
 
-    def transform_data(self, step):  # optimized
+    def transform_data(self, step):
+        """"""
         # NB: Restructure dataset based on reference item
         if self.time_ok:
             # 1. Calculate time difference using step
@@ -101,9 +97,9 @@ class TGrad:
                 if ref_col in self.time_cols:
                     msg = "Reference column is a 'date-time' attribute"
                     raise Exception(msg)
-                elif (ref_col < 0) or (ref_col >= len(self.d_set.title)):
+                elif (ref_col < 0) or (ref_col >= self.col_count):
                     msg = "Reference column does not exist\nselect column between: " \
-                          "0 and " + str(len(self.d_set.title) - 1)
+                          "0 and " + str(self.col_count - 1)
                     raise Exception(msg)
                 else:
                     # 1. Split the transpose datasets set into column-tuples
@@ -135,17 +131,17 @@ class TGrad:
             raise Exception(msg)
 
     def get_time_diffs(self, step):  # optimized
-        data = self.d_set.data
-        size = len(data)
+        """"""
+        size = self.row_count
         time_diffs = []
         for i in range(size):
             if i < (size - step):
                 # for col in self.time_cols:
                 col = self.time_cols[0]  # use only the first date-time value
-                temp_1 = str(data[i][int(col)])
-                temp_2 = str(data[i + step][int(col)])
-                stamp_1 = Dataset.get_timestamp(temp_1)
-                stamp_2 = Dataset.get_timestamp(temp_2)
+                temp_1 = str(self.data[i][int(col)])
+                temp_2 = str(self.data[i + step][int(col)])
+                stamp_1 = TGrad.get_timestamp(temp_1)
+                stamp_2 = TGrad.get_timestamp(temp_2)
                 if (not stamp_1) or (not stamp_2):
                     return False, [i + 1, i + step + 1]
                 time_diff = (stamp_2 - stamp_1)
@@ -154,105 +150,60 @@ class TGrad:
                 time_diffs.append([time_diff, i])
         return True, np.array(time_diffs)
 
-    # Delete These
-    def inv(self, g_item):
-        if g_item[1] == '+':
-            temp = tuple([g_item[0], '-'])
-        else:
-            temp = tuple([g_item[0], '+'])
-        return temp
-
-    def gen_apriori_candidates(self, R, sup, n):
-        res = []
-        I = []
-        if len(R) < 2:
-            return []
+    @staticmethod
+    def get_timestamp(time_data):
+        """"""
         try:
-            Ck = [{x[0]} for x in R]
-        except TypeError:
-            Ck = [set(x[0]) for x in R]
+            ok, stamp = Dataset.test_time(time_data)
+            if ok:
+                return stamp
+            else:
+                return False
+        except ValueError:
+            return False
 
-        for i in range(len(R) - 1):
-            for j in range(i + 1, len(R)):
-                try:
-                    R_i = {R[i][0]}
-                    R_j = {R[j][0]}
-                    R_o = {R[0][0]}
-                except TypeError:
-                    R_i = set(R[i][0])
-                    R_j = set(R[j][0])
-                    R_o = set(R[0][0])
-                temp = R_i | R_j
-                invtemp = {self.inv(x) for x in temp}
-                if (len(temp) == len(R_o) + 1) and (not (I != [] and temp in I)) \
-                        and (not (I != [] and invtemp in I)):
-                    test = 1
-                    for k in temp:
-                        try:
-                            k_set = {k}
-                        except TypeError:
-                            k_set = set(k)
-                        temp2 = temp - k_set
-                        invtemp2 = {self.inv(x) for x in temp2}
-                        if not temp2 in Ck and not invtemp2 in Ck:
-                            test = 0
-                            break
-                    if test == 1:
-                        m = R[i][1] * R[j][1]
-                        t = float(np.sum(m)) / float(n * (n - 1.0) / 2.0)
-                        if t > sup:
-                            res.append([temp, m])
-                    I.append(temp)
-                    gc.collect()
-        return res
+    def discover(self, t_diffs=None, d_set=None):
+        """"""
 
-    def graank(self, t_diffs=None, d_set=None):
+        # self.fit_bitmap()
 
-        d_set = d_set
-        min_sup = d_set.thd_supp
-
-        patterns = []
+        gradual_patterns = []
+        """:type gradual_patterns: list"""
+        # n = self.attr_size
+        # valid_bins = self.valid_bins
         n = d_set.attr_size
-        # lst_valid_gi = gen_valid_bins(d_set.invalid_bins, d_set.attr_cols)
         valid_bins = d_set.valid_bins
 
+        invalid_count = 0
         while len(valid_bins) > 0:
-            valid_bins = self.gen_apriori_candidates(valid_bins, min_sup, n)
+            valid_bins, inv_count = self._gen_apriori_candidates(valid_bins)
+            invalid_count += inv_count
             i = 0
             while i < len(valid_bins) and valid_bins != []:
                 gi_tuple = valid_bins[i][0]
                 bin_data = valid_bins[i][1]
-                # grp = 'dataset/' + d_set.step_name + '/valid_bins/' + gi.as_string()
-                # bin_data = d_set.read_h5_dataset(grp)
                 sup = float(np.sum(np.array(bin_data))) / float(n * (n - 1.0) / 2.0)
-                if sup < min_sup:
+                if sup < self.thd_supp:
                     del valid_bins[i]
+                    invalid_count += 1
                 else:
                     z = 0
-                    while z < (len(patterns) - 1):
-                        if set(patterns[z].get_pattern()).issubset(set(gi_tuple)):
-                            del patterns[z]
+                    while z < (len(gradual_patterns) - 1):
+                        if set(gradual_patterns[z].get_pattern()).issubset(set(gi_tuple)):
+                            del gradual_patterns[z]
                         else:
                             z = z + 1
-                    if t_diffs is not None:
-                        t_lag = calculate_time_lag(bin_data, t_diffs)
-                        if t_lag.valid:
-                            gp = GP()
-                            for obj in valid_bins[i][0]:
-                                gi = GI(obj[0], obj[1].decode())
-                                gp.add_gradual_item(gi)
-                            gp.set_support(sup)
-                            tgp = TGP(gp=gp, t_lag=t_lag)
-                            patterns.append(tgp)
-                    else:
+
+                    t_lag = calculate_time_lag(bin_data, t_diffs)
+                    if t_lag.valid:
                         gp = GP()
                         for obj in valid_bins[i][0]:
                             gi = GI(obj[0], obj[1].decode())
+                            """:type gi: GI"""
                             gp.add_gradual_item(gi)
                         gp.set_support(sup)
-                        patterns.append(gp)
+                        tgp = TGP(gp=gp, t_lag=t_lag)
+                        gradual_patterns.append(tgp)
                     i += 1
-        if t_diffs is None:
-            return d_set, patterns
-        else:
-            return patterns
+
+        return gradual_patterns

@@ -27,7 +27,7 @@ from .TGP.t_graank import TGrad
 def tgp_app(f_path, refItem, minSup, minRep, num_cores, eq=False):
     try:
 
-        tgp = TGrad(f_path, eq, refItem, minSup, minRep, num_cores)
+        tgp = TGrad(f_path, eq, minSup, refItem, minRep, num_cores)
         if num_cores >= 1:
             msg_para = "True"
             list_tgp = tgp.discover_tgp(parallel=True)
