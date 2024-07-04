@@ -1,12 +1,5 @@
 # -*- coding: utf-8 -*-
 """
-@author: "Dickson Owuor"
-@credits: "Anne Laurent and Joseph Orero"
-@license: "MIT"
-@version: "2.0"
-@email: "owuordickson@gmail.com"
-@created: "19 November 2019"
-
 Usage:
     $python3 cli_main.py -f ../datasets/DATASET.csv -c 0 -s 0.5 -r 0.5 -p 1
 
@@ -15,7 +8,6 @@ Description:
     c -> reference column
     s -> minimum support
     r -> representativity
-
 """
 
 import sys
