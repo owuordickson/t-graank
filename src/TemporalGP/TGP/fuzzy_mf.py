@@ -11,7 +11,6 @@
 import numpy as np
 import skfuzzy as fuzzy
 from so4gp import TimeLag
-# from ..common.gp import TimeLag
 
 
 def calculate_time_lag(bin_data, time_diffs):
@@ -71,4 +70,3 @@ def calculate_support(memberships):  # optimized
 def get_indices(bin_data):  # optimized
     indices = np.argwhere(bin_data == 1)
     return indices
-
