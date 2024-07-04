@@ -7,7 +7,8 @@ name = "StructuralGTb"
 dynamic = ["version"]
 dependencies = [
   "numpy",
-  "scikit-fuzzy"
+  "scikit-fuzzy",
+  "python-dateutil"
 ]
 requires-python = ">=3.11"
 authors = [
