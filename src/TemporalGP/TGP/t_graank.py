@@ -1,4 +1,8 @@
-# -*- coding: utf-8 -*-
+# SPDX-License-Identifier: GNU GPL v3
+# This file is dual licensed under the terms of the GNU General Public, Version
+# 3.0.  See the LICENSE file in the root of this
+# repository for complete details.
+
 """
 Description: updated version that uses aco-graank and parallel multiprocessing
 """
@@ -11,7 +15,7 @@ from so4gp import DataGP as Dataset
 from .graank import graank
 
 
-class Tgrad:
+class TGrad:
 
     def __init__(self, f_path, eq, ref_item, min_sup, min_rep, cores):
         # For tgraank
@@ -37,7 +41,7 @@ class Tgrad:
         all_rows = len(self.d_set.data)
         return all_rows - int(min_rep * all_rows)
 
-    def run_tgraank(self, parallel=False):
+    def discover(self, parallel=False):
         if parallel:
             # implement parallel multi-processing
             steps = range(self.max_step)

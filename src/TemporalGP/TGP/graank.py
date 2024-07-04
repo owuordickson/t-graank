@@ -1,20 +1,18 @@
-# -*- coding: utf-8 -*-
-"""
-@author: Olivier + modif MJL+MR 140316
-@created on Fri Jun 12 14:31:16 2015
+# SPDX-License-Identifier: GNU GPL v3
+# This file is dual licensed under the terms of the GNU General Public, Version
+# 3.0.  See the LICENSE file in the root of this
+# repository for complete details.
 
-@modified by D. Owuor 04 June 2020
+"""
 
 """
 
 
 import gc
 import numpy as np
-from so4gp import DataGP as Dataset
 from so4gp import GI, GP, TimeLag
 
 from .fuzzy_mf import calculate_time_lag
-# from ..common.dataset import Dataset
 # from ..common.gp import GI, GP, TGP
 
 
@@ -83,13 +81,11 @@ def gen_apriori_candidates(R, sup, n):
     return res
 
 
-def graank(f_path=None, min_sup=None, eq=False, t_diffs=None, d_set=None):
-    if d_set is None:
-        d_set = Dataset(f_path, min_sup, eq)
-        d_set.init_attributes()
-    else:
-        d_set = d_set
-        min_sup = d_set.thd_supp
+def graank(t_diffs=None, d_set=None):
+
+    d_set = d_set
+    min_sup = d_set.thd_supp
+
     patterns = []
     n = d_set.attr_size
     # lst_valid_gi = gen_valid_bins(d_set.invalid_bins, d_set.attr_cols)

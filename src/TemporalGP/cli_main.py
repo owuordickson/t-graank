@@ -20,20 +20,20 @@ Description:
 
 import sys
 from optparse import OptionParser
-from .TGP.t_graank import Tgrad
+from .TGP.t_graank import TGrad
 # from .TGP.t_graank_h5 import Tgrad_5
 
 
 def tgp_app(f_path, refItem, minSup, minRep, num_cores, eq=False):
     try:
 
-        tgp = Tgrad(f_path, eq, refItem, minSup, minRep, num_cores)
+        tgp = TGrad(f_path, eq, refItem, minSup, minRep, num_cores)
         if num_cores >= 1:
             msg_para = "True"
-            list_tgp = tgp.run_tgraank(parallel=True)
+            list_tgp = tgp.discover(parallel=True)
         else:
             msg_para = "False"
-            list_tgp = tgp.run_tgraank()
+            list_tgp = tgp.discover()
 
         d_set = tgp.d_set
         wr_line = "Algorithm: T-GRAANK \n"
@@ -76,10 +76,10 @@ def tgp_app_h5(f_path, refItem, minSup, minRep, allowPara, eq=False):
         tgp = Tgrad_5(f_path, eq, refItem, minSup, minRep, allowPara)
         if allowPara >= 1:
             msg_para = "True"
-            list_tgp = tgp.run_tgraank(parallel=True)
+            list_tgp = tgp.discover(parallel=True)
         else:
             msg_para = "False"
-            list_tgp = tgp.run_tgraank()
+            list_tgp = tgp.discover()
 
         d_set = tgp.d_set
         wr_line = "Algorithm: T-GRAANK \n"
