@@ -21,13 +21,13 @@ Description:
 import sys
 from optparse import OptionParser
 from .TGP.t_graank import TGrad
-# from .TGP.t_graank_h5 import Tgrad_5
+# from .TGP.t_graank_h5 import TGrad_5
 
 
-def tgp_app(f_path, refItem, minSup, minRep, num_cores, eq=False):
+def tgp_app(f_path, ref_item, min_sup, min_rep, num_cores, eq=False):
     try:
 
-        tgp = TGrad(f_path, eq, minSup, refItem, minRep, num_cores)
+        tgp = TGrad(f_path, eq, min_sup, ref_item, min_rep, num_cores)
         if num_cores >= 1:
             msg_para = "True"
             list_tgp = tgp.discover_tgp(parallel=True)
@@ -35,19 +35,18 @@ def tgp_app(f_path, refItem, minSup, minRep, num_cores, eq=False):
             msg_para = "False"
             list_tgp = tgp.discover_tgp()
 
-        d_set = tgp.d_set
         wr_line = "Algorithm: T-GRAANK \n"
-        wr_line += "No. of (dataset) attributes: " + str(d_set.column_size) + '\n'
-        wr_line += "No. of (dataset) tuples: " + str(d_set.size) + '\n'
-        wr_line += "Minimum support: " + str(minSup) + '\n'
-        wr_line += "Minimum representativity: " + str(minRep) + '\n'
+        wr_line += "No. of (dataset) attributes: " + str(tgp.col_count) + '\n'
+        wr_line += "No. of (dataset) tuples: " + str(tgp.row_count) + '\n'
+        wr_line += "Minimum support: " + str(min_sup) + '\n'
+        wr_line += "Minimum representativity: " + str(min_rep) + '\n'
         wr_line += "Multi-core execution: " + str(msg_para) + '\n'
         wr_line += "Number of cores: " + str(tgp.cores) + '\n'
         wr_line += "Number of tasks: " + str(tgp.max_step) + '\n\n'
 
-        for txt in d_set.title:
+        for txt in tgp.titles:
             col = int(txt[0])
-            if col == refItem:
+            if col == ref_item:
                 wr_line += (str(txt[0]) + '. ' + str(txt[1].decode()) + '**' + '\n')
             else:
                 wr_line += (str(txt[0]) + '. ' + str(txt[1].decode()) + '\n')
@@ -71,10 +70,10 @@ def tgp_app(f_path, refItem, minSup, minRep, num_cores, eq=False):
         return wr_line
 
 
-def tgp_app_h5(f_path, refItem, minSup, minRep, allowPara, eq=False):
+def tgp_app_h5(f_path, ref_item, min_sup, min_rep, allow_para, eq=False):
     try:
-        tgp = Tgrad_5(f_path, eq, refItem, minSup, minRep, allowPara)
-        if allowPara >= 1:
+        tgp = TGrad_5(f_path, eq, min_sup, ref_item, min_rep, allow_para)
+        if allow_para >= 1:
             msg_para = "True"
             list_tgp = tgp.discover_tgp(parallel=True)
         else:
@@ -86,15 +85,15 @@ def tgp_app_h5(f_path, refItem, minSup, minRep, allowPara, eq=False):
         wr_line += "   - H5Py implementation \n"
         wr_line += "No. of (dataset) attributes: " + str(d_set.column_size) + '\n'
         wr_line += "No. of (dataset) tuples: " + str(d_set.size) + '\n'
-        wr_line += "Minimum support: " + str(minSup) + '\n'
-        wr_line += "Minimum representativity: " + str(minRep) + '\n'
+        wr_line += "Minimum support: " + str(min_sup) + '\n'
+        wr_line += "Minimum representativity: " + str(min_rep) + '\n'
         wr_line += "Multi-core execution: " + str(msg_para) + '\n'
         wr_line += "Number of cores: " + str(tgp.cores) + '\n'
         wr_line += "Number of tasks: " + str(tgp.max_step) + '\n\n'
 
         for txt in d_set.title:
             col = int(txt[0])
-            if col == refItem:
+            if col == ref_item:
                 wr_line += (str(txt[0]) + '. ' + str(txt[1].decode()) + '**' + '\n')
             else:
                 wr_line += (str(txt[0]) + '. ' + str(txt[1].decode()) + '\n')
@@ -163,14 +162,13 @@ def terminal_app():
                              default=1,
                              type='int')
         (options, args) = optparser.parse_args()
-        inFile = None
+
         if options.file is None:
             print('No datasets-set filename specified, system with exit')
             print("Usage: $python3 cli_main.py -f filename.csv -c refColumn -s minSup  -r minRep")
             sys.exit('System will exit')
-        else:
-            inFile = options.file
-        file_path = inFile
+
+        file_path = options.file
         ref_col = options.refCol
         min_sup = options.minSup
         min_rep = options.minRep
@@ -181,7 +179,7 @@ def terminal_app():
 
     start = time.time()
     # tracemalloc.start()
-    res_text = terminal_app(file_path, ref_col, min_sup, min_rep, allow_p)
+    res_text = tgp_app(file_path, ref_col, min_sup, min_rep, allow_p)
     # snapshot = tracemalloc.take_snapshot()
     end = time.time()
 
@@ -191,4 +189,3 @@ def terminal_app():
     f_name = str('res_temp' + str(end).replace('.', '', 1) + '.txt')
     write_file(wr_text, f_name)
     print(wr_text)
-

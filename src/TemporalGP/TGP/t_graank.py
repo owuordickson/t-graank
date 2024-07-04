@@ -73,8 +73,7 @@ class TGrad(GRAANK):
         attr_data, time_diffs = self.transform_data(step)
 
         # 2. Execute t-graank for each transformation
-        d_set.update_attributes(attr_data)
-        t_gps = self.discover(t_diffs=time_diffs, d_set=d_set)
+        t_gps = self.discover(t_diffs=time_diffs, attr_data=attr_data)
 
         if len(t_gps) > 0:
             return t_gps
@@ -148,17 +147,17 @@ class TGrad(GRAANK):
                 time_diffs.append([time_diff, i])
         return True, np.array(time_diffs)
 
-    def discover(self, t_diffs=None, d_set=None):
+    def discover(self, t_diffs=None, attr_data=None):
         """"""
 
-        # self.fit_bitmap()
+        self.fit_bitmap(attr_data)
 
         gradual_patterns = []
         """:type gradual_patterns: list"""
-        # n = self.attr_size
-        # valid_bins = self.valid_bins
-        n = d_set.attr_size
-        valid_bins = d_set.valid_bins
+        n = self.attr_size
+        valid_bins = self.valid_bins
+        # n = d_set.attr_size
+        # valid_bins = d_set.valid_bins
 
         invalid_count = 0
         while len(valid_bins) > 0:
