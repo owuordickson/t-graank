@@ -9,9 +9,6 @@ except ImportError:
 with open('README.md') as readme_file:
     readme = readme_file.read()
 
-with open('HISTORY.rst') as history_file:
-    history = history_file.read()
-
 with open('requirements.txt') as requirements_file:
     requirements = requirements_file.read()
 
@@ -24,12 +21,12 @@ setup(
     name='tgraank',
     version='1.0',
     description="A Python implementation of the Temporal GRAdual rANKing algorithm.",
-    long_description=readme + '\n\n' + history,
+    long_description=readme,
     author="Dickson Owuor",
     author_email='owuordickson@ieee.org',
     url='https://github.com/owuordickson/tgraank',
     packages=find_packages(),
-    #package_dir={'tgraank':'tgraank'},
+    # package_dir={'tgraank':'tgraank'},
     include_package_data=True,
     install_requires=requirements,
     license="MIT",
@@ -40,7 +37,7 @@ setup(
         'Intended Audience :: Developers',
         'License :: OSI Approved :: Massachusetts Institute of Technology (MIT) License',
         'Natural Language :: English',
-        'Programming Language :: Python :: 3.6',
+        'Programming Language :: Python :: 3.11',
     ],
     test_suite='tests',
     tests_require=test_requirements
