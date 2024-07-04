@@ -30,10 +30,10 @@ def tgp_app(f_path, refItem, minSup, minRep, num_cores, eq=False):
         tgp = TGrad(f_path, eq, refItem, minSup, minRep, num_cores)
         if num_cores >= 1:
             msg_para = "True"
-            list_tgp = tgp.discover(parallel=True)
+            list_tgp = tgp.discover_tgp(parallel=True)
         else:
             msg_para = "False"
-            list_tgp = tgp.discover()
+            list_tgp = tgp.discover_tgp()
 
         d_set = tgp.d_set
         wr_line = "Algorithm: T-GRAANK \n"
@@ -76,10 +76,10 @@ def tgp_app_h5(f_path, refItem, minSup, minRep, allowPara, eq=False):
         tgp = Tgrad_5(f_path, eq, refItem, minSup, minRep, allowPara)
         if allowPara >= 1:
             msg_para = "True"
-            list_tgp = tgp.discover(parallel=True)
+            list_tgp = tgp.discover_tgp(parallel=True)
         else:
             msg_para = "False"
-            list_tgp = tgp.discover()
+            list_tgp = tgp.discover_tgp()
 
         d_set = tgp.d_set
         wr_line = "Algorithm: T-GRAANK \n"
