@@ -13,7 +13,8 @@
 
 import numpy as np
 import skfuzzy as fuzzy
-from ..common.gp import TimeLag
+from so4gp import TimeLag
+# from ..common.gp import TimeLag
 
 
 def calculate_time_lag(bin_data, time_diffs):

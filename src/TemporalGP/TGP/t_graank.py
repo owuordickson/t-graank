@@ -1,22 +1,13 @@
 # -*- coding: utf-8 -*-
 """
-@author: "Dickson Owuor"
-@credits: "Anne Laurent and Joseph Orero"
-@license: "MIT"
-@version: "2.0"
-@email: "owuordickson@gmail.com"
-@created: "19 November 2019"
-
-
-
-Description: updated version that uses aco-graank and parallel multi-processing
-
+Description: updated version that uses aco-graank and parallel multiprocessing
 """
 
 # from joblib import Parallel, delayed
 import numpy as np
 import multiprocessing as mp
-from ..common.dataset import Dataset
+# from ..common.dataset import Dataset
+from so4gp import DataGP as Dataset
 from .graank import graank
 
 

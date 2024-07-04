@@ -7,11 +7,15 @@
 
 """
 
-import numpy as np
+
 import gc
+import numpy as np
 from .fuzzy_mf import calculate_time_lag
-from ..common.dataset import Dataset
+# from ..common.dataset import Dataset
 from ..common.gp import GI, GP, TGP
+from so4gp import DataGP as Dataset
+# from so4gp import GI, GP, TGP
+
 
 
 def inv(g_item):
