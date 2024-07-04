@@ -17,8 +17,7 @@ Description: updated version that uses aco-graank and parallel multi-processing
 import numpy as np
 import multiprocessing as mp
 from ..common.dataset import Dataset
-from ..common.profile_cpu import Profile
-from ..graank.graank_v2 import graank
+from .graank import graank
 
 
 class Tgrad:
@@ -50,14 +49,8 @@ class Tgrad:
     def run_tgraank(self, parallel=False):
         if parallel:
             # implement parallel multi-processing
-            if self.cores > 1:
-                num_cores = self.cores
-            else:
-                num_cores = Profile.get_num_cores()
-
-            self.cores = num_cores
             steps = range(self.max_step)
-            pool = mp.Pool(num_cores)
+            pool = mp.Pool(self.cores)
             patterns = pool.map(self.fetch_patterns, steps)
             pool.close()
             pool.join()

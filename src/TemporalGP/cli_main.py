@@ -8,7 +8,7 @@
 @created: "19 November 2019"
 
 Usage:
-    $python3 cli_tgraank.py -f ../datasets/DATASET.csv -c 0 -s 0.5 -r 0.5 -p 1
+    $python3 cli_main.py -f ../datasets/DATASET.csv -c 0 -s 0.5 -r 0.5 -p 1
 
 Description:
     f -> file path (CSV)
@@ -20,14 +20,15 @@ Description:
 
 import sys
 from optparse import OptionParser
-from algorithms.tgraank.t_graank_v2 import Tgrad
-from algorithms.tgraank.t_graank_h5 import Tgrad_5
+from .TGP.t_graank import Tgrad
+# from .TGP.t_graank_h5 import Tgrad_5
 
 
-def terminal_app(f_path, refItem, minSup, minRep, allowPara, eq=False):
+def tgp_app(f_path, refItem, minSup, minRep, num_cores, eq=False):
     try:
-        tgp = Tgrad(f_path, eq, refItem, minSup, minRep, allowPara)
-        if allowPara >= 1:
+
+        tgp = Tgrad(f_path, eq, refItem, minSup, minRep, num_cores)
+        if num_cores >= 1:
             msg_para = "True"
             list_tgp = tgp.run_tgraank(parallel=True)
         else:
@@ -70,7 +71,7 @@ def terminal_app(f_path, refItem, minSup, minRep, allowPara, eq=False):
         return wr_line
 
 
-def terminal_app_h5(f_path, refItem, minSup, minRep, allowPara, eq=False):
+def tgp_app_h5(f_path, refItem, minSup, minRep, allowPara, eq=False):
     try:
         tgp = Tgrad_5(f_path, eq, refItem, minSup, minRep, allowPara)
         if allowPara >= 1:
@@ -123,7 +124,7 @@ def write_file(data, path):
         f.close()
 
 
-if __name__ == "__main__":
+def terminal_app():
     if not sys.argv:
         # pType = sys.argv[1]
         file_path = sys.argv[1]
@@ -165,7 +166,7 @@ if __name__ == "__main__":
         inFile = None
         if options.file is None:
             print('No datasets-set filename specified, system with exit')
-            print("Usage: $python3 cli_tgraank.py -f filename.csv -c refColumn -s minSup  -r minRep")
+            print("Usage: $python3 cli_main.py -f filename.csv -c refColumn -s minSup  -r minRep")
             sys.exit('System will exit')
         else:
             inFile = options.file

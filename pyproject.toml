@@ -1,12 +1,13 @@
 [build-system]
-requires = ["setuptools >= 61.0", "wheel"]
+requires = ["setuptools >= 68.0", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
 name = "StructuralGTb"
 dynamic = ["version"]
 dependencies = [
-  "numpy"
+  "numpy",
+  "scikit-fuzzy"
 ]
 requires-python = ">=3.11"
 authors = [
