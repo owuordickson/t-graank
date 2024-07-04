@@ -4,17 +4,15 @@ A python implementation of the <i>Temporal-GRAdual rANKing</i> algorithm. The al
 
 * D. Owuor, A. Laurent and J. Orero, "Mining Fuzzy-Temporal Gradual Patterns," 2019 IEEE International Conference on Fuzzy Systems (FUZZ-IEEE), 2019, pp. 1-6, doi: 10.1109/FUZZ-IEEE.2019.8858883.
 
-### List of Files:
+### List of (important) Files:
 1. README.md (this file)
-2. t_graank.py
-3. fuzzy_temporal.py
-4. data_transform.py
-5. DATASET.csv
+2. init_tgraank.py
+3. DATASET.csv
 
 ### Usage:
 Use it a command line program with the local package:
 ```
-$python src/init_tgraank.py -f fileName.csv -c refColumn -s minSupport  -r minRepresentativity
+$python src/init_tgraank.py -f data/DATASET.csv -c refColumn -s minSupport  -r minRepresentativity
 ```
 
 The input parameters are: ```fileName.csv, refColumn, minSupport, minRepresentativity```. You are required to use a <strong>file</strong> in csv format and make sure the <i>timestamp column</i> is the first column in the file. You specify:
