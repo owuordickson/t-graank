@@ -1,0 +1,54 @@
+[build-system]
+requires = ["setuptools >= 61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "StructuralGTb"
+dynamic = ["version"]
+dependencies = [
+  "numpy"
+]
+requires-python = ">=3.11"
+authors = [
+  {name = "Dickson Owuor", email = "owuordickson@gmail.com"},
+  {name = "Anne Laurent", email = "laurent@lirmm.fr"}
+]
+maintainers = [
+  {name = "Dickson Owuor", email = "owuordickson@gmail.com"}
+]
+description = "A Python implementation of the Temporal GRAdual rANKing algorithm."
+readme =  "README.md"
+license = {file = "LICENSE"}
+keywords = ["gradual patterns", "GRAANK", "time series", "AMI"]
+classifiers = [
+  "Development Status :: 4 - Beta",
+  "Programming Language :: Python :: 3.11",
+  "License :: OSI Approved :: GNU General Public License v3 License",
+  "Operating System :: OS Independent",
+  "Intended Audience :: Science/Research",
+  "Topic :: Scientific/Engineering :: Artificial Intelligence"
+]
+
+# docs = []
+
+[project.urls]
+Homepage = "https://github.com/owuordickson/tgraank"
+Documentation = "http://tgraank.readthedocs.io"
+Repository = "https://github.com/owuordickson/tgraank.git"
+"Bug Tracker" = "https://github.com/owuordickson/tgraank/issues"
+Changelog = "https://github.com/owuordickson/tgraank/blob/main/CHANGELOG.md"
+
+[project.scripts]
+TemporalGP = "TemporalGP.entrypoints:main_cli"
+
+[tool.setuptools]
+include-package-data = true
+
+[tool.setuptools.dynamic]
+version = {attr = "TemporalGP.__version__"}
+
+[tool.setuptools.packages.find]
+where = ["src"]  # list of folders that contain the packages (["."] by default)
+include = ["*"]  # package names should match these glob patterns (["*"] by default)
+exclude = ["tests*"]  # exclude packages matching these glob patterns (empty by default)
+namespaces = false  # to disable scanning PEP 420 namespaces (true by default)

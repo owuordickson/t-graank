@@ -15,9 +15,9 @@ Description: updated version that uses aco-graank and parallel multi-processing
 
 # from joblib import Parallel, delayed
 import numpy as np
-from ..common.dataset_h5 import Dataset_h5
+from src.algorithms.common.dataset_h5 import Dataset_h5
 from ..common.profile_cpu import Profile
-from ..graank.graank_h5 import graank_h5
+from src.algorithms.graank_h5 import graank_h5
 
 
 class Tgrad_5:

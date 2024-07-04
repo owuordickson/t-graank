@@ -5,8 +5,8 @@ python:
 
 before_install:
   - sudo apt-get -y install libopenmpi-dev
-  - "python setup.py install"
+  - "pip install ."
 
 install: pip install -r requirements.txt
 
-script: python3 src/init_tgraank.py -f datasets/DATASET.csv
+script: python3 src/cli_tgraank.py -f datasets/DATASET.csv

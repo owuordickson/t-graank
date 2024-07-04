@@ -9,9 +9,9 @@
 
 import numpy as np
 import gc
-from ..common.fuzzy_mf import calculate_time_lag
-from ..common.dataset_h5 import Dataset_h5
-from ..common.gp import GI, GP, TGP
+from src.algorithms.common.fuzzy_mf import calculate_time_lag
+from src.algorithms.common.dataset_h5 import Dataset_h5
+from src.algorithms.common.gp import GI, GP, TGP
 
 
 def inv(g_item):

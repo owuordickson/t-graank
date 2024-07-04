@@ -13,7 +13,7 @@
 
 import numpy as np
 import skfuzzy as fuzzy
-from .gp import TimeLag
+from src.algorithms.gp import TimeLag
 
 
 def calculate_time_lag(bin_data, time_diffs):

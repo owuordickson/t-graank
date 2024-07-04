@@ -8,7 +8,7 @@
 @created: "19 November 2019"
 
 Usage:
-    $python3 init_tgraank.py -f ../datasets/DATASET.csv -c 0 -s 0.5 -r 0.5 -p 1
+    $python3 cli_tgraank.py -f ../datasets/DATASET.csv -c 0 -s 0.5 -r 0.5 -p 1
 
 Description:
     f -> file path (CSV)
@@ -21,9 +21,10 @@ Description:
 import sys
 from optparse import OptionParser
 from algorithms.tgraank.t_graank_v2 import Tgrad
+from algorithms.tgraank.t_graank_h5 import Tgrad_5
 
 
-def init_algorithm(f_path, refItem, minSup, minRep, allowPara, eq=False):
+def terminal_app(f_path, refItem, minSup, minRep, allowPara, eq=False):
     try:
         tgp = Tgrad(f_path, eq, refItem, minSup, minRep, allowPara)
         if allowPara >= 1:
@@ -35,6 +36,53 @@ def init_algorithm(f_path, refItem, minSup, minRep, allowPara, eq=False):
 
         d_set = tgp.d_set
         wr_line = "Algorithm: T-GRAANK \n"
+        wr_line += "No. of (dataset) attributes: " + str(d_set.column_size) + '\n'
+        wr_line += "No. of (dataset) tuples: " + str(d_set.size) + '\n'
+        wr_line += "Minimum support: " + str(minSup) + '\n'
+        wr_line += "Minimum representativity: " + str(minRep) + '\n'
+        wr_line += "Multi-core execution: " + str(msg_para) + '\n'
+        wr_line += "Number of cores: " + str(tgp.cores) + '\n'
+        wr_line += "Number of tasks: " + str(tgp.max_step) + '\n\n'
+
+        for txt in d_set.title:
+            col = int(txt[0])
+            if col == refItem:
+                wr_line += (str(txt[0]) + '. ' + str(txt[1].decode()) + '**' + '\n')
+            else:
+                wr_line += (str(txt[0]) + '. ' + str(txt[1].decode()) + '\n')
+
+        wr_line += str("\nFile: " + f_path + '\n')
+        wr_line += str("\nPattern : Support" + '\n')
+
+        count = 0
+        for obj in list_tgp:
+            if obj:
+                for tgp in obj:
+                    count += 1
+                    wr_line += (str(tgp.to_string()) + ' : ' + str(tgp.support) +
+                                ' | ' + str(tgp.time_lag.to_string()) + '\n')
+
+        wr_line += "\n\n Number of patterns: " + str(count) + '\n'
+        return wr_line
+    except Exception as error:
+        wr_line = "Failed: " + str(error)
+        print(error)
+        return wr_line
+
+
+def terminal_app_h5(f_path, refItem, minSup, minRep, allowPara, eq=False):
+    try:
+        tgp = Tgrad_5(f_path, eq, refItem, minSup, minRep, allowPara)
+        if allowPara >= 1:
+            msg_para = "True"
+            list_tgp = tgp.run_tgraank(parallel=True)
+        else:
+            msg_para = "False"
+            list_tgp = tgp.run_tgraank()
+
+        d_set = tgp.d_set
+        wr_line = "Algorithm: T-GRAANK \n"
+        wr_line += "   - H5Py implementation \n"
         wr_line += "No. of (dataset) attributes: " + str(d_set.column_size) + '\n'
         wr_line += "No. of (dataset) tuples: " + str(d_set.size) + '\n'
         wr_line += "Minimum support: " + str(minSup) + '\n'
@@ -117,7 +165,7 @@ if __name__ == "__main__":
         inFile = None
         if options.file is None:
             print('No datasets-set filename specified, system with exit')
-            print("Usage: $python3 init_tgraank.py -f filename.csv -c refColumn -s minSup  -r minRep")
+            print("Usage: $python3 cli_tgraank.py -f filename.csv -c refColumn -s minSup  -r minRep")
             sys.exit('System will exit')
         else:
             inFile = options.file
@@ -132,7 +180,7 @@ if __name__ == "__main__":
 
     start = time.time()
     # tracemalloc.start()
-    res_text = init_algorithm(file_path, ref_col, min_sup, min_rep, allow_p)
+    res_text = terminal_app(file_path, ref_col, min_sup, min_rep, allow_p)
     # snapshot = tracemalloc.take_snapshot()
     end = time.time()
 
