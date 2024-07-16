@@ -1,13 +1,11 @@
 # -*- coding: utf-8 -*-
-"""
-Usage:
-    $python3 cli_main.py -f ../datasets/DATASET.csv -c 0 -s 0.5 -r 0.5 -p 1
+# SPDX-License-Identifier: GNU GPL v3
+# This file is dual licensed under the terms of the GNU General Public, Version
+# 3.0.  See the LICENSE file in the root of this
+# repository for complete details.
 
-Description:
-    f -> file path (CSV)
-    c -> reference column
-    s -> minimum support
-    r -> representativity
+"""
+Entry points that allow users to execute GUI or Cli programs.
 """
 
 
@@ -77,9 +75,9 @@ def execute_tgp(f_path: str, min_sup: float, ref_col: int, min_rep: float, num_c
         return output_txt
 
 
-def terminal_app():
+def main_cli():
     """
-        Initializes and executes T-GRAANK algorithm.
+        Initializes and starts terminal/CMD application.
         :return:
     """
     import time

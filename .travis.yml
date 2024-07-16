@@ -5,8 +5,8 @@ python:
 
 before_install:
   - sudo apt-get -y install libopenmpi-dev
-  - "pip install ."
+  - "pip install -r requirements.txt"
 
-install: pip install -r requirements.txt
+install: pip install .
 
-script: python3 src/cli_main.py -f datasets/DATASET.csv
+script: TemporalGP -f datasets/DATASET.csv

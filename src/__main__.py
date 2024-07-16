@@ -5,10 +5,19 @@
 
 """
 A launcher for executing the application as a Terminal app.
+
+Usage:
+    $python3 __main__.py -f ../datasets/DATASET.csv -c 0 -s 0.5 -r 0.5 -p 1
+
+Description:
+    f -> file path (CSV)
+    c -> reference column
+    s -> minimum support
+    r -> representativity
 """
 
 
-from TemporalGP.entrypoints import main_cli
+from TemporalGP.cli_tgp import main_cli
 
 if __name__ == "__main__":
     main_cli()

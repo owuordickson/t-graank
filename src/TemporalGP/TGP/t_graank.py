@@ -4,7 +4,7 @@
 # repository for complete details.
 
 """
-Algorithm for mining temporal gradual patterns using fuzzy logic.
+Algorithm for mining temporal gradual patterns using fuzzy membership functions.
 """
 
 

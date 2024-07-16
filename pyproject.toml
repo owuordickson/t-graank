@@ -3,7 +3,7 @@ requires = ["setuptools >= 68.0", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "StructuralGTb"
+name = "TemporalGP"
 dynamic = ["version"]
 dependencies = [
   "numpy",
@@ -43,7 +43,7 @@ Repository = "https://github.com/owuordickson/tgraank.git"
 Changelog = "https://github.com/owuordickson/tgraank/blob/main/CHANGELOG.md"
 
 [project.scripts]
-TemporalGP = "TemporalGP.entrypoints:main_cli"
+TemporalGP = "TemporalGP.cli_tgp:main_cli"
 
 [tool.setuptools]
 include-package-data = true

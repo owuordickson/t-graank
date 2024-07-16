@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/owuordickson/t-graank.svg?branch=master)](https://travis-ci.org/owuordickson/t-graank)
+[![Build Status](https://travis-ci.org/owuordickson/t-graank.svg?branch=main)](https://travis-ci.org/owuordickson/t-graank)
 ## T-GRAANK
 A python implementation of the <i>Temporal-GRAdual rANKing</i> algorithm. The algorithm extends the <i>GRAANK</i> algorithm to the case of temporal gradual tendencies. We have optimized the implementation of the algorithm by: (1) using Numpy functions for operations that are time-consuming and, (2) allowed parallel multiprocessing. The research paper is available via:
 
@@ -6,13 +6,29 @@ A python implementation of the <i>Temporal-GRAdual rANKing</i> algorithm. The al
 
 ### List of (important) Files:
 1. README.md (this file)
-2. cli_main.py
-3. DATASET.csv
+2. cli_main.py (for running algorithm manually)
+3. DATASET.csv (a dataset for quick testing)
+
+### Installation
+
+* Install Python version 3.11 on your computer.
+* Download, extract the ```source code``` folder named **'t-graank'** and save it to your preferred location on your PC.
+* Open a terminal application such as CMD. 
+* Navigate to the location where you saved the **'t-graank'** folder using the terminal. 
+* Execute the following commands:
+
+```chatinput
+cd t-graank
+pip install --upgrade pip
+pip install -r requirements.txt
+pip install .
+```
 
 ### Usage:
 Use it a command line program with the local package:
+
 ```
-$python cli_main.py -f data/DATASET.csv -c refColumn -s minSupport  -r minRepresentativity
+TemporalGP -f datasets/DATASET.csv -c refColumn -s minSupport  -r minRepresentativity
 ```
 
 The input parameters are: ```fileName.csv, refColumn, minSupport, minRepresentativity```. You are required to use a <strong>file</strong> in csv format and make sure the <i>timestamp column</i> is the first column in the file. You specify:
@@ -22,7 +38,7 @@ The input parameters are: ```fileName.csv, refColumn, minSupport, minRepresentat
 
 Example with a data-set and specified values<br>
 ```
-$python cli_main.py -f data/DATASET.csv -c 0 -s 0.5 -r 0.5
+TemporalGP -f datasets/DATASET.csv -c 0 -s 0.5 -r 0.5
 ```
 
 Output:

@@ -37,6 +37,7 @@ def load_configs():
         options_tgp.ref_col = int(config.get('temporal-gradual-patterns', 'ref_column'))
         options_tgp.min_rep = float(config.get('temporal-gradual-patterns', 'min_representation'))
     except configparser.NoSectionError:
+        print("Default configs!")
         # 1. (Default) GP Configurations
         options_gp.file_path = ""
         options_gp.min_sup = 0.5
@@ -82,7 +83,7 @@ def load_configs():
 
     if (options.file is None) or options.file == '':
         print('No datasets-set filename specified, system with exit')
-        print("Usage: $python3 cli_main.py -f filename.csv -c refColumn -s minSup  -r minRep")
+        print("Basic Usage: TemporalGP -f filename.csv")
         sys.exit('System will exit')
 
     # configs_data = {

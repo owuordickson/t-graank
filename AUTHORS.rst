@@ -5,7 +5,7 @@ Credits:
 
 Development Lead:
 -----------------
-1. Dickson Owuor <owuordickson@ieee.org>
+1. Dickson Owuor <owuordickson@gmail.com>
 
 Contributors
 ------------
