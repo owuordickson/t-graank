@@ -12,8 +12,8 @@ Description:
 
 import sys
 from optparse import OptionParser
+from so4gp import write_file
 from .TGP.t_graank import TGrad
-# from .TGP.t_graank_h5 import TGrad_5
 
 
 def tgp_app(f_path, ref_item, min_sup, min_rep, num_cores, eq=False):
@@ -27,92 +27,39 @@ def tgp_app(f_path, ref_item, min_sup, min_rep, num_cores, eq=False):
             msg_para = "False"
             list_tgp = tgp.discover_tgp()
 
-        wr_line = "Algorithm: T-GRAANK \n"
-        wr_line += "No. of (dataset) attributes: " + str(tgp.col_count) + '\n'
-        wr_line += "No. of (dataset) tuples: " + str(tgp.row_count) + '\n'
-        wr_line += "Minimum support: " + str(min_sup) + '\n'
-        wr_line += "Minimum representativity: " + str(min_rep) + '\n'
-        wr_line += "Multi-core execution: " + str(msg_para) + '\n'
-        wr_line += "Number of cores: " + str(tgp.cores) + '\n'
-        wr_line += "Number of tasks: " + str(tgp.max_step) + '\n\n'
+        output_txt = "Algorithm: T-GRAANK \n"
+        output_txt += "No. of (dataset) attributes: " + str(tgp.col_count) + '\n'
+        output_txt += "No. of (dataset) tuples: " + str(tgp.row_count) + '\n'
+        output_txt += "Minimum support: " + str(min_sup) + '\n'
+        output_txt += "Minimum representativity: " + str(min_rep) + '\n'
+        output_txt += "Multi-core execution: " + str(msg_para) + '\n'
+        output_txt += "Number of cores: " + str(tgp.cores) + '\n'
+        output_txt += "Number of tasks: " + str(tgp.max_step) + '\n\n'
 
         for txt in tgp.titles:
             col = int(txt[0])
             if col == ref_item:
-                wr_line += (str(txt[0]) + '. ' + str(txt[1].decode()) + '**' + '\n')
+                output_txt += (str(txt[0]) + '. ' + str(txt[1].decode()) + '**' + '\n')
             else:
-                wr_line += (str(txt[0]) + '. ' + str(txt[1].decode()) + '\n')
+                output_txt += (str(txt[0]) + '. ' + str(txt[1].decode()) + '\n')
 
-        wr_line += str("\nFile: " + f_path + '\n')
-        wr_line += str("\nPattern : Support" + '\n')
+        output_txt += str("\nFile: " + f_path + '\n')
+        output_txt += str("\nPattern : Support" + '\n')
 
         count = 0
         for obj in list_tgp:
             if obj:
                 for tgp in obj:
                     count += 1
-                    wr_line += (str(tgp.to_string()) + ' : ' + str(tgp.support) +
+                    output_txt += (str(tgp.to_string()) + ' : ' + str(tgp.support) +
                                 ' | ' + str(tgp.time_lag.to_string()) + '\n')
 
-        wr_line += "\n\n Number of patterns: " + str(count) + '\n'
-        return wr_line
+        output_txt += "\n\n Number of patterns: " + str(count) + '\n'
+        return output_txt
     except Exception as error:
-        wr_line = "Failed: " + str(error)
+        output_txt = "Failed: " + str(error)
         print(error)
-        return wr_line
-
-
-def tgp_app_h5(f_path, ref_item, min_sup, min_rep, allow_para, eq=False):
-    try:
-        tgp = TGrad_5(f_path, eq, min_sup, ref_item, min_rep, allow_para)
-        if allow_para >= 1:
-            msg_para = "True"
-            list_tgp = tgp.discover_tgp(parallel=True)
-        else:
-            msg_para = "False"
-            list_tgp = tgp.discover_tgp()
-
-        d_set = tgp.d_set
-        wr_line = "Algorithm: T-GRAANK \n"
-        wr_line += "   - H5Py implementation \n"
-        wr_line += "No. of (dataset) attributes: " + str(d_set.column_size) + '\n'
-        wr_line += "No. of (dataset) tuples: " + str(d_set.size) + '\n'
-        wr_line += "Minimum support: " + str(min_sup) + '\n'
-        wr_line += "Minimum representativity: " + str(min_rep) + '\n'
-        wr_line += "Multi-core execution: " + str(msg_para) + '\n'
-        wr_line += "Number of cores: " + str(tgp.cores) + '\n'
-        wr_line += "Number of tasks: " + str(tgp.max_step) + '\n\n'
-
-        for txt in d_set.title:
-            col = int(txt[0])
-            if col == ref_item:
-                wr_line += (str(txt[0]) + '. ' + str(txt[1].decode()) + '**' + '\n')
-            else:
-                wr_line += (str(txt[0]) + '. ' + str(txt[1].decode()) + '\n')
-
-        wr_line += str("\nFile: " + f_path + '\n')
-        wr_line += str("\nPattern : Support" + '\n')
-
-        count = 0
-        for obj in list_tgp:
-            if obj:
-                for tgp in obj:
-                    count += 1
-                    wr_line += (str(tgp.to_string()) + ' : ' + str(tgp.support) +
-                                ' | ' + str(tgp.time_lag.to_string()) + '\n')
-
-        wr_line += "\n\n Number of patterns: " + str(count) + '\n'
-        return wr_line
-    except Exception as error:
-        wr_line = "Failed: " + str(error)
-        print(error)
-        return wr_line
-
-
-def write_file(data, path):
-    with open(path, 'w') as f:
-        f.write(data)
-        f.close()
+        return output_txt
 
 
 def terminal_app():
@@ -178,6 +125,6 @@ def terminal_app():
     wr_text = ("Run-time: " + str(end - start) + " seconds\n")
     # wr_text += (Profile.get_quick_mem_use(snapshot) + "\n")
     wr_text += str(res_text)
-    f_name = str('res_temp' + str(end).replace('.', '', 1) + '.txt')
-    write_file(wr_text, f_name)
+    f_name = str('res_tgp' + str(end).replace('.', '', 1) + '.txt')
+    write_file(wr_text, f_name, True)
     print(wr_text)

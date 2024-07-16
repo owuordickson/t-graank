@@ -4,7 +4,7 @@
 # repository for complete details.
 
 """
-
+Functions for estimating time-lag in a timeseries data set using fuzzy logic.
 """
 
 

@@ -4,7 +4,7 @@
 # repository for complete details.
 
 """
-Description: updated version that uses aco-graank and parallel multiprocessing
+Algorithm for mining temporal gradual patterns using fuzzy logic.
 """
 
 

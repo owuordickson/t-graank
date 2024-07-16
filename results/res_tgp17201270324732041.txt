@@ -1,0 +1,24 @@
+Run-time: 5.052200794219971 seconds
+Algorithm: T-GRAANK 
+No. of (dataset) attributes: 3
+No. of (dataset) tuples: 24
+Minimum support: 0.5
+Minimum representativity: 0.5
+Multi-core execution: True
+Number of cores: 1
+Number of tasks: 12
+
+0. Date
+1. rain(mm)**
+2. temperature(cel)
+
+File: ../datasets/rain_temp2013-2015.csv
+
+Pattern : Support
+['1+', '2-'] : 0.615 | ~ +2.0 months : 0.909
+['1-', '2+'] : 0.615 | ~ +2.0 months : 0.909
+['1+', '2-'] : 0.676 | ~ +3.0 months : 0.857
+['1-', '2+'] : 0.676 | ~ +3.0 months : 0.857
+
+
+ Number of patterns: 4
