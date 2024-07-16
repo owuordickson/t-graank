@@ -36,18 +36,14 @@ class TGrad(GRAANK):
         if len(self.time_cols) > 0:
             print("Dataset Ok")
             self.time_ok = True
-            self.ref_item = ref_item
-            self.max_step = self.get_max_step(min_rep)
+            self.ref_col = ref_item
+            self.max_step = self.row_count - int(min_rep * self.row_count)
             self.orig_attr_data = self.data.copy().T
             self.cores = cores
         else:
             print("Dataset Error")
             self.time_ok = False
             raise Exception('No date-time datasets found')
-
-    def get_max_step(self, min_rep):
-        """"""
-        return self.row_count - int(min_rep * self.row_count)
 
     def discover_tgp(self, parallel=False):
         if parallel:
@@ -89,7 +85,7 @@ class TGrad(GRAANK):
                       + " or row " + str(time_diffs[1]) + " is not valid."
                 raise Exception(msg)
             else:
-                ref_col = self.ref_item
+                ref_col = self.ref_col
                 if ref_col in self.time_cols:
                     msg = "Reference column is a 'date-time' attribute"
                     raise Exception(msg)

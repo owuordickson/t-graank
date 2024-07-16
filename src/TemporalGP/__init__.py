@@ -14,7 +14,7 @@ A software package for mining temporal gradual patterns using AMI.
 
 
 # Project Details
-__version__ = "2.2.7"
+__version__ = "2.2.8"
 __title__ = f"TemporalGP (v{__version__})"
 __author__ = "Dickson Owuor"
 __credits__ = "Montpellier University"
