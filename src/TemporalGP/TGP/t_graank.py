@@ -178,7 +178,7 @@ class TGrad(GRAANK):
                         else:
                             z = z + 1
 
-                    t_lag = TGrad.calculate_time_lag(bin_data, t_diffs)
+                    t_lag = TGrad.get_fuzzy_time_lag(bin_data, t_diffs)
                     if t_lag.valid:
                         gp = GP()
                         for obj in valid_bins[i][0]:
@@ -205,7 +205,7 @@ class TGrad(GRAANK):
             return False
 
     @staticmethod
-    def calculate_time_lag(bin_data, time_diffs):
+    def get_fuzzy_time_lag(bin_data, time_diffs):
         # 1. Get Indices
         indices = np.argwhere(bin_data == 1)
 
@@ -218,12 +218,12 @@ class TGrad(GRAANK):
                 time_lags.append(obj[0])
         time_lags = np.array(time_lags)
 
-        # 3. Approximate TimeLag
-        time_lag = TGrad.__approximate_fuzzy_support__(time_lags)
+        # 3. Approximate TimeLag using Fuzzy Membership
+        time_lag = TGrad.__approximate_fuzzy_time_lag__(time_lags)
         return time_lag
 
     @staticmethod
-    def __approximate_fuzzy_support__(time_lags):
+    def __approximate_fuzzy_time_lag__(time_lags):
         if len(time_lags) <= 0:
             # if time_lags is blank return nothing
             return TimeLag()
