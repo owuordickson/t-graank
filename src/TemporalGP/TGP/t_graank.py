@@ -9,11 +9,10 @@ Algorithm for mining temporal gradual patterns using fuzzy logic.
 
 
 import numpy as np
+import skfuzzy as fuzzy
 import multiprocessing as mp
 from so4gp import DataGP as Dataset
 from so4gp import GI, GP, TimeLag, GRAANK
-
-from .fuzzy_mf import calculate_time_lag
 
 
 class TGP(GP):
@@ -179,7 +178,7 @@ class TGrad(GRAANK):
                         else:
                             z = z + 1
 
-                    t_lag = calculate_time_lag(bin_data, t_diffs)
+                    t_lag = TGrad.calculate_time_lag(bin_data, t_diffs)
                     if t_lag.valid:
                         gp = GP()
                         for obj in valid_bins[i][0]:
@@ -204,3 +203,56 @@ class TGrad(GRAANK):
                 return False
         except ValueError:
             return False
+
+    @staticmethod
+    def calculate_time_lag(bin_data, time_diffs):
+        # 1. Get Indices
+        indices = np.argwhere(bin_data == 1)
+
+        # 2. Get TimeLags
+        pat_indices_flat = np.unique(indices.flatten())
+        time_lags = list()
+        for obj in time_diffs:
+            index1 = obj[1]
+            if int(index1) in pat_indices_flat:
+                time_lags.append(obj[0])
+        time_lags = np.array(time_lags)
+
+        # 3. Approximate TimeLag
+        time_lag = TGrad.__approximate_fuzzy_support__(time_lags)
+        return time_lag
+
+    @staticmethod
+    def __approximate_fuzzy_support__(time_lags):
+        if len(time_lags) <= 0:
+            # if time_lags is blank return nothing
+            return TimeLag()
+        else:
+            time_lags = np.absolute(np.array(time_lags))
+            min_a = np.min(time_lags)
+            max_c = np.max(time_lags)
+            count = time_lags.size + 3
+            tot_boundaries = np.linspace(min_a / 2, max_c + 1, num=count)
+
+            sup1 = 0
+            center = time_lags[0]
+            size = len(tot_boundaries)
+            for i in range(0, size, 2):
+                if (i + 3) <= size:
+                    boundaries = tot_boundaries[i:i + 3:1]
+                else:
+                    boundaries = tot_boundaries[size - 3:size:1]
+                memberships = fuzzy.membership.trimf(time_lags, boundaries)
+
+                # Compute Support
+                sup_count = np.count_nonzero(memberships > 0)
+                total = memberships.size
+                sup = sup_count / total
+                # sup = calculate_support(memberships)
+
+                if sup > sup1:
+                    sup1 = sup
+                    center = boundaries[1]
+                if sup >= 0.5:
+                    return TimeLag(boundaries[1], sup)
+            return TimeLag(center, sup1)
