@@ -13,11 +13,13 @@ print(f"Delayed MIs: {tgp.mi_arr[:, 0]} \n")
 # vec1 = np.array(tgp.initial_mutual_info).reshape(1, -1)
 # diff_vec = tgp.mi_arr[:, 0] - tgp.initial_mutual_info[0]
 # var = np.var(diff_vec, axis=0)
-init_mi = np.full(tgp.mi_arr[:, 0].shape, tgp.initial_mutual_info[0])
+# init_mi = np.full(tgp.mi_arr[:, 0].shape, tgp.initial_mutual_info[0])
+# mi_arr1 = tgp.mi_arr[:, 0]
+# mi_arr1[mi_arr1 == 0] = -1
 squared_diff = (tgp.mi_arr[:, 0] - tgp.initial_mutual_info[0]) ** 2
 absolute_error = np.sqrt(squared_diff)
 
-print(f"Init MI: {init_mi}\n")
+# print(f"Init MI: {init_mi}\n")
 print(f"Diff: {squared_diff}\n")
 print(f"Abs.E.: {absolute_error}\n")
 print(f"Optimal Step: {np.argmin(absolute_error)}\n")

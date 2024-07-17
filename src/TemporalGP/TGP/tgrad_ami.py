@@ -45,7 +45,12 @@ class TGradAMI(TGrad):
             x_data = np.array(attr_data[self.feature_cols], dtype=float).T
             mutual_info = mutual_info_regression(x_data, y)
             mi_list.append(mutual_info)
-        return np.array(mi_list, dtype=float)
+        mi_arr = np.array(mi_list, dtype=float)
+        # We replace 0 with -1 because 0 indicates NO MI, so we make it useless by making it -1, so it allows small
+        # MI values to be considered and not 0. This is beautiful because if initial MI is 0, then both will be -1
+        # making it the optimal MI with any other -1 in the time-delayed MIs
+        mi_arr[mi_arr == 0] = -1
+        return mi_arr
 
     def discover_tgp(self, parallel=False):
         """"""
