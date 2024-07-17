@@ -38,7 +38,7 @@ class TGrad(GRAANK):
             self.time_ok = True
             self.ref_col = ref_item
             self.max_step = self.row_count - int(min_rep * self.row_count)
-            self.orig_attr_data = self.data.copy().T
+            self.full_attr_data = self.data.copy().T
             self.cores = cores
         else:
             print("Dataset Error")
@@ -57,13 +57,12 @@ class TGrad(GRAANK):
         else:
             patterns = list()
             for step in range(self.max_step):
-                t_pattern = self.fetch_patterns(step)
+                t_pattern = self.fetch_patterns(step+1)  # because for-loop is not inclusive from range: 0 - max_step
                 if t_pattern:
                     patterns.append(t_pattern)
             return patterns
 
     def fetch_patterns(self, step):
-        step += 1  # because for-loop is not inclusive from range: 0 - max_step
         # 1. Transform datasets
         attr_data, time_diffs = self.transform_data(step)
 
@@ -94,30 +93,24 @@ class TGrad(GRAANK):
                           "0 and " + str(self.col_count - 1)
                     raise Exception(msg)
                 else:
-                    # 1. Split the transpose datasets set into column-tuples
-                    attr_data = self.orig_attr_data
-
-                    # 2. Transform the datasets using (row) n+step
-                    new_attr_data = list()
-                    size = len(attr_data)
-                    for k in range(size):
-                        col_index = k
-                        tuples = attr_data[k]
-                        n = tuples.size
-                        # temp_tuples = np.empty(n, )
-                        # temp_tuples[:] = np.NaN
-                        if col_index in self.time_cols:
-                            # date-time attribute
-                            temp_tuples = tuples[:]
-                        elif col_index == ref_col:
-                            # reference attribute
-                            temp_tuples = tuples[0: n - step]
+                    delayed_attr_data = None  # list()
+                    for col_index in range(self.col_count):
+                        # Transform the datasets using (row) n+step
+                        n = self.row_count
+                        if (col_index == ref_col) or (col_index in self.time_cols):
+                            # date-time attribute OR reference attribute
+                            temp_row = self.full_attr_data[col_index][0: (n-step)]
                         else:
                             # other attributes
-                            temp_tuples = tuples[step: n]
-                        # print(temp_tuples)
-                        new_attr_data.append(temp_tuples)
-                    return new_attr_data, time_diffs
+                            temp_row = self.full_attr_data[col_index][step: n]
+
+                        delayed_attr_data = temp_row if (delayed_attr_data is None) \
+                            else np.vstack((delayed_attr_data, temp_row))
+
+                    # print(f"Time Diffs: {time_diffs}\n")
+                    # print(f"{self.full_attr_data}: {type(self.full_attr_data)}\n")
+                    # print(f"{delayed_attr_data}: {type(delayed_attr_data)}\n")
+                    return delayed_attr_data, time_diffs
         else:
             msg = "Fatal Error: Time format in column could not be processed"
             raise Exception(msg)
