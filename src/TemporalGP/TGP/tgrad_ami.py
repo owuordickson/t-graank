@@ -29,28 +29,24 @@ class TGradAMI(TGrad):
 
         super(TGradAMI, self).__init__(f_path, eq, min_sup, ref_item=ref_item, min_rep=0.25, cores=cores)
         self.feature_cols = np.setdiff1d(self.attr_cols, self.ref_col)
-        self.initial_mutual_info = self.compute_mutual_info(self.full_attr_data)
+        mi_arr = self.compute_mutual_info(self.full_attr_data)
+        # print(f"{mi_arr}\n")
+        self.initial_mutual_info = mi_arr[0]  # step 0 is the MI without any time delay (or step)
+        self.mi_arr = mi_arr[1:]
         self.error_margin = err
-        self.mi_arr = None
 
     def compute_mutual_info(self, attr_data):
-        """"""
-        y = np.array(attr_data[self.ref_col], dtype=float).T
-        x_data = np.array(attr_data[self.feature_cols], dtype=float).T
-
-        mutual_info = mutual_info_regression(x_data, y)
-        # mi_series = pd.Series(mutual_info)
-        # mi_series.index = self.titles[attr_cols]
-        # mi_series.sort_values(ascending=False)
-
-        return mutual_info
-
-    def discover_tgp(self, parallel=False):
         """"""
         # 1. Compute all the MI for every time-delay and store in list
         mi_list = []
         for step in range(self.max_step):
-            attr_data, time_diffs = self.transform_data(step+1)
-            mi = self.compute_mutual_info(attr_data)
-            mi_list.append(mi)
-        self.mi_arr = np.array(mi_list, dtype=float)
+            attr_data, _ = self.transform_data(step)
+            y = np.array(attr_data[self.ref_col], dtype=float).T
+            x_data = np.array(attr_data[self.feature_cols], dtype=float).T
+            mutual_info = mutual_info_regression(x_data, y)
+            mi_list.append(mutual_info)
+        return np.array(mi_list, dtype=float)
+
+    def discover_tgp(self, parallel=False):
+        """"""
+        pass
