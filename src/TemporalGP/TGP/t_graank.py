@@ -7,7 +7,7 @@
 Algorithm for mining temporal gradual patterns using fuzzy membership functions.
 """
 
-
+import gc
 import numpy as np
 import skfuzzy as fuzzy
 import multiprocessing as mp
@@ -57,7 +57,7 @@ class TGrad(GRAANK):
         else:
             patterns = list()
             for step in range(self.max_step):
-                t_pattern = self.fetch_patterns(step+1)  # because for-loop is not inclusive from range: 0 - max_step
+                t_pattern = self.fetch_patterns(step + 1)  # because for-loop is not inclusive from range: 0 - max_step
                 if t_pattern:
                     patterns.append(t_pattern)
             return patterns
@@ -99,7 +99,7 @@ class TGrad(GRAANK):
                         n = self.row_count
                         if (col_index == ref_col) or (col_index in self.time_cols):
                             # date-time attribute OR reference attribute
-                            temp_row = self.full_attr_data[col_index][0: (n-step)]
+                            temp_row = self.full_attr_data[col_index][0: (n - step)]
                         else:
                             # other attributes
                             temp_row = self.full_attr_data[col_index][step: n]
@@ -153,7 +153,7 @@ class TGrad(GRAANK):
             invalid_count += inv_count
             i = 0
             while i < len(valid_bins) and valid_bins != []:
-                gi_tuple = valid_bins[i][0]
+                gi_arr = valid_bins[i][0]
                 bin_data = valid_bins[i][1]
                 sup = float(np.sum(np.array(bin_data))) / float(n * (n - 1.0) / 2.0)
                 if sup < self.thd_supp:
@@ -162,7 +162,7 @@ class TGrad(GRAANK):
                 else:
                     z = 0
                     while z < (len(gradual_patterns) - 1):
-                        if set(gradual_patterns[z].get_pattern()).issubset(set(gi_tuple)):
+                        if set(gradual_patterns[z].get_pattern()).issubset(set(gi_arr)):
                             del gradual_patterns[z]
                         else:
                             z = z + 1
@@ -170,7 +170,7 @@ class TGrad(GRAANK):
                     t_lag = TGrad.get_fuzzy_time_lag(bin_data, t_diffs)
                     if t_lag.valid:
                         gp = GP()
-                        for obj in valid_bins[i][0]:
+                        for obj in gi_arr:
                             gi = GI(obj[0], obj[1].decode())
                             """:type gi: GI"""
                             gp.add_gradual_item(gi)
@@ -180,6 +180,66 @@ class TGrad(GRAANK):
                     i += 1
 
         return gradual_patterns
+
+    def _gen_apriori_candidates(self, gi_bins):
+        """Description
+
+        Generates Apriori GP candidates with respect to reference-col
+        :param gi_bins: GI together with bitmaps
+        :return:
+        """
+        sup = self.thd_supp
+        n = self.row_count
+
+        invalid_count = 0
+        res = []
+        all_candidates = []
+        if len(gi_bins) < 2:
+            return []
+        try:
+            set_gi = [{x[0]} for x in gi_bins]
+        except TypeError:
+            set_gi = [set(x[0]) for x in gi_bins]
+
+        for i in range(len(gi_bins) - 1):
+            for j in range(i + 1, len(gi_bins)):
+                try:
+                    gi_i = {gi_bins[i][0]}
+                    gi_j = {gi_bins[j][0]}
+                    gi_o = {gi_bins[0][0]}
+                except TypeError:
+                    gi_i = set(gi_bins[i][0])
+                    gi_j = set(gi_bins[j][0])
+                    gi_o = set(gi_bins[0][0])
+                gp_cand = gi_i | gi_j
+                inv_gp_cand = {GI.inv_arr(x) for x in gp_cand}
+                has_ref_col = np.array([(y[0] == self.ref_col) for y in gp_cand], dtype=bool)
+                if (np.any(has_ref_col) and
+                        (len(gp_cand) == len(gi_o) + 1) and
+                        (not (all_candidates != [] and gp_cand in all_candidates)) and
+                        (not (all_candidates != [] and inv_gp_cand in all_candidates))):
+                    print(f"{self.ref_col} and {gp_cand}: {has_ref_col} -> {np.any(has_ref_col)}\n")
+                    test = 1
+                    for k in gp_cand:
+                        try:
+                            k_set = {k}
+                        except TypeError:
+                            k_set = set(k)
+                        gp_cand_2 = gp_cand - k_set
+                        inv_gp_cand_2 = {GI.inv_arr(x) for x in gp_cand_2}
+                        if gp_cand_2 not in set_gi and inv_gp_cand_2 not in set_gi:
+                            test = 0
+                            break
+                    if test == 1:
+                        m = gi_bins[i][1] * gi_bins[j][1]
+                        t = float(np.sum(m)) / float(n * (n - 1.0) / 2.0)
+                        if t > sup:
+                            res.append([gp_cand, m])
+                        else:
+                            invalid_count += 1
+                    all_candidates.append(gp_cand)
+                    gc.collect()
+        return res, invalid_count
 
     @staticmethod
     def get_timestamp(time_data):
