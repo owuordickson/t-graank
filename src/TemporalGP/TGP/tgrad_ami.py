@@ -27,11 +27,11 @@ class TGradAMI(TGrad):
         # almost equal to actual, then we have the most accurate time-delay. Instead of
         # min-representativity value, we propose error-margin.
 
-        super(TGradAMI, self).__init__(f_path, eq, min_sup, ref_item=ref_item, min_rep=0.5, cores=cores)
+        super(TGradAMI, self).__init__(f_path, eq, min_sup, ref_item=ref_item, min_rep=0.25, cores=cores)
         self.feature_cols = np.setdiff1d(self.attr_cols, self.ref_col)
         self.initial_mutual_info = self.compute_mutual_info(self.full_attr_data)
         self.error_margin = err
-        self.mi_arr = list()
+        self.mi_arr = None
 
     def compute_mutual_info(self, attr_data):
         """"""
@@ -48,7 +48,9 @@ class TGradAMI(TGrad):
     def discover_tgp(self, parallel=False):
         """"""
         # 1. Compute all the MI for every time-delay and store in list
+        mi_list = []
         for step in range(self.max_step):
             attr_data, time_diffs = self.transform_data(step+1)
             mi = self.compute_mutual_info(attr_data)
-            self.mi_arr.append(mi)
+            mi_list.append(mi)
+        self.mi_arr = np.array(mi_list, dtype=float)
