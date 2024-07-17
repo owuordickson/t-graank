@@ -1,4 +1,5 @@
 numpy~=2.0.0
 scikit-fuzzy~=0.4.2
-so4gp~=0.4.0
+so4gp~=0.4.2
+scikit-learn~=1.5.1
 ypstruct~=0.0.2

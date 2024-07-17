@@ -149,7 +149,7 @@ class TGrad(GRAANK):
 
         invalid_count = 0
         while len(valid_bins) > 0:
-            valid_bins, inv_count = self._gen_apriori_candidates(valid_bins)
+            valid_bins, inv_count = self._gen_apriori_candidates(valid_bins, self.ref_col)
             invalid_count += inv_count
             i = 0
             while i < len(valid_bins) and valid_bins != []:
@@ -180,66 +180,6 @@ class TGrad(GRAANK):
                     i += 1
 
         return gradual_patterns
-
-    def _gen_apriori_candidates(self, gi_bins):
-        """Description
-
-        Generates Apriori GP candidates with respect to reference-col
-        :param gi_bins: GI together with bitmaps
-        :return:
-        """
-        sup = self.thd_supp
-        n = self.row_count
-
-        invalid_count = 0
-        res = []
-        all_candidates = []
-        if len(gi_bins) < 2:
-            return []
-        try:
-            set_gi = [{x[0]} for x in gi_bins]
-        except TypeError:
-            set_gi = [set(x[0]) for x in gi_bins]
-
-        for i in range(len(gi_bins) - 1):
-            for j in range(i + 1, len(gi_bins)):
-                try:
-                    gi_i = {gi_bins[i][0]}
-                    gi_j = {gi_bins[j][0]}
-                    gi_o = {gi_bins[0][0]}
-                except TypeError:
-                    gi_i = set(gi_bins[i][0])
-                    gi_j = set(gi_bins[j][0])
-                    gi_o = set(gi_bins[0][0])
-                gp_cand = gi_i | gi_j
-                inv_gp_cand = {GI.inv_arr(x) for x in gp_cand}
-                has_ref_col = np.array([(y[0] == self.ref_col) for y in gp_cand], dtype=bool)
-                if (np.any(has_ref_col) and
-                        (len(gp_cand) == len(gi_o) + 1) and
-                        (not (all_candidates != [] and gp_cand in all_candidates)) and
-                        (not (all_candidates != [] and inv_gp_cand in all_candidates))):
-                    print(f"{self.ref_col} and {gp_cand}: {has_ref_col} -> {np.any(has_ref_col)}\n")
-                    test = 1
-                    for k in gp_cand:
-                        try:
-                            k_set = {k}
-                        except TypeError:
-                            k_set = set(k)
-                        gp_cand_2 = gp_cand - k_set
-                        inv_gp_cand_2 = {GI.inv_arr(x) for x in gp_cand_2}
-                        if gp_cand_2 not in set_gi and inv_gp_cand_2 not in set_gi:
-                            test = 0
-                            break
-                    if test == 1:
-                        m = gi_bins[i][1] * gi_bins[j][1]
-                        t = float(np.sum(m)) / float(n * (n - 1.0) / 2.0)
-                        if t > sup:
-                            res.append([gp_cand, m])
-                        else:
-                            invalid_count += 1
-                    all_candidates.append(gp_cand)
-                    gc.collect()
-        return res, invalid_count
 
     @staticmethod
     def get_timestamp(time_data):
