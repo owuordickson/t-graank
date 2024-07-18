@@ -28,17 +28,17 @@ pip install .
 Use it a command line program with the local package:
 
 ```
-TemporalGP -f datasets/DATASET.csv -c refColumn -s minSupport  -r minRepresentativity
+TemporalGP -f datasets/DATASET.csv -t targetColumn -s minSupport  -r minRepresentativity -p allowMultiprocessing -c numCPUs
 ```
 
-The input parameters are: ```fileName.csv, refColumn, minSupport, minRepresentativity```. You are required to use a <strong>file</strong> in csv format and make sure the <i>timestamp column</i> is the first column in the file. You specify:
-* <strong>reference item</strong> - column\attribute that is the base of the temporal transformations
-* <strong>minimum support</strong> - threshold count of frequent FtGPs
-* <strong>minimum representativity item</strong> - threshold count of transformations to be performed on the data-set
+The input parameters are: ```fileName.csv, targetColumn, minSupport, minRepresentativity```. You are required to use a <strong>file</strong> in csv format and make sure the <i>timestamp column</i> is the first column in the file. You specify:
+* <strong>target column</strong> - (int) column\attribute that is the base of the temporal transformations
+* <strong>minimum support</strong> - (float: 0-1) threshold count of frequent FtGPs
+* <strong>minimum representativity item</strong> - (float: 0-1) threshold count of transformations to be performed on the data-set
 
 Example with a data-set and specified values<br>
 ```
-TemporalGP -f datasets/DATASET.csv -c 0 -s 0.5 -r 0.5
+TemporalGP -f datasets/DATASET.csv -t 0 -s 0.5 -r 0.5 -p 1
 ```
 
 Output:

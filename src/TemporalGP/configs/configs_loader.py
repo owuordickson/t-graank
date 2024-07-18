@@ -34,7 +34,7 @@ def load_configs():
         options_gp.allow_multiprocessing = int(config.get('computation', 'allow_multiprocessing'))
 
         # 2. (configs.ini) TGP Configurations
-        options_tgp.ref_col = int(config.get('temporal-gradual-patterns', 'ref_column'))
+        options_tgp.target_column = int(config.get('temporal-gradual-patterns', 'target_column'))
         options_tgp.min_rep = float(config.get('temporal-gradual-patterns', 'min_representation'))
     except configparser.NoSectionError:
         print("Default configs!")
@@ -45,7 +45,7 @@ def load_configs():
         options_gp.allow_multiprocessing = 1
 
         # 2. (Default) TGP Configurations
-        options_tgp.ref_col = 1
+        options_tgp.target_column = 1
         options_tgp.min_rep = 0.5
 
     optparser = OptionParser()
@@ -64,15 +64,15 @@ def load_configs():
                          help='allow multiprocessing',
                          default=options_gp.allow_multiprocessing,
                          type='int')
-    optparser.add_option('-n', '--cores',
+    optparser.add_option('-c', '--cores',
                          dest='numCores',
                          help='number of cores',
                          default=options_gp.num_cores,
                          type='int')
-    optparser.add_option('-c', '--refColumn',
-                         dest='refCol',
-                         help='reference column',
-                         default=options_tgp.ref_col,
+    optparser.add_option('-t', '--targetColumn',
+                         dest='tgtCol',
+                         help='target column',
+                         default=options_tgp.target_column,
                          type='int')
     optparser.add_option('-r', '--minRepresentativity',
                          dest='minRep',

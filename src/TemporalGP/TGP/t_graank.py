@@ -7,7 +7,7 @@
 Algorithm for mining temporal gradual patterns using fuzzy membership functions.
 """
 
-import gc
+
 import numpy as np
 import skfuzzy as fuzzy
 import multiprocessing as mp
@@ -29,17 +29,17 @@ class TGP(GP):
 
 class TGrad(GRAANK):
 
-    def __init__(self, f_path, eq, min_sup, ref_item, min_rep, cores):
+    def __init__(self, f_path: str, eq: bool, min_sup: float, target_col: int, min_rep: float, num_cores: int):
         """"""
 
         super(TGrad, self).__init__(data_source=f_path, min_sup=min_sup, eq=eq)
         if len(self.time_cols) > 0:
             print("Dataset Ok")
             self.time_ok = True
-            self.ref_col = ref_item
+            self.target_col = target_col
             self.max_step = self.row_count - int(min_rep * self.row_count)
             self.full_attr_data = self.data.copy().T
-            self.cores = cores
+            self.cores = num_cores
         else:
             print("Dataset Error")
             self.time_ok = False
@@ -75,7 +75,7 @@ class TGrad(GRAANK):
 
     def transform_data(self, step):
         """"""
-        # NB: Restructure dataset based on reference item
+        # NB: Restructure dataset based on target/reference col
         if self.time_ok:
             # 1. Calculate time difference using step
             ok, time_diffs = self.get_time_diffs(step)
@@ -84,12 +84,12 @@ class TGrad(GRAANK):
                       + " or row " + str(time_diffs[1]) + " is not valid."
                 raise Exception(msg)
             else:
-                ref_col = self.ref_col
-                if ref_col in self.time_cols:
-                    msg = "Reference column is a 'date-time' attribute"
+                tgt_col = self.target_col
+                if tgt_col in self.time_cols:
+                    msg = "Target column is a 'date-time' attribute"
                     raise Exception(msg)
-                elif (ref_col < 0) or (ref_col >= self.col_count):
-                    msg = "Reference column does not exist\nselect column between: " \
+                elif (tgt_col < 0) or (tgt_col >= self.col_count):
+                    msg = "Target column does not exist\nselect column between: " \
                           "0 and " + str(self.col_count - 1)
                     raise Exception(msg)
                 else:
@@ -97,8 +97,8 @@ class TGrad(GRAANK):
                     for col_index in range(self.col_count):
                         # Transform the datasets using (row) n+step
                         n = self.row_count
-                        if (col_index == ref_col) or (col_index in self.time_cols):
-                            # date-time attribute OR reference attribute
+                        if (col_index == tgt_col) or (col_index in self.time_cols):
+                            # date-time column OR target column
                             temp_row = self.full_attr_data[col_index][0: (n - step)]
                         else:
                             # other attributes
@@ -106,7 +106,6 @@ class TGrad(GRAANK):
 
                         delayed_attr_data = temp_row if (delayed_attr_data is None) \
                             else np.vstack((delayed_attr_data, temp_row))
-
                     # print(f"Time Diffs: {time_diffs}\n")
                     # print(f"{self.full_attr_data}: {type(self.full_attr_data)}\n")
                     # print(f"{delayed_attr_data}: {type(delayed_attr_data)}\n")
@@ -149,7 +148,7 @@ class TGrad(GRAANK):
 
         invalid_count = 0
         while len(valid_bins) > 0:
-            valid_bins, inv_count = self._gen_apriori_candidates(valid_bins, self.ref_col)
+            valid_bins, inv_count = self._gen_apriori_candidates(valid_bins, self.target_col)
             invalid_count += inv_count
             i = 0
             while i < len(valid_bins) and valid_bins != []:

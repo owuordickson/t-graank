@@ -14,12 +14,12 @@ from .configs.configs_loader import load_configs
 from .TGP.t_graank import TGrad
 
 
-def execute_tgp(f_path: str, min_sup: float, ref_col: int, min_rep: float, num_cores: int, allow_mp: bool, eq=False):
+def execute_tgp(f_path: str, min_sup: float, tgt_col: int, min_rep: float, num_cores: int, allow_mp: bool, eq=False):
     """
     Executes T-GRAANK algorithm using the user-specified configuration options.
 
     :param f_path: input path of a CSV file/Pandas DataFrame.
-    :param ref_col: reference column of the data-set.
+    :param tgt_col: target/reference column of the data-set.
     :param min_sup: minimum support threshold.
     :param min_rep: minimum representativity threshold.
     :param num_cores: number of available cores.
@@ -32,7 +32,7 @@ def execute_tgp(f_path: str, min_sup: float, ref_col: int, min_rep: float, num_c
         if num_cores <= 1:
             num_cores = sgp.get_num_cores()
 
-        tgp = TGrad(f_path, eq, min_sup, ref_col, min_rep, num_cores)
+        tgp = TGrad(f_path, eq, min_sup, tgt_col, min_rep, num_cores)
         if allow_mp:
             msg_para = "True"
             list_tgp = tgp.discover_tgp(parallel=True)
@@ -51,7 +51,7 @@ def execute_tgp(f_path: str, min_sup: float, ref_col: int, min_rep: float, num_c
 
         for txt in tgp.titles:
             col = int(txt[0])
-            if col == ref_col:
+            if col == tgt_col:
                 output_txt += (str(txt[0]) + '. ' + str(txt[1].decode()) + '**' + '\n')
             else:
                 output_txt += (str(txt[0]) + '. ' + str(txt[1].decode()) + '\n')
@@ -87,7 +87,7 @@ def main_cli():
 
     start = time.time()
     # tracemalloc.start()
-    res_text = execute_tgp(cfg.file, cfg.minSup, cfg.refCol, cfg.minRep, cfg.numCores, cfg.allowPara)
+    res_text = execute_tgp(cfg.file, cfg.minSup, cfg.tgtCol, cfg.minRep, cfg.numCores, cfg.allowPara)
     # snapshot = tracemalloc.take_snapshot()
     end = time.time()
 
