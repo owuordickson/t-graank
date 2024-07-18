@@ -56,3 +56,12 @@ class TGradAMI(TGrad):
         """"""
         # 1. Compute mutual information
         self.compute_mutual_info()
+
+        # 2. Identify steps (for every feature w.r.t. target) with minimum error from initial MI
+        squared_diff = np.square(np.subtract(self.mi_arr, self.initial_mutual_info))
+        absolute_error = np.sqrt(squared_diff)
+        optimal_steps_arr = np.argmin(absolute_error, axis=0)
+        # print(f"Initial MI: {self.initial_mutual_info}\n")
+        # print(f"Delayed MIs: {self.mi_arr}\n")
+        # print(f"Abs.E.: {absolute_error}\n")
+        print(f"Optimal Steps Arr: {optimal_steps_arr}\n")
