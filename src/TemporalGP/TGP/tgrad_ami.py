@@ -56,6 +56,7 @@ class TGradAMI(TGrad):
 
     def discover_tgp(self, parallel=False):
         """"""
+
         # 1. Compute mutual information
         self.compute_mutual_info()
 
