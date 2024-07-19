@@ -67,4 +67,10 @@ class TGradAMI(TGrad):
         # print(f"Initial MI: {self.initial_mutual_info}\n")
         # print(f"Delayed MIs: {self.mi_arr}\n")
         # print(f"Abs.E.: {absolute_error}\n")
-        print(f"Optimal Steps Arr: {optimal_steps_arr}\n")
+        # print(f"Optimal Steps Arr: {optimal_steps_arr}\n")
+
+        # 3. Integrate feature indices with the computed steps
+        # optimal_dict = dict(map(lambda key, val: (int(key), int(val+1)), self.feature_cols, optimal_steps_arr))
+        optimal_dict = {int(self.feature_cols[i]): int(optimal_steps_arr[i] + 1) for i in range(len(self.feature_cols))}
+        print(f"Optimal Dict: {optimal_dict}\n")
+
