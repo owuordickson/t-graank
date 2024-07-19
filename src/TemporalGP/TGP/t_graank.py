@@ -197,9 +197,9 @@ class TGrad(GRAANK):
         # 2. Get TimeLags
         pat_indices_flat = np.unique(indices.flatten())
         time_lags = list()
-        for row, stamp in time_diffs.items():
+        for row, stamp_diff in time_diffs.items():
             if int(row) in pat_indices_flat:
-                time_lags.append(stamp)
+                time_lags.append(stamp_diff)
         time_lags = np.array(time_lags)
 
         # 3. Approximate TimeLag using Fuzzy Membership
