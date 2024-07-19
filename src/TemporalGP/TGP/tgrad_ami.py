@@ -11,7 +11,6 @@ the random variables X and Y provide about one another.
 
 """
 
-
 import numpy as np
 from sklearn.feature_selection import mutual_info_regression
 
@@ -78,24 +77,31 @@ class TGradAMI(TGrad):
 
         # 4. Create final (and dynamic) delayed dataset
         delayed_data = None
+        time_dict = {}
+        n = self.row_count
+        k = (n - max_step)  # No. of rows created by largest step-delay
         for col_index in range(self.col_count):
-            n = self.row_count
             if (col_index == self.target_col) or (col_index in self.time_cols):
                 # date-time column OR target column
-                temp_row = self.full_attr_data[col_index][0: (n - max_step)]
+                temp_row = self.full_attr_data[col_index][0: k]
             else:
                 # other attributes
                 step = optimal_dict[col_index]
                 temp_row = self.full_attr_data[col_index][step: n]
                 _, time_diffs = self.get_time_diffs(step)
-                # Get first K (n - max_step) items
-                temp_row = temp_row[0: (n - max_step)]
-                time_diffs = dict(list(time_diffs.items())[0: (n - max_step)])
-                print(f"{time_diffs}\n")
 
+                # Get first k items
+                temp_row = temp_row[0: k]
+                # time_diffs = dict(list(time_diffs.items())[0: k])
+                for i in range(k):
+                    if i in time_dict:
+                        time_dict[i].append(time_diffs[i])
+                    else:
+                        time_dict[i] = [time_diffs[i]]
+                # print(f"{time_diffs}\n")
                 # WHAT ABOUT TIME DIFFERENCE/DELAY? It is different for every step!!!
-
             delayed_data = temp_row if (delayed_data is None) \
                 else np.vstack((delayed_data, temp_row))
         # print(f"{delayed_data}\n")
+        print(f"{time_dict}\n")
 
