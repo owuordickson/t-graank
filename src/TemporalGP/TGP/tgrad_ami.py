@@ -87,7 +87,11 @@ class TGradAMI(TGrad):
                 # other attributes
                 step = optimal_dict[col_index]
                 temp_row = self.full_attr_data[col_index][step: n]
+                _, time_diffs = self.get_time_diffs(step)
+                # Get first K (n - max_step) items
                 temp_row = temp_row[0: (n - max_step)]
+                time_diffs = dict(list(time_diffs.items())[0: (n - max_step)])
+                print(f"{time_diffs}\n")
 
                 # WHAT ABOUT TIME DIFFERENCE/DELAY? It is different for every step!!!
 
