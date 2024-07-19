@@ -117,7 +117,7 @@ class TGrad(GRAANK):
     def get_time_diffs(self, step):  # optimized
         """"""
         size = self.row_count
-        time_diffs = []
+        time_diffs = {}
         for i in range(size):
             if i < (size - step):
                 # for col in self.time_cols:
@@ -129,10 +129,8 @@ class TGrad(GRAANK):
                 if (not stamp_1) or (not stamp_2):
                     return False, [i + 1, i + step + 1]
                 time_diff = (stamp_2 - stamp_1)
-                # index = tuple([i, i + step])
-                # time_diffs.append([time_diff, index])
-                time_diffs.append([time_diff, i])
-        return True, np.array(time_diffs)
+                time_diffs[int(i)] = float(time_diff)
+        return True, time_diffs
 
     def discover(self, t_diffs=None, attr_data=None):
         """"""
@@ -177,7 +175,6 @@ class TGrad(GRAANK):
                         tgp = TGP(gp=gp, t_lag=t_lag)
                         gradual_patterns.append(tgp)
                     i += 1
-
         return gradual_patterns
 
     @staticmethod
@@ -200,10 +197,9 @@ class TGrad(GRAANK):
         # 2. Get TimeLags
         pat_indices_flat = np.unique(indices.flatten())
         time_lags = list()
-        for obj in time_diffs:
-            index1 = obj[1]
-            if int(index1) in pat_indices_flat:
-                time_lags.append(obj[0])
+        for row, stamp in time_diffs.items():
+            if int(row) in pat_indices_flat:
+                time_lags.append(stamp)
         time_lags = np.array(time_lags)
 
         # 3. Approximate TimeLag using Fuzzy Membership

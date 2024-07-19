@@ -88,6 +88,8 @@ class TGradAMI(TGrad):
                 step = optimal_dict[col_index]
                 temp_row = self.full_attr_data[col_index][step: n]
                 temp_row = temp_row[0: (n - max_step)]
+
+                # WHAT ABOUT TIME DIFFERENCE/DELAY? It is different for every step!!!
             delayed_data = temp_row if (delayed_data is None) \
                 else np.vstack((delayed_data, temp_row))
         # print(f"{delayed_data}\n")
