@@ -64,6 +64,8 @@ class TGradAMI(TGrad):
         squared_diff = np.square(np.subtract(self.mi_arr, self.initial_mutual_info))
         absolute_error = np.sqrt(squared_diff)
         optimal_steps_arr = np.argmin(absolute_error, axis=0)
+        max_step = (np.max(optimal_steps_arr) + 1)
+        print(f"Largest step delay: {max_step}\n")
         # print(f"Initial MI: {self.initial_mutual_info}\n")
         # print(f"Delayed MIs: {self.mi_arr}\n")
         # print(f"Abs.E.: {absolute_error}\n")
@@ -73,4 +75,20 @@ class TGradAMI(TGrad):
         # optimal_dict = dict(map(lambda key, val: (int(key), int(val+1)), self.feature_cols, optimal_steps_arr))
         optimal_dict = {int(self.feature_cols[i]): int(optimal_steps_arr[i] + 1) for i in range(len(self.feature_cols))}
         print(f"Optimal Dict: {optimal_dict}\n")
+
+        # 4. Create final (and dynamic) delayed dataset
+        delayed_data = None
+        for col_index in range(self.col_count):
+            n = self.row_count
+            if (col_index == self.target_col) or (col_index in self.time_cols):
+                # date-time column OR target column
+                temp_row = self.full_attr_data[col_index][0: (n - max_step)]
+            else:
+                # other attributes
+                step = optimal_dict[col_index]
+                temp_row = self.full_attr_data[col_index][step: n]
+                temp_row = temp_row[0: (n - max_step)]
+            delayed_data = temp_row if (delayed_data is None) \
+                else np.vstack((delayed_data, temp_row))
+        # print(f"{delayed_data}\n")
 

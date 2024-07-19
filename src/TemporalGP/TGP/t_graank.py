@@ -93,10 +93,10 @@ class TGrad(GRAANK):
                           "0 and " + str(self.col_count - 1)
                     raise Exception(msg)
                 else:
-                    delayed_attr_data = None  # list()
+                    delayed_attr_data = None
+                    n = self.row_count
                     for col_index in range(self.col_count):
                         # Transform the datasets using (row) n+step
-                        n = self.row_count
                         if (col_index == tgt_col) or (col_index in self.time_cols):
                             # date-time column OR target column
                             temp_row = self.full_attr_data[col_index][0: (n - step)]
