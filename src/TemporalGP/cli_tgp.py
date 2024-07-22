@@ -8,7 +8,6 @@
 Entry points that allow users to execute GUI or Cli programs.
 """
 
-
 import so4gp as sgp
 from .configs.configs_loader import load_configs
 from .TGP.t_graank import TGrad

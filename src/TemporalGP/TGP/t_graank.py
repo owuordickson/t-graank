@@ -12,12 +12,12 @@ import numpy as np
 import skfuzzy as fuzzy
 import multiprocessing as mp
 from so4gp import DataGP as Dataset
-from so4gp import GI, GP, TimeLag, GRAANK
+from so4gp import GI, ExtGP, TimeLag, GRAANK
 
 
-class TGP(GP):
+class TGP(ExtGP):
 
-    def __init__(self, gp=GP(), t_lag=TimeLag()):
+    def __init__(self, gp=ExtGP(), t_lag=TimeLag()):
         super().__init__()
         self.gradual_items = gp.gradual_items
         self.support = gp.support
@@ -25,6 +25,30 @@ class TGP(GP):
 
     def set_time_lag(self, t_lag):
         self.time_lag = t_lag
+
+    @staticmethod
+    def remove_subsets(gp_list, gi_arr):
+        """
+        Description
+
+        Remove subset GPs from the list.
+
+        :param gp_list: list of existing GPs
+        :type gp_list: list[so4gp.ExtGP]
+
+        :param gi_arr: gradual items in an array
+        :type gi_arr: set
+
+        :return: list of GPs
+        """
+        mod_gp_list = []
+        for gp in gp_list:
+            result1 = set(gp.get_pattern()).issubset(gi_arr)
+            result2 = set(gp.inv_pattern()).issubset(gi_arr)
+            if not (result1 or result2):
+                mod_gp_list.append(gp)
+
+        return mod_gp_list
 
 
 class TGrad(GRAANK):
@@ -57,9 +81,9 @@ class TGrad(GRAANK):
         else:
             patterns = list()
             for step in range(self.max_step):
-                t_pattern = self.fetch_patterns(step + 1)  # because for-loop is not inclusive from range: 0 - max_step
-                if t_pattern:
-                    patterns.append(t_pattern)
+                t_gps = self.fetch_patterns(step + 1)  # because for-loop is not inclusive from range: 0 - max_step
+                if t_gps:
+                    patterns.append(t_gps)
             return patterns
 
     def fetch_patterns(self, step):
@@ -128,11 +152,15 @@ class TGrad(GRAANK):
                     temp_stamp_1 = TGrad.get_timestamp(temp_1)
                     temp_stamp_2 = TGrad.get_timestamp(temp_2)
                     if (not temp_stamp_1) or (not temp_stamp_2):
+                        # Unable to read time
                         return False, [i + 1, i + step + 1]
                     else:
                         stamp_1 += temp_stamp_1
                         stamp_2 += temp_stamp_2
                 time_diff = (stamp_2 - stamp_1)
+                if time_diff < 0:
+                    # Error time CANNOT go backwards
+                    return False, [i + 1, i + step + 1]
                 time_diffs[int(i)] = float(time_diff)
         return True, time_diffs
 
@@ -145,8 +173,6 @@ class TGrad(GRAANK):
         """:type gradual_patterns: list"""
         n = self.attr_size
         valid_bins = self.valid_bins
-        # n = d_set.attr_size
-        # valid_bins = d_set.valid_bins
 
         invalid_count = 0
         while len(valid_bins) > 0:
@@ -161,23 +187,23 @@ class TGrad(GRAANK):
                     del valid_bins[i]
                     invalid_count += 1
                 else:
-                    z = 0
-                    while z < (len(gradual_patterns) - 1):
-                        if set(gradual_patterns[z].get_pattern()).issubset(set(gi_arr)):
-                            del gradual_patterns[z]
-                        else:
-                            z = z + 1
+                    # Remove subsets
+                    gradual_patterns = TGP.remove_subsets(gradual_patterns, set(gi_arr))
 
                     t_lag = TGrad.get_fuzzy_time_lag(bin_data, t_diffs)
                     if t_lag.valid:
-                        gp = GP()
+                        gp = ExtGP()
+                        """:type gp: ExtGP"""
                         for obj in gi_arr:
                             gi = GI(obj[0], obj[1].decode())
                             """:type gi: GI"""
                             gp.add_gradual_item(gi)
                         gp.set_support(sup)
                         tgp = TGP(gp=gp, t_lag=t_lag)
+                        """:type tgp: TGP"""
                         gradual_patterns.append(tgp)
+                    # else:
+                    #    print(f"{t_lag.timestamp} - {gi_arr}")
                     i += 1
         return gradual_patterns
 
