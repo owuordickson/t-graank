@@ -77,6 +77,7 @@ class TGradAMI(TGrad):
 
         # 4. Create final (and dynamic) delayed dataset
         delayed_data = None
+        time_data = []
         time_dict = {}
         n = self.row_count
         k = (n - max_step)  # No. of rows created by largest step-delay
@@ -93,15 +94,20 @@ class TGradAMI(TGrad):
                 # Get first k items
                 temp_row = temp_row[0: k]
                 # time_diffs = dict(list(time_diffs.items())[0: k])
+                temp_diffs = []
                 for i in range(k):
+                    temp_diffs.append(time_diffs[i])
                     if i in time_dict:
                         time_dict[i].append(time_diffs[i])
                     else:
                         time_dict[i] = [time_diffs[i]]
+                time_data.append(temp_diffs)
                 # print(f"{time_diffs}\n")
                 # WHAT ABOUT TIME DIFFERENCE/DELAY? It is different for every step!!!
             delayed_data = temp_row if (delayed_data is None) \
                 else np.vstack((delayed_data, temp_row))
+        time_data = np.array(time_data)
         # print(f"{delayed_data}\n")
         print(f"{time_dict}\n")
-
+        print(f"{time_data}\n")
+        print(f"{time_data.T}\n")
