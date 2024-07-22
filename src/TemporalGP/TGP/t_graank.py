@@ -120,14 +120,18 @@ class TGrad(GRAANK):
         time_diffs = {}
         for i in range(size):
             if i < (size - step):
-                # for col in self.time_cols:
-                col = self.time_cols[0]  # use only the first date-time value
-                temp_1 = str(self.data[i][int(col)])
-                temp_2 = str(self.data[i + step][int(col)])
-                stamp_1 = TGrad.get_timestamp(temp_1)
-                stamp_2 = TGrad.get_timestamp(temp_2)
-                if (not stamp_1) or (not stamp_2):
-                    return False, [i + 1, i + step + 1]
+                stamp_1 = 0
+                stamp_2 = 0
+                for col in self.time_cols:  # sum timestamps from all time-columns
+                    temp_1 = str(self.data[i][int(col)])
+                    temp_2 = str(self.data[i + step][int(col)])
+                    temp_stamp_1 = TGrad.get_timestamp(temp_1)
+                    temp_stamp_2 = TGrad.get_timestamp(temp_2)
+                    if (not temp_stamp_1) or (not temp_stamp_2):
+                        return False, [i + 1, i + step + 1]
+                    else:
+                        stamp_1 += temp_stamp_1
+                        stamp_2 += temp_stamp_2
                 time_diff = (stamp_2 - stamp_1)
                 time_diffs[int(i)] = float(time_diff)
         return True, time_diffs
