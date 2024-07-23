@@ -237,6 +237,16 @@ class TGrad(GRAANK):
         return time_lag
 
     @staticmethod
+    def triangular_mf(x, a, b, c):
+        """"""
+        if a <= x <= b:
+            return (x - a) / (b - a)
+        elif b <= x <= c:
+            return (c - x) / (c - b)
+        else:
+            return 0
+
+    @staticmethod
     def __approximate_fuzzy_time_lag__(time_lags):
         if len(time_lags) <= 0:
             # if time_lags is blank return nothing
