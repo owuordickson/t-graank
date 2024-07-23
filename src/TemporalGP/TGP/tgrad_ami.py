@@ -12,6 +12,8 @@ the random variables X and Y provide about one another.
 """
 
 import numpy as np
+from sklearn.cluster import KMeans
+from sklearn.preprocessing import MinMaxScaler
 from sklearn.feature_selection import mutual_info_regression
 
 from .t_graank import TGrad
@@ -19,7 +21,7 @@ from .t_graank import TGrad
 
 class TGradAMI(TGrad):
 
-    def __init__(self, f_path, eq, min_sup, target_col, err, num_cores):
+    def __init__(self, f_path: str, eq: bool, min_sup: float, target_col: int, err: float, num_cores: int):
         """"""
         # Compute MI w.r.t. target-column with original dataset to get the actual relationship
         # between variables. Compute MI for every time-delay/time-lag: if the values are
@@ -53,32 +55,11 @@ class TGradAMI(TGrad):
         self.initial_mutual_info = mi_arr[0]  # step 0 is the MI without any time delay (or step)
         self.mi_arr = mi_arr[1:]
 
-    def discover_tgp(self, parallel=False):
+    def gather_delayed_data(self, optimal_dict: dict, max_step: int):
         """"""
-
-        # 1. Compute mutual information
-        self.compute_mutual_info()
-
-        # 2. Identify steps (for every feature w.r.t. target) with minimum error from initial MI
-        squared_diff = np.square(np.subtract(self.mi_arr, self.initial_mutual_info))
-        absolute_error = np.sqrt(squared_diff)
-        optimal_steps_arr = np.argmin(absolute_error, axis=0)
-        max_step = (np.max(optimal_steps_arr) + 1)
-        print(f"Largest step delay: {max_step}\n")
-        # print(f"Initial MI: {self.initial_mutual_info}\n")
-        # print(f"Delayed MIs: {self.mi_arr}\n")
-        # print(f"Abs.E.: {absolute_error}\n")
-        # print(f"Optimal Steps Arr: {optimal_steps_arr}\n")
-
-        # 3. Integrate feature indices with the computed steps
-        # optimal_dict = dict(map(lambda key, val: (int(key), int(val+1)), self.feature_cols, optimal_steps_arr))
-        optimal_dict = {int(self.feature_cols[i]): int(optimal_steps_arr[i] + 1) for i in range(len(self.feature_cols))}
-        print(f"Optimal Dict: {optimal_dict}\n")
-
-        # 4. Create final (and dynamic) delayed dataset
         delayed_data = None
         time_data = []
-        time_dict = {}
+        # time_dict = {}
         n = self.row_count
         k = (n - max_step)  # No. of rows created by largest step-delay
         for col_index in range(self.col_count):
@@ -91,23 +72,92 @@ class TGradAMI(TGrad):
                 temp_row = self.full_attr_data[col_index][step: n]
                 _, time_diffs = self.get_time_diffs(step)
 
-                # Get first k items
+                # Get first k items for delayed data
                 temp_row = temp_row[0: k]
-                # time_diffs = dict(list(time_diffs.items())[0: k])
-                temp_diffs = []
-                for i in range(k):
-                    temp_diffs.append(time_diffs[i])
-                    if i in time_dict:
-                        time_dict[i].append(time_diffs[i])
-                    else:
-                        time_dict[i] = [time_diffs[i]]
+
+                # Get first k items for time-lag data
+                temp_diffs = [(time_diffs[i]) for i in range(k)]
                 time_data.append(temp_diffs)
+
+                # for i in range(k):
+                #    if i in time_dict:
+                #        time_dict[i].append(time_diffs[i])
+                #    else:
+                #        time_dict[i] = [time_diffs[i]]
                 # print(f"{time_diffs}\n")
                 # WHAT ABOUT TIME DIFFERENCE/DELAY? It is different for every step!!!
             delayed_data = temp_row if (delayed_data is None) \
                 else np.vstack((delayed_data, temp_row))
-        time_data = np.array(time_data)
+
+        # print(f"{time_dict}\n")
+        return delayed_data, np.array(time_data)
+
+    def discover_tgp(self, parallel=False):
+        """"""
+
+        # 1. Compute mutual information
+        self.compute_mutual_info()
+
+        # 2. Identify steps (for every feature w.r.t. target) with minimum error from initial MI
+        squared_diff = np.square(np.subtract(self.mi_arr, self.initial_mutual_info))
+        absolute_error = np.sqrt(squared_diff)
+        optimal_steps_arr = np.argmin(absolute_error, axis=0)
+        max_step = (np.max(optimal_steps_arr) + 1)
+        print(f"Largest step delay: {max_step}\n")
+        # print(f"Abs.E.: {absolute_error}\n")
+
+        # 3. Integrate feature indices with the computed steps
+        # optimal_dict = dict(map(lambda key, val: (int(key), int(val+1)), self.feature_cols, optimal_steps_arr))
+        optimal_dict = {int(self.feature_cols[i]): int(optimal_steps_arr[i] + 1) for i in range(len(self.feature_cols))}
+        print(f"Optimal Dict: {optimal_dict}\n")
+
+        # 4. Create final (and dynamic) delayed dataset
+        delayed_data, time_data = self.gather_delayed_data(optimal_dict, max_step)
         # print(f"{delayed_data}\n")
-        print(f"{time_dict}\n")
         print(f"{time_data}\n")
-        print(f"{time_data.T}\n")
+
+        # 5. Build triangular MF
+        a, b, c = TGradAMI.build_mf(time_data)
+        print(f"{a}, {b}, {c}")
+
+    @staticmethod
+    def build_mf(time_data: np.ndarray):
+        """"""
+        # Reshape into 1-column dataset
+        time_data = time_data.reshape(-1, 1)
+
+        # Standardize data
+        scaler = MinMaxScaler()
+        data_scaled = scaler.fit_transform(time_data)
+
+        # Apply SVD
+        u, s, vt = np.linalg.svd(data_scaled, full_matrices=False)
+
+        # Plot singular values to help determine the number of clusters
+        # Based on the plot, choose the number of clusters (e.g., 3 clusters)
+        num_clusters = int(s[0])
+
+        # Perform k-means clustering
+        kmeans = KMeans(n_clusters=num_clusters)
+        kmeans.fit(data_scaled)
+
+        # Get cluster centers
+        centers = kmeans.cluster_centers_.flatten()
+
+        # Define membership functions to ensure membership > 0.5
+        # mf_list = []
+        largest_mf = [0, 0, 0]
+        for center in centers:
+            half_width = 0.5 / 2  # since membership value should be > 0.5
+            a = center - half_width
+            b = center
+            c = center + half_width
+            if abs(c - a) > abs(largest_mf[2] - largest_mf[0]):
+                largest_mf = [a, b, c]
+            # mf_list.append((a, b, c))
+
+        # Reverse the scaling
+        a = scaler.inverse_transform([[largest_mf[0]]])[0, 0]
+        b = scaler.inverse_transform([[largest_mf[1]]])[0, 0]
+        c = scaler.inverse_transform([[largest_mf[2]]])[0, 0]
+        return a, b, c
