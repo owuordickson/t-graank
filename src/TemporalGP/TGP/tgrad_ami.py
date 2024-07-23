@@ -120,6 +120,9 @@ class TGradAMI(TGrad):
         a, b, c = TGradAMI.build_mf(time_data)
         print(f"{a}, {b}, {c}")
 
+        # 6. Learn the best MF through slide-descent/sliding
+        # 7. Apply cartesian product on multiple MFs to pick the MF with the biggest center (inference logic)
+
     @staticmethod
     def build_mf(time_data: np.ndarray):
         """"""
