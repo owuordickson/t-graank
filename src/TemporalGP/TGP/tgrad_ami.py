@@ -178,7 +178,7 @@ class TGradAMI(TGrad):
         # min_membership = 0.001
 
         # 1. ML Approach
-        # tri_mf_data = np.array([a, b, c])
+        tri_mf_data = np.array([a, b, c])
         # Normalization
         # combined_data = np.concatenate((tri_mf_data, x_data))
         # x_min = np.min(combined_data)
@@ -186,20 +186,19 @@ class TGradAMI(TGrad):
         # Normalize x_train and tri_mf_data
         # tri_mf_data = (tri_mf_data - x_min) / (x_max - x_min)
         # x_train = (x_data - x_min) / (x_max - x_min)
+        # y_train = np.full_like(x_data, 1, dtype=float)
 
         y_train = np.where(np.logical_and(x_data > a, x_data < b), b - 0.001, x_data)
         y_train = np.where(np.logical_and(y_train > b, y_train <= c), b + 0.001, y_train)
         y_train = np.where(y_train <= a, a + 0.001, y_train)
         y_train = np.where(y_train >= c, c - 0.001, y_train)
-        # y_train = np.full_like(x_data, 1, dtype=float)
+        y_train = x_data + 1.5
 
         # Normalize x_train
-        # combined_data = np.concatenate((y_train, x_data))
-        # x_min = np.min(combined_data)
-        # x_max = np.max(combined_data)
-        # x_train = (x_data - x_min) / (x_max - x_min)
-        # y_train = (y_train - x_min) / (x_max - x_min)
-        x_train = x_data
+        x_min = np.min(x_data)
+        x_max = np.max(x_data)
+        x_train = (x_data - x_min) / (x_max - x_min)
+        # x_train = np.array(x_data, dtype=float)
 
         print(f"x-train: {x_train}")
         print(f"y-train: {y_train}")
@@ -208,14 +207,13 @@ class TGradAMI(TGrad):
         model = tf.keras.Sequential([
             tf.keras.layers.Input(shape=(1,)),
             BiasLayer(1)
-            # tf.keras.layers.Activation('sigmoid')
         ])
 
         # Automated
-        opt = tf.keras.optimizers.Adam()
+        opt = tf.keras.optimizers.SGD()
         model.compile(optimizer=opt, loss='mse')
         print(model.summary())
-        model.fit(x_train, y_train, epochs=10)
+        model.fit(x_train, y_train, epochs=50)
 
         # Custom Training Loop
         # optimizer = tf.keras.optimizers.Adam()
@@ -228,7 +226,8 @@ class TGradAMI(TGrad):
         #    optimizer.apply_gradients(zip(gradients, model.trainable_variables))
         #    print(f"Epoch {epoch + 1}/{epochs}, Loss: {loss.numpy()}")
 
-        bias = model.layers[0].bias.numpy()
+        bias_hat = model.layers[0].bias.numpy()
+        bias = bias_hat * (x_max - x_min) + x_min
         print(f"bias: {bias}")
 
         # 2. Manual Approach
