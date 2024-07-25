@@ -202,9 +202,10 @@ class TGradAMI(TGrad):
         # optimizer = tf.keras.optimizers.Adam()
         # model.compile(optimizer=optimizer, loss=TGradAMI.cost_function_wrapper(tri_mf_data, min_membership))
         # model.fit(x_train, y_train, epochs=10)
+        # print(model.summary())
 
         # Custom Training Loop
-        optimizer = tf.keras.optimizers.SGD(learning_rate=0.1)
+        optimizer = tf.keras.optimizers.Adam()
         epochs = 10
         for epoch in range(epochs):
             with tf.GradientTape() as tape:
@@ -212,6 +213,7 @@ class TGradAMI(TGrad):
                 loss = TGradAMI.cost_function(y_train, predictions, tri_mf_data, min_membership)
 
             gradients = tape.gradient(loss, model.trainable_variables)
+            print(model.trainable_variables)
             print(gradients)
             optimizer.apply_gradients(zip(gradients, model.trainable_variables))
             print(f"Epoch {epoch + 1}/{epochs}, Loss: {loss.numpy()}")
@@ -318,6 +320,10 @@ class BiasLayer(tf.keras.layers.Layer):
         self.units = units
 
     def build(self, input_shape):
+        self.kernel = self.add_weight(name='kernel',
+                                      shape=(input_shape[-1], self.units),
+                                      initializer='ones',
+                                      trainable=True)
         # Initialize bias as a trainable variable
         self.bias = self.add_weight(name='bias',
                                     shape=(self.units,),
@@ -327,4 +333,5 @@ class BiasLayer(tf.keras.layers.Layer):
         self.fixed_weights = tf.ones((input_shape[-1], self.units), dtype=tf.float32)
 
     def call(self, inputs):
-        return tf.matmul(inputs, self.fixed_weights) + self.bias
+        # return tf.matmul(inputs, self.fixed_weights) + self.bias
+        return tf.matmul(inputs, self.kernel) + self.bias
