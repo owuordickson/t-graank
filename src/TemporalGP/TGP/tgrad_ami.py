@@ -218,7 +218,8 @@ class TGradAMI(TGrad):
     @staticmethod
     def cost_function_wrapper(tri_mf: np.ndarray, min_membership: float):
         """
-        Computes the logistic regression cost function for a fuzzy set created from a triangular membership function.
+        Computes the logistic regression cost function for a fuzzy set created from a
+        triangular membership function.
 
         :param tri_mf: The a,b,c values of the triangular membership function in indices 0,1,2 respectively.
         :param min_membership: The minimum accepted value to allow membership in a fuzzy set.
@@ -227,11 +228,12 @@ class TGradAMI(TGrad):
 
         def custom_loss(y_true: np.ndarray, x_hat: np.ndarray):
             """
-                Computes the logistic regression cost function for a fuzzy set created from a triangular membership function.
+            Computes the logistic regression cost function for a fuzzy set created from a
+            triangular membership function.
 
-                :param y_true: A numpy array of the true labels.
-                :param x_hat: A numpy array of the predicted labels.
-                :return: A numpy array of the cost function values.
+            :param y_true: A numpy array of the true labels.
+            :param x_hat: A numpy array of the predicted labels.
+            :return: A numpy array of the cost function values.
             """
 
             # 1. Generate fuzzy data set using MF from x_data
