@@ -229,6 +229,7 @@ class TGradAMI(TGrad):
         bias_hat = model.layers[0].bias.numpy()
         bias = bias_hat * (x_max - x_min) + x_min
         print(f"bias: {bias}")
+        # print(model.layers[0].fixed_weights.numpy())
 
         # 2. Manual Approach
         # candidate_steps = [float((((0.5*(b+a)/x)-1) if (x <= b) else float((0.5*(b+c)/x)-1)) * x) for x in x_data]
