@@ -194,6 +194,8 @@ class TGradAMI(TGrad):
 
         weights = model.layers[0].get_weights()[0]
         bias = model.layers[0].get_weights()[1]
+        print(f"x-train: {x_train}")
+        print(f"y-train: {y_train}")
         print(f"weights: {weights}")
         print(f"bias: {bias}")
 
