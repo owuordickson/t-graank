@@ -292,6 +292,7 @@ class TGradAMI(TGrad):
         :return: cost function values.
         """
         a, b, c = tri_mf[0], tri_mf[1], tri_mf[2]
+        # candidate_steps = [float((((0.5*(b+a)/x)-1) if (x <= b) else float((0.5*(b+c)/x)-1)) * x) for x in x_data]
 
         # Convert numpy array to tensor
         a_tensor = tf.constant(a, dtype=tf.float32)
