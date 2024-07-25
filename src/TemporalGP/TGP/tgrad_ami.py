@@ -16,8 +16,6 @@ import tensorflow as tf
 from sklearn.cluster import KMeans
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.feature_selection import mutual_info_regression
-from tensorflow.keras.layers import Layer, Input
-from tensorflow.keras import Sequential
 
 from .t_graank import TGrad
 
@@ -194,14 +192,15 @@ class TGradAMI(TGrad):
         print(f"y-train: {y_train}")
         print(f"tri-mf: {tri_mf_data}")
 
-        model = Sequential([
-            Input(shape=(1,)),
-            FixedWeightsLayer(1),
+        model = tf.keras.Sequential([
+            tf.keras.layers.InputLayer(shape=(1,)),
+            BiasLayer(1),
             tf.keras.layers.Activation('sigmoid')
         ])
         model.compile(optimizer='adam', loss=TGradAMI.cost_function_wrapper(tri_mf_data, min_membership))
-        model.fit(x_train, y_train, epochs=10)
+        print(model.summary())
 
+        model.fit(x_train, y_train, epochs=10)
         weights = model.layers[0].get_weights()[0]
         bias = model.layers[0].get_weights()[1]
         # print(f"x-train: {x_train}")
@@ -266,9 +265,9 @@ class TGradAMI(TGrad):
         return custom_loss
 
 
-class FixedWeightsLayer(Layer):
+class BiasLayer(tf.keras.layers.Layer):
     def __init__(self, units, **kwargs):
-        super(FixedWeightsLayer, self).__init__(**kwargs)
+        super(BiasLayer, self).__init__(**kwargs)
         self.units = units
 
     def build(self, input_shape):
