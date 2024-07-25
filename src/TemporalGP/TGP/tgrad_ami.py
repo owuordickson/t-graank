@@ -204,7 +204,7 @@ class TGradAMI(TGrad):
         # model.fit(x_train, y_train, epochs=10)
 
         # Custom Training Loop
-        optimizer = tf.keras.optimizers.SGD()
+        optimizer = tf.keras.optimizers.SGD(learning_rate=0.1)
         epochs = 10
         for epoch in range(epochs):
             with tf.GradientTape() as tape:
@@ -212,6 +212,7 @@ class TGradAMI(TGrad):
                 loss = TGradAMI.cost_function(y_train, predictions, tri_mf_data, min_membership)
 
             gradients = tape.gradient(loss, model.trainable_variables)
+            print(gradients)
             optimizer.apply_gradients(zip(gradients, model.trainable_variables))
             print(f"Epoch {epoch + 1}/{epochs}, Loss: {loss.numpy()}")
 
