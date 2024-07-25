@@ -180,7 +180,7 @@ class TGradAMI(TGrad):
         w0_c = c / (c - b)
 
     @staticmethod
-    def logistic_regression_cost_function(y_true: np.ndarray, y_hat: np.ndarray):
+    def cost_function(y_true: np.ndarray, y_hat: np.ndarray):
         """
         Computes the logistic regression cost function.
 
@@ -192,7 +192,7 @@ class TGradAMI(TGrad):
         # Example usage:
         # y_true = np.array([1, 0, 1, 0])
         # y_hat = np.array([0.8, 0.2, 0.7, 0.3])
-        # cost = logistic_regression_cost_function(y_true, y_hat)
+        # cost = cost_function(y_true, y_hat)
         # print(cost)  # output: 0.2899092476264711 (the lower the better)
 
         cost = -np.mean(y_true * np.log(y_hat) + (1 - y_true) * np.log(1 - y_hat))
