@@ -241,10 +241,14 @@ class TGradAMI(TGrad):
             x_hat = np.where(x_hat <= b, (x_hat - a) / (b - a), (c - x_hat) / (c - b))
 
             # 2. Generate y_train based on the given criteria (x>minimum_membership)
-            y_hat = np.where((x_hat >= min_membership), 1, 0)
+            y_hat = np.where((x_hat >= min_membership), 0.99, 0.01)
 
-            cost = -np.mean(y_true * np.log(y_hat) + (1 - y_true) * np.log(1 - y_hat))
-            return cost
+            # 3. Compute loss
+            # cost = -np.mean(y_true * np.log(y_hat) + (1 - y_true) * np.log(1 - y_hat))
+            # return cost
+            epsilon = tf.keras.backend.epsilon()
+            y_hat = tf.clip_by_value(y_hat, epsilon, 1. - epsilon)
+            return -tf.reduce_mean(y_true * tf.math.log(y_hat) + (1 - y_true) * tf.math.log(1 - y_hat))
         return custom_loss
 
 
