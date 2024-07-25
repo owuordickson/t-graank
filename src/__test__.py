@@ -15,5 +15,5 @@ c = 6
 x = np.array([1, 2, 3, 4, 8])
 
 print(f"a: {a}, b: {b}, c: {c}")
-print(f"x-data: {x}")
+print(f"x-data: {x}\n")
 TGradAMI.learn_best_mf(a, b, c, x)

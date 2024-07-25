@@ -173,19 +173,33 @@ class TGradAMI(TGrad):
 
         # Initialize parameters
         e = 0
-        w1_a = (1 + e) / (b - a)
-        w0_a = -a / (b - a)
+        # w1_a = (1 + e) / (b - a)
+        # w0_a = -a / (b - a)
+        # w1_c = (-1 - e) / (c - b)
+        # w0_c = c / (c - b)
 
-        w1_c = (-1 - e) / (c - b)
-        w0_c = c / (c - b)
+        for i in range(5):
+            print(f"Slide: {e}")
+            x_train = x_data.copy()
+            print(f"x-train: {x_train}")
 
-        # Generate fuzzy data set using MF
-        x_data = np.where(x_data <= b, (w1_a * x_data) + w0_a, (w1_c * x_data) + w0_c)
-        # Generate y_train based on the given criteria (x>0.5)
-        y_train = np.where(x_data >= 0.5, 1, 0)
+            # 1. Generate fuzzy data set using MF from x_data
+            # Method 1 (OK)
+            x_train = x_train + e
+            x_train = np.where(x_train <= b, (x_train-a)/(b-a), (c-x_train)/(c-b))
 
-        print(f"x-train: {x_data}")
-        print(f"y-train: {y_train}")
+            # Method 2 (NOT OK) - e is multiplied by x instead of adding in w1
+            # w1_a = (1 + e) / (b - a)
+            # w0_a = -a / (b - a)
+            # w1_c = (-1 - e) / (c - b)
+            # w0_c = c / (c - b)
+            # x_train = np.where(x_train+e <= b, (w1_a * x_train) + w0_a, (w1_c * x_train) + w0_c)
+
+            # 2. Generate y_train based on the given criteria (x>0.5)
+            y_train = np.where(x_train >= 0.5, 1, 0)
+            print(f"x-train MF: {x_train}")
+            print(f"y-train: {y_train}\n")
+            e = e + 1
 
     @staticmethod
     def cost_function(y_true: np.ndarray, y_hat: np.ndarray):
