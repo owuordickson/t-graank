@@ -169,7 +169,7 @@ class TGradAMI(TGrad):
     def learn_best_mf(a: float, b: float, c: float, x_data: np.ndarray):
         """"""
         # if a <= x <= b then y_hat = (x - a) / (b - a)
-        # b <= x <= c then y_hat = (c - x) / (c - b)
+        # if b <= x <= c then y_hat = (c - x) / (c - b)
 
         # Initialize parameters
         e = 0
@@ -179,14 +179,8 @@ class TGradAMI(TGrad):
         w1_c = (-1 - e) / (c - b)
         w0_c = c / (c - b)
 
-        # Generate x_train and y_train data
-        # for x in x_data:
-        #    if x <= b:
-        #        y_hat = (w1_a * x) + w0_a
-        #    else:
-        #        y_hat = (w1_c * x) + w0_c
+        # Generate fuzzy data set using MF
         x_data = np.where(x_data <= b, (w1_a * x_data) + w0_a, (w1_c * x_data) + w0_c)
-
         # Generate y_train based on the given criteria (x>0.5)
         y_train = np.where(x_data >= 0.5, 1, 0)
 
