@@ -174,7 +174,7 @@ class TGradAMI(TGrad):
         print(f"Candidate Steps: {candidate_steps}")
 
         # Initialize parameters
-        min_membership = 0.1
+        min_membership = 0.01
         for i in range(10):
             print(f"Slide: {i}")
             print(f"x-data: {x_data}")
