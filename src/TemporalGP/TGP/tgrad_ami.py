@@ -12,9 +12,13 @@ the random variables X and Y provide about one another.
 """
 
 import numpy as np
+import tensorflow as tf
 from sklearn.cluster import KMeans
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.feature_selection import mutual_info_regression
+from tensorflow.keras.layers import Layer
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import Input
 
 from .t_graank import TGrad
 
@@ -30,6 +34,8 @@ class TGradAMI(TGrad):
 
         super(TGradAMI, self).__init__(f_path, eq, min_sup, target_col=target_col, min_rep=0.25, num_cores=num_cores)
         self.error_margin = err
+        self.min_membership = 0.001
+        self.tri_mf_data = None  # The a,b,c values of the triangular membership function in indices 0,1,2 respectively.
         self.feature_cols = np.setdiff1d(self.attr_cols, self.target_col)
         self.initial_mutual_info = None
         self.mi_arr = None
@@ -118,6 +124,7 @@ class TGradAMI(TGrad):
 
         # 5. Build triangular MF
         a, b, c = TGradAMI.build_mf(time_data)
+        self.tri_mf_data = np.array([a, b, c])
         print(f"{a}, {b}, {c}")
 
         # 6. Learn the best MF through slide-descent/sliding
@@ -166,46 +173,92 @@ class TGradAMI(TGrad):
         return a, b, c
 
     @staticmethod
-    def learn_best_mf(a: float, b: float, c: float, x_data: np.ndarray):
+    def learn_best_mf(a: float, b: float, c: float, x_train: np.ndarray):
         """"""
         # if a <= x <= b then y_hat = (x - a) / (b - a)
         # if b <= x <= c then y_hat = (c - x) / (c - b)
-        candidate_steps = [float((((0.5*(b+a)/x) - 1) if (x <= b) else float((0.5*(b+c)/x) - 1))*x)for x in x_data]
-        print(f"Candidate Steps: {candidate_steps}")
-
         # Initialize parameters
-        min_membership = 0.01
-        for i in range(10):
-            print(f"Slide: {i}")
-            print(f"x-data: {x_data}")
+        min_membership = 0.001
 
-            # 1. Generate fuzzy data set using MF from x_data
-            # Method 1 (OK)
-            x_train = np.where(x_data <= b, (x_data-a)/(b-a), (c-x_data)/(c-b))
-            b = 0.5
-            x_data = x_data + b
+        # 1. ML Approach
+        tri_mf_data = np.array([a, b, c])
+        y_train = np.full_like(x_train, 1)
 
-            # 2. Generate y_train based on the given criteria (x>0.5)
-            y_train = np.where((x_train >= min_membership), 1, 0)
+        model = Sequential([
+            Input(shape=(1,)),
+            FixedWeightsLayer(1),
+            tf.keras.layers.Activation('sigmoid')
+        ])
+        model.compile(optimizer='adam', loss=TGradAMI.cost_function_wrapper(tri_mf_data, min_membership))
+        model.fit(x_train, y_train, epochs=10)
 
-            print(f"x-train: {x_train}")
-            print(f"y-train: {y_train}\n")
+        weights = model.layers[0].get_weights()[0]
+        bias = model.layers[0].get_weights()[1]
+        print(f"weights: {weights}")
+        print(f"bias: {bias}")
+
+        # 2. Manual Approach
+        # candidate_steps = [float((((0.5*(b+a)/x)-1) if (x <= b) else float((0.5*(b+c)/x)-1)) * x) for x in x_data]
+        # print(f"Candidate Steps: {candidate_steps}")
+        # for i in range(10):
+        #    print(f"Slide: {i}")
+        #    print(f"x-train: {x_train}")
+        #    # 1. Generate fuzzy data set using MF from x_data
+        #    # Method 1 (OK)
+        #    x_hat = np.where(x_train <= b, (x_train-a)/(b-a), (c-x_train)/(c-b))
+        #    b = 0.5
+        #    x_train = x_train + b
+        #    # 2. Generate y_train based on the given criteria (x>0.5)
+        #    y_hat = np.where((x_hat >= min_membership), 1, 0)
+        #    print(f"x-hat: {x_hat}")
+        #    print(f"y-hat: {y_hat}\n")
 
     @staticmethod
-    def cost_function(y_true: np.ndarray, y_hat: np.ndarray):
+    def cost_function_wrapper(tri_mf: np.ndarray, min_membership: float):
         """
-        Computes the logistic regression cost function.
+        Computes the logistic regression cost function for a fuzzy set created from a triangular membership function.
 
-        :param y_true: A numpy array of the true labels.
-        :param y_hat: A numpy array of the predicted labels.
+        :param tri_mf: The a,b,c values of the triangular membership function in indices 0,1,2 respectively.
+        :param min_membership: The minimum accepted value to allow membership in a fuzzy set.
         :return: A numpy array of the cost function values.
         """
 
-        # Example usage:
-        # y_true = np.array([1, 0, 1, 0])
-        # y_hat = np.array([0.8, 0.2, 0.7, 0.3])
-        # cost = cost_function(y_true, y_hat)
-        # print(cost)  # output: 0.2899092476264711 (the lower the better)
+        def custom_loss(y_true: np.ndarray, x_hat: np.ndarray):
+            """
+                Computes the logistic regression cost function for a fuzzy set created from a triangular membership function.
 
-        cost = -np.mean(y_true * np.log(y_hat) + (1 - y_true) * np.log(1 - y_hat))
-        return cost
+                :param y_true: A numpy array of the true labels.
+                :param x_hat: A numpy array of the predicted labels.
+                :return: A numpy array of the cost function values.
+            """
+
+            # 1. Generate fuzzy data set using MF from x_data
+            a, b, c = tri_mf[0], tri_mf[1], tri_mf[2]
+            x_hat = np.where(x_hat <= b, (x_hat - a) / (b - a), (c - x_hat) / (c - b))
+
+            # 2. Generate y_train based on the given criteria (x>minimum_membership)
+            y_hat = np.where((x_hat >= min_membership), 1, 0)
+
+            cost = -np.mean(y_true * np.log(y_hat) + (1 - y_true) * np.log(1 - y_hat))
+            return cost
+        return custom_loss
+
+
+class FixedWeightsLayer(Layer):
+    def __init__(self, units, **kwargs):
+        super(FixedWeightsLayer, self).__init__(**kwargs)
+        self.fixed_weights = None
+        self.bias = None
+        self.units = units
+
+    def build(self, input_shape):
+        # Initialize bias as a trainable variable
+        self.bias = self.add_weight(name='bias',
+                                    shape=(self.units,),
+                                    initializer='zeros',
+                                    trainable=True)
+        # Set weights to 1 and make them non-trainable
+        self.fixed_weights = tf.ones((input_shape[-1], self.units), dtype=tf.float32)
+
+    def call(self, inputs):
+        return tf.matmul(inputs, self.fixed_weights) + self.bias
