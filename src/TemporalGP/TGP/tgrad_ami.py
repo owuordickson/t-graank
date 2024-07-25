@@ -166,7 +166,7 @@ class TGradAMI(TGrad):
         return a, b, c
 
     @staticmethod
-    def learn_best_mf(a: float, b: float, c: float, x: np.ndarray):
+    def learn_best_mf(a: float, b: float, c: float, x_data: np.ndarray):
         """"""
         # if a <= x <= b then y_hat = (x - a) / (b - a)
         # b <= x <= c then y_hat = (c - x) / (c - b)
@@ -178,6 +178,20 @@ class TGradAMI(TGrad):
 
         w1_c = (-1 - e) / (c - b)
         w0_c = c / (c - b)
+
+        # Generate x_train and y_train data
+        # for x in x_data:
+        #    if x <= b:
+        #        y_hat = (w1_a * x) + w0_a
+        #    else:
+        #        y_hat = (w1_c * x) + w0_c
+        x_data = np.where(x_data <= b, (w1_a * x_data) + w0_a, (w1_c * x_data) + w0_c)
+
+        # Generate y_train based on the given criteria (x>0.5)
+        y_train = np.where(x_data >= 0.5, 1, 0)
+
+        print(f"x-train: {x_data}")
+        print(f"y-train: {y_train}")
 
     @staticmethod
     def cost_function(y_true: np.ndarray, y_hat: np.ndarray):
