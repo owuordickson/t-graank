@@ -16,9 +16,8 @@ import tensorflow as tf
 from sklearn.cluster import KMeans
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.feature_selection import mutual_info_regression
-from tensorflow.keras.layers import Layer
-from tensorflow.keras.models import Sequential
-from tensorflow.keras.layers import Input
+from tensorflow.keras.layers import Layer, Input
+from tensorflow.keras import Sequential
 
 from .t_graank import TGrad
 
@@ -173,7 +172,7 @@ class TGradAMI(TGrad):
         return a, b, c
 
     @staticmethod
-    def learn_best_mf(a: float, b: float, c: float, x_train: np.ndarray):
+    def learn_best_mf(a: float, b: float, c: float, x_data: np.ndarray):
         """"""
         # if a <= x <= b then y_hat = (x - a) / (b - a)
         # if b <= x <= c then y_hat = (c - x) / (c - b)
@@ -182,7 +181,18 @@ class TGradAMI(TGrad):
 
         # 1. ML Approach
         tri_mf_data = np.array([a, b, c])
-        y_train = np.full_like(x_train, 1)
+        # Normalization
+        combined_data = np.concatenate((tri_mf_data, x_data))
+        x_min = np.min(combined_data)
+        x_max = np.max(combined_data)
+        # Normalize x_train and tri_mf_data
+        tri_mf_data = (tri_mf_data - x_min) / (x_max - x_min)
+        x_train = (x_data - x_min) / (x_max - x_min)
+        y_train = np.full_like(x_train, 1, dtype=float)
+
+        print(f"x-train: {x_train}")
+        print(f"y-train: {y_train}")
+        print(f"tri-mf: {tri_mf_data}")
 
         model = Sequential([
             Input(shape=(1,)),
@@ -194,8 +204,8 @@ class TGradAMI(TGrad):
 
         weights = model.layers[0].get_weights()[0]
         bias = model.layers[0].get_weights()[1]
-        print(f"x-train: {x_train}")
-        print(f"y-train: {y_train}")
+        # print(f"x-train: {x_train}")
+        # print(f"y-train: {y_train}")
         print(f"weights: {weights}")
         print(f"bias: {bias}")
 
@@ -223,8 +233,9 @@ class TGradAMI(TGrad):
 
         :param tri_mf: The a,b,c values of the triangular membership function in indices 0,1,2 respectively.
         :param min_membership: The minimum accepted value to allow membership in a fuzzy set.
-        :return: A numpy array of the cost function values.
+        :return: cost function values.
         """
+        a, b, c = tri_mf[0], tri_mf[1], tri_mf[2]
 
         def custom_loss(y_true: np.ndarray, x_hat: np.ndarray):
             """
@@ -233,30 +244,31 @@ class TGradAMI(TGrad):
 
             :param y_true: A numpy array of the true labels.
             :param x_hat: A numpy array of the predicted labels.
-            :return: A numpy array of the cost function values.
+            :return: loss values.
             """
 
+            # Convert numpy array to tensor
+            a_tensor = tf.constant(a, dtype=tf.float32)
+            b_tensor = tf.constant(b, dtype=tf.float32)
+            c_tensor = tf.constant(c, dtype=tf.float32)
+
             # 1. Generate fuzzy data set using MF from x_data
-            a, b, c = tri_mf[0], tri_mf[1], tri_mf[2]
-            x_hat = np.where(x_hat <= b, (x_hat - a) / (b - a), (c - x_hat) / (c - b))
+            y_hat = tf.where(x_hat <= b_tensor,
+                             (x_hat - a_tensor) / (b_tensor - a_tensor),
+                             (c_tensor - x_hat) / (c_tensor - b_tensor))
 
             # 2. Generate y_train based on the given criteria (x>minimum_membership)
-            y_hat = np.where((x_hat >= min_membership), 0.99, 0.01)
+            y_hat = tf.where(y_hat >= min_membership, 0.99, 0.01)
 
             # 3. Compute loss
-            # cost = -np.mean(y_true * np.log(y_hat) + (1 - y_true) * np.log(1 - y_hat))
-            # return cost
-            epsilon = tf.keras.backend.epsilon()
-            y_hat = tf.clip_by_value(y_hat, epsilon, 1. - epsilon)
-            return -tf.reduce_mean(y_true * tf.math.log(y_hat) + (1 - y_true) * tf.math.log(1 - y_hat))
+            loss = tf.keras.losses.binary_crossentropy(y_true, y_hat)
+            return loss
         return custom_loss
 
 
 class FixedWeightsLayer(Layer):
     def __init__(self, units, **kwargs):
         super(FixedWeightsLayer, self).__init__(**kwargs)
-        self.fixed_weights = None
-        self.bias = None
         self.units = units
 
     def build(self, input_shape):
