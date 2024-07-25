@@ -175,22 +175,35 @@ class TGradAMI(TGrad):
         # if a <= x <= b then y_hat = (x - a) / (b - a)
         # if b <= x <= c then y_hat = (c - x) / (c - b)
         # Initialize parameters
-        min_membership = 0.001
+        # min_membership = 0.001
 
         # 1. ML Approach
-        tri_mf_data = np.array([a, b, c])
+        # tri_mf_data = np.array([a, b, c])
         # Normalization
-        combined_data = np.concatenate((tri_mf_data, x_data))
-        x_min = np.min(combined_data)
-        x_max = np.max(combined_data)
+        # combined_data = np.concatenate((tri_mf_data, x_data))
+        # x_min = np.min(combined_data)
+        # x_max = np.max(combined_data)
         # Normalize x_train and tri_mf_data
-        tri_mf_data = (tri_mf_data - x_min) / (x_max - x_min)
-        x_train = (x_data - x_min) / (x_max - x_min)
-        y_train = np.full_like(x_train, 1, dtype=float)
+        # tri_mf_data = (tri_mf_data - x_min) / (x_max - x_min)
+        # x_train = (x_data - x_min) / (x_max - x_min)
+
+        y_train = np.where(np.logical_and(x_data > a, x_data < b), b - 0.001, x_data)
+        y_train = np.where(np.logical_and(y_train > b, y_train <= c), b + 0.001, y_train)
+        y_train = np.where(y_train <= a, a + 0.001, y_train)
+        y_train = np.where(y_train >= c, c - 0.001, y_train)
+        # y_train = np.full_like(x_data, 1, dtype=float)
+
+        # Normalize x_train
+        # combined_data = np.concatenate((y_train, x_data))
+        # x_min = np.min(combined_data)
+        # x_max = np.max(combined_data)
+        # x_train = (x_data - x_min) / (x_max - x_min)
+        # y_train = (y_train - x_min) / (x_max - x_min)
+        x_train = x_data
 
         print(f"x-train: {x_train}")
         print(f"y-train: {y_train}")
-        print(f"tri-mf: {tri_mf_data}")
+        # print(f"tri-mf: {tri_mf_data}")
 
         model = tf.keras.Sequential([
             tf.keras.layers.Input(shape=(1,)),
@@ -199,27 +212,23 @@ class TGradAMI(TGrad):
         ])
 
         # Automated
-        # optimizer = tf.keras.optimizers.Adam()
-        # model.compile(optimizer=optimizer, loss=TGradAMI.cost_function_wrapper(tri_mf_data, min_membership))
-        # model.fit(x_train, y_train, epochs=10)
-        # print(model.summary())
+        opt = tf.keras.optimizers.Adam()
+        model.compile(optimizer=opt, loss='mse')
+        print(model.summary())
+        model.fit(x_train, y_train, epochs=10)
 
         # Custom Training Loop
-        optimizer = tf.keras.optimizers.Adam()
-        epochs = 10
-        for epoch in range(epochs):
-            with tf.GradientTape() as tape:
-                predictions = model(x_train, training=True)
-                loss = TGradAMI.cost_function(y_train, predictions, tri_mf_data, min_membership)
-
-            gradients = tape.gradient(loss, model.trainable_variables)
-            optimizer.apply_gradients(zip(gradients, model.trainable_variables))
-            print(f"Epoch {epoch + 1}/{epochs}, Loss: {loss.numpy()}")
+        # optimizer = tf.keras.optimizers.Adam()
+        # epochs = 10
+        # for epoch in range(epochs):
+        #    with tf.GradientTape() as tape:
+        #        predictions = model(x_train, training=True)
+        #        loss = TGradAMI.cost_function(y_train, predictions, tri_mf_data, min_membership)
+        #    gradients = tape.gradient(loss, model.trainable_variables)
+        #    optimizer.apply_gradients(zip(gradients, model.trainable_variables))
+        #    print(f"Epoch {epoch + 1}/{epochs}, Loss: {loss.numpy()}")
 
         bias = model.layers[0].bias.numpy()
-        # print(model.summary())
-        # print(f"x-train: {x_train}")
-        # print(f"y-train: {y_train}")
         print(f"bias: {bias}")
 
         # 2. Manual Approach
@@ -299,14 +308,20 @@ class TGradAMI(TGrad):
         b_tensor = tf.constant(b, dtype=tf.float32)
         c_tensor = tf.constant(c, dtype=tf.float32)
 
-        # 1. Generate fuzzy data set using MF from x_data
-        y_hat = tf.where(x_hat <= b_tensor,
-                         (x_hat - a_tensor) / (b_tensor - a_tensor),
-                         (c_tensor - x_hat) / (c_tensor - b_tensor))
+        y_hat = tf.where(tf.logical_and(x_hat > a_tensor, x_hat < b_tensor), b_tensor-0.001, x_hat)
+        y_hat = tf.where(tf.logical_and(y_hat > b_tensor, y_hat <= c_tensor), b_tensor+0.001, y_hat)
+        y_hat = tf.where(y_hat <= a_tensor, a_tensor+0.001, y_hat)
+        y_hat = tf.where(y_hat >= c_tensor, c_tensor-0.001, y_hat)
+        y_hat = tf.squeeze(y_hat)  # Ensure y_hat has the same shape as y_true
+        print(f"x-hat Model: {y_hat}")
 
+        # 1. Generate fuzzy data set using MF from x_data
+        # y_hat = tf.where(x_hat <= b_tensor,
+        #                 (x_hat - a_tensor) / (b_tensor - a_tensor),
+        #                 (c_tensor - x_hat) / (c_tensor - b_tensor))
         # 2. Generate y_train based on the given criteria (x>minimum_membership)
-        y_hat = tf.where(y_hat >= min_membership, 0.9, 0.2)
-        y_hat = tf.squeeze(x_hat)  # Ensure y_hat has the same shape as y_true
+        # y_hat = tf.where(y_hat >= min_membership, 0.9, 0.2)
+        # y_hat = tf.squeeze(x_hat)  # Ensure y_hat has the same shape as y_true
 
         # 3. Compute loss
         loss = tf.keras.losses.binary_crossentropy(y_true, y_hat)
