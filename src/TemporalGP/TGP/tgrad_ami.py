@@ -210,7 +210,7 @@ class TGradAMI(TGrad):
         ])
 
         # Automated
-        opt = tf.keras.optimizers.SGD()
+        opt = tf.keras.optimizers.Adam()
         model.compile(optimizer=opt, loss='mse')
         print(model.summary())
         model.fit(x_train, y_train, epochs=50)
