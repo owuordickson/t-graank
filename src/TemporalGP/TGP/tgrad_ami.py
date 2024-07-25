@@ -170,36 +170,23 @@ class TGradAMI(TGrad):
         """"""
         # if a <= x <= b then y_hat = (x - a) / (b - a)
         # if b <= x <= c then y_hat = (c - x) / (c - b)
+        candidate_steps = [float((((0.5*(b+a)/x) - 1) if (x <= b) else float((0.5*(b+c)/x) - 1))*x)for x in x_data]
+        print(f"Candidate Steps: {candidate_steps}")
 
         # Initialize parameters
-        e = 0
-        s = 1
-        # w1_a = (1 + e) / (b - a)
-        # w0_a = -a / (b - a)
-        # w1_c = (-1 - e) / (c - b)
-        # w0_c = c / (c - b)
-
+        min_membership = 0.1
         for i in range(10):
-            print(f"Slide: {e}")
-            # x_train = x_data.copy()
+            print(f"Slide: {i}")
             print(f"x-data: {x_data}")
 
             # 1. Generate fuzzy data set using MF from x_data
             # Method 1 (OK)
-            x_train_1 = np.where(x_data <= b, (x_data-a)/(b-a), (c-x_data)/(c-b))
-            x_data = x_data - s
-
-            # Method 2 (NOT OK) - e is multiplied by x instead of adding in w1
-            w1_a = (1 + e) / (b - a)
-            w0_a = -a / (b - a)
-            w1_c = (-1 - e) / (c - b)
-            w0_c = c / (c - b)
-            x_train_2 = np.where(x_data+e <= b, (w1_a * x_data) + w0_a, (w1_c * x_data) + w0_c)
-            e = e + 1
+            x_train = np.where(x_data <= b, (x_data-a)/(b-a), (c-x_data)/(c-b))
+            b = 0.5
+            x_data = x_data + b
 
             # 2. Generate y_train based on the given criteria (x>0.5)
-            x_train = x_train_1
-            y_train = np.where((x_train >= 0.5), 1, 0)
+            y_train = np.where((x_train >= min_membership), 1, 0)
 
             print(f"x-train: {x_train}")
             print(f"y-train: {y_train}\n")
