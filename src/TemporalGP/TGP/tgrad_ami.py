@@ -192,7 +192,7 @@ class TGradAMI(TGrad):
         y_train = np.where(np.logical_and(y_train > b, y_train <= c), b + 0.001, y_train)
         y_train = np.where(y_train <= a, a + 0.001, y_train)
         y_train = np.where(y_train >= c, c - 0.001, y_train)
-        y_train = x_data + 1.5
+        # y_train = x_data + 1.5
 
         # Normalize x_train
         x_min = np.min(x_data)
