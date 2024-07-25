@@ -197,9 +197,25 @@ class TGradAMI(TGrad):
             BiasLayer(1),
             tf.keras.layers.Activation('sigmoid')
         ])
+
+        # Automated
+        # optimizer = tf.keras.optimizers.Adam()
+        # model.compile(optimizer=optimizer, loss=TGradAMI.cost_function_wrapper(tri_mf_data, min_membership))
+        # model.fit(x_train, y_train, epochs=10)
+        # print(model.summary())
+
+        # Custom Training Loop
         optimizer = tf.keras.optimizers.Adam()
-        model.compile(optimizer=optimizer, loss=TGradAMI.cost_function_wrapper(tri_mf_data, min_membership))
-        model.fit(x_train, y_train, epochs=10)
+        epochs = 10
+        for epoch in range(epochs):
+            with tf.GradientTape() as tape:
+                predictions = model(x_train, training=True)
+                loss = TGradAMI.cost_function(y_train, predictions, tri_mf_data, min_membership)
+
+            gradients = tape.gradient(loss, model.trainable_variables)
+            print(gradients)
+            optimizer.apply_gradients(zip(gradients, model.trainable_variables))
+            print(f"Epoch {epoch + 1}/{epochs}, Loss: {loss.numpy()}")
 
         bias = model.layers[0].bias.numpy()
         # print(model.summary())
@@ -291,6 +307,7 @@ class TGradAMI(TGrad):
         # 2. Generate y_train based on the given criteria (x>minimum_membership)
         y_hat = tf.where(y_hat >= min_membership, 0.99, 0.01)
         y_hat = tf.squeeze(y_hat)  # Ensure y_hat has the same shape as y_true
+        print(y_hat)
 
         # 3. Compute loss
         loss = tf.keras.losses.binary_crossentropy(y_true, y_hat)
