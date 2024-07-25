@@ -193,19 +193,32 @@ class TGradAMI(TGrad):
         print(f"tri-mf: {tri_mf_data}")
 
         model = tf.keras.Sequential([
-            tf.keras.layers.InputLayer(shape=(1,)),
+            tf.keras.layers.Input(shape=(1,)),
             BiasLayer(1),
             tf.keras.layers.Activation('sigmoid')
         ])
-        model.compile(optimizer='adam', loss=TGradAMI.cost_function_wrapper(tri_mf_data, min_membership))
-        print(model.summary())
 
-        model.fit(x_train, y_train, epochs=10)
-        weights = model.layers[0].get_weights()[0]
-        bias = model.layers[0].get_weights()[1]
+        # Automated
+        # optimizer = tf.keras.optimizers.Adam()
+        # model.compile(optimizer=optimizer, loss=TGradAMI.cost_function_wrapper(tri_mf_data, min_membership))
+        # model.fit(x_train, y_train, epochs=10)
+
+        # Custom Training Loop
+        optimizer = tf.keras.optimizers.SGD()
+        epochs = 10
+        for epoch in range(epochs):
+            with tf.GradientTape() as tape:
+                predictions = model(x_train, training=True)
+                loss = TGradAMI.cost_function(y_train, predictions, tri_mf_data, min_membership)
+
+            gradients = tape.gradient(loss, model.trainable_variables)
+            optimizer.apply_gradients(zip(gradients, model.trainable_variables))
+            print(f"Epoch {epoch + 1}/{epochs}, Loss: {loss.numpy()}")
+
+        bias = model.layers[0].bias.numpy()
+        # print(model.summary())
         # print(f"x-train: {x_train}")
         # print(f"y-train: {y_train}")
-        print(f"weights: {weights}")
         print(f"bias: {bias}")
 
         # 2. Manual Approach
@@ -262,7 +275,40 @@ class TGradAMI(TGrad):
             # 3. Compute loss
             loss = tf.keras.losses.binary_crossentropy(y_true, y_hat)
             return loss
+
         return custom_loss
+
+    @staticmethod
+    def cost_function(y_true: np.ndarray, x_hat: np.ndarray, tri_mf: np.ndarray, min_membership: float):
+        """
+        Computes the logistic regression cost function for a fuzzy set created from a
+        triangular membership function.
+
+        :param y_true: A numpy array of the true labels.
+        :param x_hat: A numpy array of the predicted labels.
+        :param tri_mf: The a,b,c values of the triangular membership function in indices 0,1,2 respectively.
+        :param min_membership: The minimum accepted value to allow membership in a fuzzy set.
+        :return: cost function values.
+        """
+        a, b, c = tri_mf[0], tri_mf[1], tri_mf[2]
+
+        # Convert numpy array to tensor
+        a_tensor = tf.constant(a, dtype=tf.float32)
+        b_tensor = tf.constant(b, dtype=tf.float32)
+        c_tensor = tf.constant(c, dtype=tf.float32)
+
+        # 1. Generate fuzzy data set using MF from x_data
+        y_hat = tf.where(x_hat <= b_tensor,
+                         (x_hat - a_tensor) / (b_tensor - a_tensor),
+                         (c_tensor - x_hat) / (c_tensor - b_tensor))
+
+        # 2. Generate y_train based on the given criteria (x>minimum_membership)
+        y_hat = tf.where(y_hat >= min_membership, 0.99, 0.01)
+        y_hat = tf.squeeze(y_hat)  # Ensure y_hat has the same shape as y_true
+
+        # 3. Compute loss
+        loss = tf.keras.losses.binary_crossentropy(y_true, y_hat)
+        return tf.reduce_mean(loss)
 
 
 class BiasLayer(tf.keras.layers.Layer):
