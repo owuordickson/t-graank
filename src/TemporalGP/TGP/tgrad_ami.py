@@ -194,8 +194,8 @@ class TGradAMI(TGrad):
 
         model = tf.keras.Sequential([
             tf.keras.layers.Input(shape=(1,)),
-            BiasLayer(1),
-            tf.keras.layers.Activation('sigmoid')
+            BiasLayer(1)
+            # tf.keras.layers.Activation('sigmoid')
         ])
 
         # Automated
@@ -213,7 +213,6 @@ class TGradAMI(TGrad):
                 loss = TGradAMI.cost_function(y_train, predictions, tri_mf_data, min_membership)
 
             gradients = tape.gradient(loss, model.trainable_variables)
-            print(gradients)
             optimizer.apply_gradients(zip(gradients, model.trainable_variables))
             print(f"Epoch {epoch + 1}/{epochs}, Loss: {loss.numpy()}")
 
@@ -305,9 +304,8 @@ class TGradAMI(TGrad):
                          (c_tensor - x_hat) / (c_tensor - b_tensor))
 
         # 2. Generate y_train based on the given criteria (x>minimum_membership)
-        y_hat = tf.where(y_hat >= min_membership, 0.99, 0.01)
-        y_hat = tf.squeeze(y_hat)  # Ensure y_hat has the same shape as y_true
-        print(y_hat)
+        y_hat = tf.where(y_hat >= min_membership, 0.9, 0.2)
+        y_hat = tf.squeeze(x_hat)  # Ensure y_hat has the same shape as y_true
 
         # 3. Compute loss
         loss = tf.keras.losses.binary_crossentropy(y_true, y_hat)
