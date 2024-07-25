@@ -164,3 +164,36 @@ class TGradAMI(TGrad):
         b = scaler.inverse_transform([[largest_mf[1]]])[0, 0]
         c = scaler.inverse_transform([[largest_mf[2]]])[0, 0]
         return a, b, c
+
+    @staticmethod
+    def learn_best_mf(a: float, b: float, c: float, x: np.ndarray):
+        """"""
+        # if a <= x <= b then y_hat = (x - a) / (b - a)
+        # b <= x <= c then y_hat = (c - x) / (c - b)
+
+        # Initialize parameters
+        e = 0
+        w1_a = (1 + e) / (b - a)
+        w0_a = -a / (b - a)
+
+        w1_c = (-1 - e) / (c - b)
+        w0_c = c / (c - b)
+
+    @staticmethod
+    def logistic_regression_cost_function(y_true: np.ndarray, y_hat: np.ndarray):
+        """
+        Computes the logistic regression cost function.
+
+        :param y_true: A numpy array of the true labels.
+        :param y_hat: A numpy array of the predicted labels.
+        :return: A numpy array of the cost function values.
+        """
+
+        # Example usage:
+        # y_true = np.array([1, 0, 1, 0])
+        # y_hat = np.array([0.8, 0.2, 0.7, 0.3])
+        # cost = logistic_regression_cost_function(y_true, y_hat)
+        # print(cost)  # output: 0.2899092476264711 (the lower the better)
+
+        cost = -np.mean(y_true * np.log(y_hat) + (1 - y_true) * np.log(1 - y_hat))
+        return cost
