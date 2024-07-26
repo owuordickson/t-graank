@@ -16,4 +16,5 @@ x = np.array([1, 2, 3, 4, 8])
 
 print(f"a: {a}, b: {b}, c: {c}")
 print(f"x-data: {x}\n")
-TGradAMI.learn_best_mf_w_ml(a, b, c, x)
+# TGradAMI.learn_best_mf_w_ml(a, b, c, x)
+TGradAMI.learn_best_mf(a, b, c, x)

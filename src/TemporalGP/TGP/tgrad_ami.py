@@ -13,6 +13,7 @@ the random variables X and Y provide about one another.
 import numpy as np
 import tensorflow as tf
 from sklearn.cluster import KMeans
+from sklearn.metrics import mean_squared_error
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.feature_selection import mutual_info_regression
 
@@ -167,6 +168,36 @@ class TGradAMI(TGrad):
         b = scaler.inverse_transform([[largest_mf[1]]])[0, 0]
         c = scaler.inverse_transform([[largest_mf[2]]])[0, 0]
         return a, b, c
+
+    @staticmethod
+    def learn_best_mf(a: float, b: float, c: float, x_data: np.ndarray):
+        """"""
+
+        y_train = np.where(np.logical_and(x_data > a, x_data < b), b - 0.001, x_data)
+        y_train = np.where(np.logical_and(y_train > b, y_train <= c), b + 0.001, y_train)
+        y_train = np.where(y_train <= a, a + 0.001, y_train)
+        y_train = np.where(y_train >= c, c - 0.001, y_train)
+        # y_train = x_data + 1.5
+
+        # Normalize x_train
+        # x_data = x_data.reshape(-1, 1)
+        # scaler = MinMaxScaler()
+        # x_train = scaler.fit_transform(x_data)
+        x_train = np.array(x_data, dtype=float)
+
+        print(f"x-train: {x_train}")
+        print(f"y-train: {y_train}")
+        # print(f"tri-mf: {tri_mf_data}")
+
+        # Perform hill climbing to find the optimal bias
+        optimal_bias, best_mse = TGradAMI.hill_climbing(x_train, y_train)
+
+        # Make predictions using the optimal bias
+        y_pred = x_train + optimal_bias
+
+        print(f"Optimal bias: {optimal_bias}")
+        print(f"Predictions: {y_pred}")
+        print(f"Mean Squared Error: {best_mse}")
 
     @staticmethod
     def learn_best_mf_w_ml(a: float, b: float, c: float, x_data: np.ndarray):
@@ -326,6 +357,63 @@ class TGradAMI(TGrad):
         # 3. Compute loss
         loss = tf.keras.losses.binary_crossentropy(y_true, y_hat)
         return tf.reduce_mean(loss)
+
+    @staticmethod
+    def hill_climbing_cost_function(x_hat: np.ndarray, tri_mf: np.ndarray):
+        """
+        Computes the logistic regression cost function for a fuzzy set created from a
+        triangular membership function.
+
+        :param x_hat: A numpy array of the predicted labels.
+        :param tri_mf: The a,b,c values of the triangular membership function in indices 0,1,2 respectively.
+        :return: cost function values.
+        """
+        min_membership = 0.001
+        a, b, c = tri_mf[0], tri_mf[1], tri_mf[2]
+
+        # y_hat = np.where(np.logical_and(x_hat > a, x_hat < b), b-0.001, x_hat)
+        # y_hat = np.where(np.logical_and(y_hat > b, y_hat <= c), b+0.001, y_hat)
+        # y_hat = np.where(y_hat <= a, a+0.001, y_hat)
+        # y_hat = np.where(y_hat >= c, c-0.001, y_hat)
+        # print(f"x-hat Model: {y_hat}")
+
+        # 1. Generate fuzzy data set using MF from x_data
+        y_hat = np.where(x_hat <= b,
+                         (x_hat - a) / (b - a),
+                         (c - x_hat) / (c - b))
+        # 2. Generate y_train based on the given criteria (x>minimum_membership)
+        y_hat = np.where(y_hat >= min_membership, 1, 0)
+        x = np.count_nonzero(y_hat)
+        y_true = len(y_hat)
+
+        # 3. Compute loss
+        loss = ((y_true - x)**2)**0.5
+        # loss = abs(y_true - x)
+        return loss
+
+    @staticmethod
+    def hill_climbing(x_train, y_train, initial_bias=0, step_size=0.9, max_iterations=1000):
+        bias = initial_bias
+        y_pred = x_train + bias
+        # best_mse = mean_squared_error(y_train, y_pred)
+        best_mse = TGradAMI.hill_climbing_cost_function(y_pred, np.array([2, 4, 6]))
+
+        for iteration in range(max_iterations):
+            # Generate a new candidate bias by perturbing the current bias
+            new_bias = bias + step_size * np.random.randn()
+
+            # Compute the predictions and the MSE with the new bias
+            y_pred = x_train + new_bias
+            # new_mse = mean_squared_error(y_train, y_pred)
+            new_mse = TGradAMI.hill_climbing_cost_function(y_pred, np.array([2, 4, 6]))
+
+            # If the new MSE is lower, update the bias
+            if new_mse < best_mse:
+                print(f"new bias: {new_bias}")
+                bias = new_bias
+                best_mse = new_mse
+
+        return bias, best_mse
 
 
 class BiasLayer(tf.keras.layers.Layer):
