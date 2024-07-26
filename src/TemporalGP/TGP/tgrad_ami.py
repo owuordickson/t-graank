@@ -198,7 +198,6 @@ class TGradAMI(TGrad):
         x_data = x_data.reshape(-1, 1)
         scaler = MinMaxScaler()
         x_train = scaler.fit_transform(x_data)
-
         # x_train = np.array(x_data, dtype=float)
 
         print(f"x-train: {x_train}")
