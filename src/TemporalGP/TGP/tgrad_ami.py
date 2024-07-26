@@ -14,7 +14,7 @@ the random variables X and Y provide about one another.
 import numpy as np
 import tensorflow as tf
 from sklearn.cluster import KMeans
-from sklearn.preprocessing import MinMaxScaler, StandardScaler
+from sklearn.preprocessing import MinMaxScaler
 from sklearn.feature_selection import mutual_info_regression
 
 from .t_graank import TGrad
@@ -178,7 +178,7 @@ class TGradAMI(TGrad):
         # min_membership = 0.001
 
         # 1. ML Approach
-        tri_mf_data = np.array([a, b, c])
+        # tri_mf_data = np.array([a, b, c])
         # Normalization
         # combined_data = np.concatenate((tri_mf_data, x_data))
         # x_min = np.min(combined_data)
