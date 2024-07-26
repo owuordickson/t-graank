@@ -8,7 +8,6 @@ Functions for estimating time-lag using AMI and extending it to mining gradual p
 The average mutual information I(X; Y) is a measure of the amount of “information” that
 the random variables X and Y provide about one another.
 
-
 """
 
 import numpy as np
