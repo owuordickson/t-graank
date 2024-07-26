@@ -228,9 +228,9 @@ class TGradAMI(TGrad):
         #    print(f"Epoch {epoch + 1}/{epochs}, Loss: {loss.numpy()}")
 
         bias_hat = model.layers[0].bias.numpy()
-        # bias = bias_hat * (x_max - x_min) + x_min
         bias = scaler.inverse_transform([[float(bias_hat)]])[0, 0]
         print(f"bias: {bias}")
+        # print(model.layers[0].get_weights())
         # print(f"weights: {model.layers[0].kernel.numpy()}")
         # print(f"weights: {model.layers[0].fixed_weights.numpy()}")
 
