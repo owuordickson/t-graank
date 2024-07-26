@@ -290,7 +290,7 @@ class TGradAMI(TGrad):
         return custom_loss
 
     @staticmethod
-    def cost_function(y_true: np.ndarray, x_hat: np.ndarray, tri_mf: np.ndarray, min_membership: float):
+    def cost_function(y_true: np.ndarray, x_hat: np.ndarray, tri_mf: np.ndarray):
         """
         Computes the logistic regression cost function for a fuzzy set created from a
         triangular membership function.
@@ -298,7 +298,6 @@ class TGradAMI(TGrad):
         :param y_true: A numpy array of the true labels.
         :param x_hat: A numpy array of the predicted labels.
         :param tri_mf: The a,b,c values of the triangular membership function in indices 0,1,2 respectively.
-        :param min_membership: The minimum accepted value to allow membership in a fuzzy set.
         :return: cost function values.
         """
         a, b, c = tri_mf[0], tri_mf[1], tri_mf[2]
