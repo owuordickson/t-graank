@@ -371,12 +371,6 @@ class TGradAMI(TGrad):
         min_membership = 0.001
         a, b, c = tri_mf[0], tri_mf[1], tri_mf[2]
 
-        # y_hat = np.where(np.logical_and(x_hat > a, x_hat < b), b-0.001, x_hat)
-        # y_hat = np.where(np.logical_and(y_hat > b, y_hat <= c), b+0.001, y_hat)
-        # y_hat = np.where(y_hat <= a, a+0.001, y_hat)
-        # y_hat = np.where(y_hat >= c, c-0.001, y_hat)
-        # print(f"x-hat Model: {y_hat}")
-
         # 1. Generate fuzzy data set using MF from x_data
         y_hat = np.where(x_hat <= b,
                          (x_hat - a) / (b - a),
