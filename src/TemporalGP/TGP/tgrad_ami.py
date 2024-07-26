@@ -14,7 +14,7 @@ the random variables X and Y provide about one another.
 import numpy as np
 import tensorflow as tf
 from sklearn.cluster import KMeans
-from sklearn.preprocessing import MinMaxScaler
+from sklearn.preprocessing import MinMaxScaler, StandardScaler
 from sklearn.feature_selection import mutual_info_regression
 
 from .t_graank import TGrad
@@ -195,9 +195,10 @@ class TGradAMI(TGrad):
         # y_train = x_data + 1.5
 
         # Normalize x_train
-        x_min = np.min(x_data)
-        x_max = np.max(x_data)
-        x_train = (x_data - x_min) / (x_max - x_min)
+        x_data = x_data.reshape(-1, 1)
+        scaler = MinMaxScaler()
+        x_train = scaler.fit_transform(x_data)
+
         # x_train = np.array(x_data, dtype=float)
 
         print(f"x-train: {x_train}")
@@ -227,8 +228,10 @@ class TGradAMI(TGrad):
         #    print(f"Epoch {epoch + 1}/{epochs}, Loss: {loss.numpy()}")
 
         bias_hat = model.layers[0].bias.numpy()
-        bias = bias_hat * (x_max - x_min) + x_min
+        # bias = bias_hat * (x_max - x_min) + x_min
+        bias = scaler.inverse_transform([[float(bias_hat)]])[0, 0]
         print(f"bias: {bias}")
+        # print(f"weights: {model.layers[0].kernel.numpy()}")
         # print(f"weights: {model.layers[0].fixed_weights.numpy()}")
 
         # 2. Manual Approach
@@ -347,5 +350,6 @@ class BiasLayer(tf.keras.layers.Layer):
         self.fixed_weights = tf.ones((input_shape[-1], self.units), dtype=tf.float32)
 
     def call(self, inputs):
+        # print(f"y_hat bias: {self.bias}")
         return tf.matmul(inputs, self.fixed_weights) + self.bias
         # return tf.matmul(inputs, self.kernel) + self.bias
