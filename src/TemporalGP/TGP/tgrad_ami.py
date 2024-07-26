@@ -170,7 +170,7 @@ class TGradAMI(TGrad):
         return a, b, c
 
     @staticmethod
-    def learn_best_mf(a: float, b: float, c: float, x_data: np.ndarray):
+    def learn_best_mf_w_ml(a: float, b: float, c: float, x_data: np.ndarray):
         """"""
         # if a <= x <= b then y_hat = (x - a) / (b - a)
         # if b <= x <= c then y_hat = (c - x) / (c - b)
