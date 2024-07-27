@@ -396,6 +396,9 @@ class TGradAMI(TGrad):
 class BiasLayer(tf.keras.layers.Layer):
     def __init__(self, units, **kwargs):
         super(BiasLayer, self).__init__(**kwargs)
+        self.fixed_weights = None
+        self.bias = None
+        self.kernel = None
         self.units = units
 
     def build(self, input_shape):
