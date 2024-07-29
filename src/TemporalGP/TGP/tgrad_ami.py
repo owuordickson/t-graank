@@ -146,7 +146,9 @@ class TGradAMI(TGrad):
         for obj in gi_arr:
             # Ignore target-col and, remove time-cols and target-col from count
             col = int(obj[0])
-            if col != self.target_col:
+            if (col != self.target_col) and (col < self.target_col):
+                selected_cols.append(col - (len(self.time_cols)))
+            elif (col != self.target_col) and (col > self.target_col):
                 selected_cols.append(col - (len(self.time_cols)+1))
         selected_cols = np.array(selected_cols, dtype=int)
         t_lag_arr = time_diffs[np.ix_(selected_cols, selected_rows)]
