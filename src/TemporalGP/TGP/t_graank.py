@@ -207,6 +207,24 @@ class TGrad(GRAANK):
                     i += 1
         return gradual_patterns
 
+    def get_fuzzy_time_lag(self, bin_data: np.ndarray, time_diffs, gi_arr=None):
+        """"""
+
+        # 1. Get Indices
+        indices = np.argwhere(bin_data == 1)
+
+        # 2. Get TimeLags
+        pat_indices_flat = np.unique(indices.flatten())
+        time_lags = list()
+        for row, stamp_diff in time_diffs.items():  # {row: time-lag-stamp}
+            if int(row) in pat_indices_flat:
+                time_lags.append(stamp_diff)
+        time_lags = np.array(time_lags)
+
+        # 3. Approximate TimeLag using Fuzzy Membership
+        time_lag = TGrad.__approximate_fuzzy_time_lag__(time_lags)
+        return time_lag
+
     @staticmethod
     def get_timestamp(time_data):
         """"""
@@ -218,47 +236,6 @@ class TGrad(GRAANK):
                 return False
         except ValueError:
             return False
-
-    def get_fuzzy_time_lag(self, bin_data: np.ndarray, time_diffs, gi_arr=None):
-        """"""
-
-        if isinstance(time_diffs, dict):
-            # 1. Get Indices
-            indices = np.argwhere(bin_data == 1)
-
-            # 2. Get TimeLags
-            pat_indices_flat = np.unique(indices.flatten())
-            time_lags = list()
-            for row, stamp_diff in time_diffs.items():  # {row: time-lag-stamp}
-                if int(row) in pat_indices_flat:
-                    time_lags.append(stamp_diff)
-            time_lags = np.array(time_lags)
-
-            # 3. Approximate TimeLag using Fuzzy Membership
-            time_lag = TGrad.__approximate_fuzzy_time_lag__(time_lags)
-        else:
-            # 1. Get Indices
-            indices = np.argwhere(bin_data == 1)
-
-            # 2. Get TimeLag Array
-            selected_rows = np.unique(indices.flatten())
-            selected_cols = []
-            for obj in gi_arr:
-                # Ignore target-col and, remove time-cols and target-col from count
-                col = int(obj[0])
-                if col != self.target_col:
-                    selected_cols.append(col - (len(self.time_cols)+1))
-            selected_cols = np.array(selected_cols, dtype=int)
-            t_lag_arr = time_diffs[np.ix_(selected_cols, selected_rows)]
-
-            # 3.
-
-            print(f"indices {selected_cols}: {selected_rows}")
-            print(f"GIs: {gi_arr}")
-            print(f"time lags: {t_lag_arr}\n")
-
-            time_lag = TimeLag(7200, 0.67)
-        return time_lag
 
     @staticmethod
     def triangular_mf(x, a, b, c):
