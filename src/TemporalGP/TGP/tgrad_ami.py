@@ -219,6 +219,13 @@ class TGradAMI(TGrad):
         a = scaler.inverse_transform([[largest_mf[0]]])[0, 0]
         b = scaler.inverse_transform([[largest_mf[1]]])[0, 0]
         c = scaler.inverse_transform([[largest_mf[2]]])[0, 0]
+
+        # Shift to remove negative MF (we do not want negative timestamps)
+        if a < 0:
+            shift_by = abs(a)
+            a = a + shift_by
+            b = b + shift_by
+            c = c + shift_by
         return a, b, c
 
     @staticmethod
