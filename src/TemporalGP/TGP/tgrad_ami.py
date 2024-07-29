@@ -124,7 +124,8 @@ class TGradAMI(TGrad):
 
         # 6. Learn the best MF through slide-descent/sliding
         for t_lags in time_data:
-            slide_val = TGradAMI.select_mf_hill_climbing(a, b, c, t_lags)
+            init_bias = abs(b-np.median(t_lags))
+            slide_val = TGradAMI.select_mf_hill_climbing(a, b, c, t_lags, initial_bias=init_bias)
             print(f"New Membership Fxn: {a-slide_val}, {b-slide_val}, {c-slide_val}\n")
 
         # 7. Apply cartesian product on multiple MFs to pick the MF with the biggest center (inference logic)
@@ -206,7 +207,7 @@ class TGradAMI(TGrad):
         y_train = x_train + bias
         print(f"Optimal bias: {bias}")
         print(f"Predictions: {y_train}")
-        print(f"Mean Squared Error: {best_mse}")
+        print(f"Mean Squared Error: {best_mse}%")
 
         return bias
 
@@ -234,6 +235,6 @@ class TGradAMI(TGrad):
         # 3. Compute loss
         hat_count = np.count_nonzero(y_hat)
         true_count = len(y_hat)
-        loss = ((true_count - hat_count) ** 2) ** 0.5
+        loss = (((true_count - hat_count)*100/true_count) ** 2) ** 0.5
         # loss = abs(true_count - hat_count)
         return loss
