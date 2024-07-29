@@ -7,7 +7,7 @@ from TemporalGP.TGP.tgrad_ami import TGradAMI
 f_path = "../../datasets/air_quality25.csv"
 # f_path = "../../datasets/air_quality1k.csv"
 
-tgp = TGradAMI(f_path, False, 0.1, 4, 1, 1)
+tgp = TGradAMI(f_path, False, 0.5, 4, 1, 1)
 tgp.discover_tgp()
 
 a = 2
