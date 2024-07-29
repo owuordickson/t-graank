@@ -15,6 +15,7 @@ from sklearn.cluster import KMeans
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.feature_selection import mutual_info_regression
 
+from so4gp import TimeLag
 from .t_graank import TGrad
 
 
@@ -119,7 +120,7 @@ class TGradAMI(TGrad):
 
         # 5. Build triangular MF
         a, b, c = TGradAMI.build_mf(time_data)
-        # self.tri_mf_data = np.array([a, b, c])
+        self.tri_mf_data = np.array([a, b, c])
         print(f"Membership Function: {a}, {b}, {c}\n")
 
         # 6. Discover temporal-GPs from time-delayed data
@@ -137,43 +138,46 @@ class TGradAMI(TGrad):
     def get_fuzzy_time_lag(self, bin_data: np.ndarray, time_diffs, gi_arr=None):
         """"""
 
-        if isinstance(time_diffs, dict):
-            # 1. Get Indices
-            indices = np.argwhere(bin_data == 1)
+        # 1. Get Indices
+        indices = np.argwhere(bin_data == 1)
 
-            # 2. Get TimeLags
-            pat_indices_flat = np.unique(indices.flatten())
-            time_lags = list()
-            for row, stamp_diff in time_diffs.items():  # {row: time-lag-stamp}
-                if int(row) in pat_indices_flat:
-                    time_lags.append(stamp_diff)
-            time_lags = np.array(time_lags)
+        # 2. Get TimeLag Array
+        selected_rows = np.unique(indices.flatten())
+        selected_cols = []
+        for obj in gi_arr:
+            # Ignore target-col and, remove time-cols and target-col from count
+            col = int(obj[0])
+            if col != self.target_col:
+                selected_cols.append(col - (len(self.time_cols)+1))
+        selected_cols = np.array(selected_cols, dtype=int)
+        t_lag_arr = time_diffs[np.ix_(selected_cols, selected_rows)]
 
-            # 3. Approximate TimeLag using Fuzzy Membership
-            time_lag = TGrad.__approximate_fuzzy_time_lag__(time_lags)
-        else:
-            # 1. Get Indices
-            indices = np.argwhere(bin_data == 1)
+        # 3. Learn the best MF through slide-descent/sliding
+        a, b, c = self.tri_mf_data
+        best_time_lag = TimeLag(-1, 0)
+        fuzzy_set = []
+        for t_lags in t_lag_arr:
+            init_bias = abs(b-np.median(t_lags))
+            slide_val, loss = TGradAMI.select_mf_hill_climbing(a, b, c, t_lags, initial_bias=init_bias)
+            tstamp = int(b - slide_val)
+            sup = float(1-loss)
+            fuzzy_set.append([tstamp, float(loss)])
+            if sup >= best_time_lag.support and tstamp > best_time_lag.timestamp:
+                best_time_lag = TimeLag(tstamp, sup)
+            # print(f"New Membership Fxn: {a - slide_val}, {b - slide_val}, {c - slide_val}")
 
-            # 2. Get TimeLag Array
-            selected_rows = np.unique(indices.flatten())
-            selected_cols = []
-            for obj in gi_arr:
-                # Ignore target-col and, remove time-cols and target-col from count
-                col = int(obj[0])
-                if col != self.target_col:
-                    selected_cols.append(col - (len(self.time_cols)+1))
-            selected_cols = np.array(selected_cols, dtype=int)
-            t_lag_arr = time_diffs[np.ix_(selected_cols, selected_rows)]
+        # 4. Apply cartesian product on multiple MFs to pick the MF with the best center (inference logic)
+        # Mine tGPs and then compute Union of time-lag MFs,
+        # from this union select the MF with more members (little loss)
 
-            # 3.
+        print(f"indices {selected_cols}: {selected_rows}")
+        print(f"GIs: {gi_arr}")
+        print(f"Fuzzy Set: {fuzzy_set}")
+        print(f"Selected Time Lag: {best_time_lag.to_string()}")
+        # print(f"time lags: {t_lag_arr}")
+        print("\n")
 
-            print(f"indices {selected_cols}: {selected_rows}")
-            print(f"GIs: {gi_arr}")
-            print(f"time lags: {t_lag_arr}\n")
-
-            time_lag = TimeLag(7200, 0.67)
-        return time_lag
+        return best_time_lag
 
     @staticmethod
     def build_mf(time_data: np.ndarray):
@@ -225,7 +229,7 @@ class TGradAMI(TGrad):
 
         # Normalize x_train
         x_train = np.array(x_train, dtype=float)
-        print(f"x-train: {x_train}")
+        # print(f"x-train: {x_train}")
 
         # Perform hill climbing to find the optimal bias
         min_membership = 0.001
@@ -243,20 +247,19 @@ class TGradAMI(TGrad):
 
             # If the new MSE is lower, update the bias
             if new_mse < best_mse:
-                print(f"new bias: {new_bias}")
+                # print(f"new bias: {new_bias}")
                 bias = new_bias
                 best_mse = new_mse
 
         # Make predictions using the optimal bias
         y_train = x_train + bias
-        print(f"Optimal bias: {bias}")
-        print(f"Predictions: {y_train}")
-        print(f"Mean Squared Error: {best_mse}%")
-
-        return bias
+        # print(f"Optimal bias: {bias}")
+        # print(f"Predictions: {y_train}")
+        # print(f"Mean Squared Error: {best_mse*100}%")
+        return bias, best_mse
 
     @staticmethod
-    def hill_climbing_cost_function(y_train: np.ndarray, tri_mf: np.ndarray, min_membership: float = 0.001):
+    def hill_climbing_cost_function(y_train: np.ndarray, tri_mf: np.ndarray, min_membership: float = 0.5):
         """
         Computes the logistic regression cost function for a fuzzy set created from a
         triangular membership function.
@@ -279,6 +282,6 @@ class TGradAMI(TGrad):
         # 3. Compute loss
         hat_count = np.count_nonzero(y_hat)
         true_count = len(y_hat)
-        loss = (((true_count - hat_count)*100/true_count) ** 2) ** 0.5
+        loss = (((true_count - hat_count)/true_count) ** 2) ** 0.5
         # loss = abs(true_count - hat_count)
         return loss
