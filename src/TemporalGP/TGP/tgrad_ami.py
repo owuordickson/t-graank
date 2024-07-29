@@ -110,7 +110,7 @@ class TGradAMI(TGrad):
         # 3. Integrate feature indices with the computed steps
         # optimal_dict = dict(map(lambda key, val: (int(key), int(val+1)), self.feature_cols, optimal_steps_arr))
         optimal_dict = {int(self.feature_cols[i]): int(optimal_steps_arr[i] + 1) for i in range(len(self.feature_cols))}
-        print(f"Optimal Dict: {optimal_dict}\n")
+        print(f"Optimal Dict: {optimal_dict}\n")  # {col: steps}
 
         # 4. Create final (and dynamic) delayed dataset
         delayed_data, time_data = self.gather_delayed_data(optimal_dict, max_step)
@@ -122,11 +122,14 @@ class TGradAMI(TGrad):
         # self.tri_mf_data = np.array([a, b, c])
         print(f"Membership Function: {a}, {b}, {c}\n")
 
+        # 6. Discover temporal-GPs from time-delayed data
+        t_gps = self.discover(t_diffs=time_data, attr_data=delayed_data)
+
         # 6. Learn the best MF through slide-descent/sliding
-        for t_lags in time_data:
-            init_bias = abs(b-np.median(t_lags))
-            slide_val = TGradAMI.select_mf_hill_climbing(a, b, c, t_lags, initial_bias=init_bias)
-            print(f"New Membership Fxn: {a-slide_val}, {b-slide_val}, {c-slide_val}\n")
+        # for t_lags in time_data:
+        #    init_bias = abs(b-np.median(t_lags))
+        #    slide_val = TGradAMI.select_mf_hill_climbing(a, b, c, t_lags, initial_bias=init_bias)
+        #    print(f"New Membership Fxn: {a-slide_val}, {b-slide_val}, {c-slide_val}\n")
 
         # 7. Apply cartesian product on multiple MFs to pick the MF with the biggest center (inference logic)
         # Mine tGPs and then compute Union of time-lag MFs, from this union select the MF with the biggest center value

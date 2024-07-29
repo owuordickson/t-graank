@@ -1,6 +1,6 @@
-numpy~=1.26.4
+numpy~=2.0.1
 scikit-fuzzy~=0.4.2
-so4gp~=0.4.4
+so4gp~=0.4.5
 tensorflow~=2.17.0
 scikit-learn~=1.5.1
 ypstruct~=0.0.2
