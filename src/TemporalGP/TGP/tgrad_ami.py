@@ -123,8 +123,9 @@ class TGradAMI(TGrad):
         print(f"Membership Function: {a}, {b}, {c}\n")
 
         # 6. Learn the best MF through slide-descent/sliding
-        slide_val = TGradAMI.learn_mf_hill_climbing(a, b, c, time_data)
-        print(f"New Membership Fxn: {a+slide_val}, {b+slide_val}, {c+slide_val}\n")
+        for t_lags in time_data:
+            slide_val = TGradAMI.select_mf_hill_climbing(a, b, c, t_lags)
+            print(f"New Membership Fxn: {a-slide_val}, {b-slide_val}, {c-slide_val}\n")
 
         # 7. Apply cartesian product on multiple MFs to pick the MF with the biggest center (inference logic)
         # Mine tGPs and then compute Union of time-lag MFs, from this union select the MF with the biggest center value
@@ -173,8 +174,8 @@ class TGradAMI(TGrad):
         return a, b, c
 
     @staticmethod
-    def learn_mf_hill_climbing(a: float, b: float, c: float, x_train: np.ndarray,
-                               initial_bias: float = 0, step_size: float = 0.9, max_iterations: int = 1000):
+    def select_mf_hill_climbing(a: float, b: float, c: float, x_train: np.ndarray,
+                                initial_bias: float = 0, step_size: float = 0.9, max_iterations: int = 1000):
         """"""
 
         # Normalize x_train
