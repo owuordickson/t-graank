@@ -115,19 +115,24 @@ class TGradAMI(TGrad):
         # 4. Create final (and dynamic) delayed dataset
         delayed_data, time_data = self.gather_delayed_data(optimal_dict, max_step)
         # print(f"{delayed_data}\n")
-        print(f"{time_data}\n")
+        print(f"Time Lags: {time_data}\n")
 
         # 5. Build triangular MF
         a, b, c = TGradAMI.build_mf(time_data)
-        self.tri_mf_data = np.array([a, b, c])
-        print(f"{a}, {b}, {c}")
+        # self.tri_mf_data = np.array([a, b, c])
+        print(f"Membership Function: {a}, {b}, {c}\n")
 
         # 6. Learn the best MF through slide-descent/sliding
+        slide_val = TGradAMI.learn_mf_hill_climbing(a, b, c, time_data)
+        print(f"New Membership Fxn: {a+slide_val}, {b+slide_val}, {c+slide_val}\n")
+
         # 7. Apply cartesian product on multiple MFs to pick the MF with the biggest center (inference logic)
+        # Mine tGPs and then compute Union of time-lag MFs, from this union select the MF with the biggest center value
 
     @staticmethod
     def build_mf(time_data: np.ndarray):
         """"""
+
         # Reshape into 1-column dataset
         time_data = time_data.reshape(-1, 1)
 
@@ -202,7 +207,7 @@ class TGradAMI(TGrad):
         print(f"Predictions: {y_train}")
         print(f"Mean Squared Error: {best_mse}")
 
-        return bias, best_mse
+        return bias
 
     @staticmethod
     def hill_climbing_cost_function(y_train: np.ndarray, tri_mf: np.ndarray, min_membership: float = 0.001):
