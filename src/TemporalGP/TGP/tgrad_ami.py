@@ -173,8 +173,8 @@ class TGradAMI(TGrad):
         return a, b, c
 
     @staticmethod
-    def learn_mf_hill_climbing(a: float, b: float, c: float, x_train: np.ndarray, initial_bias=0, step_size=0.9,
-                               max_iterations=1000):
+    def learn_mf_hill_climbing(a: float, b: float, c: float, x_train: np.ndarray,
+                               initial_bias: float = 0, step_size: float = 0.9, max_iterations: float = 1000):
         """"""
 
         # Normalize x_train
