@@ -124,16 +124,15 @@ class TGradAMI(TGrad):
         print(f"Membership Function: {a}, {b}, {c}\n")
 
         # 6. Discover temporal-GPs from time-delayed data
+        # 6a. Learn the best MF through slide-descent/sliding
+        # 6b. Apply cartesian product on multiple MFs to pick the MF with the best center (inference logic)
+        # Mine tGPs and then compute Union of time-lag MFs,
+        # from this union select the MF with more members (little loss)
         t_gps = self.discover(t_diffs=time_data, attr_data=delayed_data)
 
-        # 6. Learn the best MF through slide-descent/sliding
-        # for t_lags in time_data:
-        #    init_bias = abs(b-np.median(t_lags))
-        #    slide_val = TGradAMI.select_mf_hill_climbing(a, b, c, t_lags, initial_bias=init_bias)
-        #    print(f"New Membership Fxn: {a-slide_val}, {b-slide_val}, {c-slide_val}\n")
-
-        # 7. Apply cartesian product on multiple MFs to pick the MF with the biggest center (inference logic)
-        # Mine tGPs and then compute Union of time-lag MFs, from this union select the MF with the biggest center value
+        if len(t_gps) > 0:
+            return t_gps
+        return False
 
     def get_fuzzy_time_lag(self, bin_data: np.ndarray, time_diffs, gi_arr=None):
         """"""
