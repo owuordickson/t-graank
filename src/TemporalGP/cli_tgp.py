@@ -11,6 +11,7 @@ Entry points that allow users to execute GUI or Cli programs.
 import so4gp as sgp
 from .configs.configs_loader import load_configs
 from .TGP.t_graank import TGrad
+from .TGP.tgrad_ami import TGradAMI
 
 
 def execute_tgp(f_path: str, min_sup: float, tgt_col: int, min_rep: float, num_cores: int, allow_mp: bool, eq=False):
@@ -31,7 +32,8 @@ def execute_tgp(f_path: str, min_sup: float, tgt_col: int, min_rep: float, num_c
         if num_cores <= 1:
             num_cores = sgp.get_num_cores()
 
-        tgp = TGrad(f_path, eq, min_sup, tgt_col, min_rep, num_cores)
+        # tgp = TGrad(f_path, eq, min_sup, tgt_col, min_rep, num_cores)
+        tgp = TGradAMI(f_path, eq, min_sup, tgt_col, min_rep, num_cores)
         if allow_mp:
             msg_para = "True"
             list_tgp = tgp.discover_tgp(parallel=True)
@@ -39,7 +41,10 @@ def execute_tgp(f_path: str, min_sup: float, tgt_col: int, min_rep: float, num_c
             msg_para = "False"
             list_tgp = tgp.discover_tgp()
 
-        output_txt = "Algorithm: T-GRAANK \n"
+        if isinstance(tgp, TGradAMI):
+            output_txt = "Algorithm: T-GRAANK AMI\n"
+        else:
+            output_txt = "Algorithm: T-GRAANK \n"
         output_txt += "No. of (dataset) attributes: " + str(tgp.col_count) + '\n'
         output_txt += "No. of (dataset) tuples: " + str(tgp.row_count) + '\n'
         output_txt += "Minimum support: " + str(min_sup) + '\n'
@@ -59,12 +64,19 @@ def execute_tgp(f_path: str, min_sup: float, tgt_col: int, min_rep: float, num_c
         output_txt += str("\nPattern : Support" + '\n')
 
         count = 0
-        for obj in list_tgp:
-            if obj:
-                for tgp in obj:
-                    count += 1
+        if isinstance(tgp, TGradAMI):
+            if list_tgp:
+                count = len(list_tgp)
+                for tgp in list_tgp:
                     output_txt += (str(tgp.to_string()) + ' : ' + str(tgp.support) +
                                    ' | ' + str(tgp.time_lag.to_string()) + '\n')
+        else:
+            for obj in list_tgp:
+                if obj:
+                    for tgp in obj:
+                        count += 1
+                        output_txt += (str(tgp.to_string()) + ' : ' + str(tgp.support) +
+                                       ' | ' + str(tgp.time_lag.to_string()) + '\n')
 
         output_txt += "\n\n Number of patterns: " + str(count) + '\n'
         return output_txt

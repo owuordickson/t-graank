@@ -171,12 +171,12 @@ class TGradAMI(TGrad):
         # Mine tGPs and then compute Union of time-lag MFs,
         # from this union select the MF with more members (little loss)
 
-        print(f"indices {selected_cols}: {selected_rows}")
-        print(f"GIs: {gi_arr}")
-        print(f"Fuzzy Set: {fuzzy_set}")
-        print(f"Selected Time Lag: {best_time_lag.to_string()}")
+        # print(f"indices {selected_cols}: {selected_rows}")
+        # print(f"GIs: {gi_arr}")
+        # print(f"Fuzzy Set: {fuzzy_set}")
+        # print(f"Selected Time Lag: {best_time_lag.to_string()}")
         # print(f"time lags: {t_lag_arr}")
-        print("\n")
+        # print("\n")
 
         return best_time_lag
 
@@ -232,7 +232,7 @@ class TGradAMI(TGrad):
 
     @staticmethod
     def select_mf_hill_climbing(a: float, b: float, c: float, x_train: np.ndarray,
-                                initial_bias: float = 0, step_size: float = 0.9, max_iterations: int = 1000):
+                                initial_bias: float = 0, step_size: float = 0.9, max_iterations: int = 10):
         """"""
 
         # Normalize x_train
