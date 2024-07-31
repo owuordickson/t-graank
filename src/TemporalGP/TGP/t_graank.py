@@ -17,14 +17,59 @@ from so4gp import GI, ExtGP, TimeLag, GRAANK
 
 class TGP(ExtGP):
 
-    def __init__(self, gp=ExtGP(), t_lag=TimeLag()):
-        super().__init__()
-        self.gradual_items = gp.gradual_items
-        self.support = gp.support
-        self.time_lag = t_lag
+    def __init__(self):
+        super(TGP, self).__init__()
+        self.target_gradual_item = None
+        """:type target_gradual_item: GI"""
+        self.temporal_gradual_items = list()
+        """:type temporal_gradual_items: list()"""
 
-    def set_time_lag(self, t_lag):
-        self.time_lag = t_lag
+    # def set_time_lag(self, t_lag):
+    #    self.time_lag = t_lag
+
+    def add_target_gradual_item(self, item):
+        """Description
+
+            Adds a target gradual item (fTGI) into the fuzzy temporal gradual pattern (fTGP)
+            :param item: gradual item
+            :type item: so4gp.GI
+
+            :return: void
+        """
+        if item.symbol == "-" or item.symbol == "+":
+            self.gradual_items.append(item)
+            self.target_gradual_item = item
+        else:
+            pass
+
+    def add_temporal_gradual_item(self, item, time_delay):
+        """Description
+
+            Adds a fuzzy temporal gradual item (fTGI) into the fuzzy temporal gradual pattern (fTGP)
+            :param item: gradual item
+            :type item: so4gp.GI
+
+            :param time_delay: time delay
+            :type time_delay: TimeLag
+
+            :return: void
+        """
+        if item.symbol == "-" or item.symbol == "+":
+            self.gradual_items.append(item)
+            self.temporal_gradual_items.append([item, time_delay])
+        else:
+            pass
+
+    def to_string(self):
+        """Description
+
+        Returns the GP in string format
+        :return: string
+        """
+        pattern = [self.target_gradual_item.to_string()]
+        for item, t_lag in self.temporal_gradual_items:
+            pattern.append([f"({item.to_string()}){t_lag.to_string()}"])
+        return pattern
 
     @staticmethod
     def remove_subsets(gp_list, gi_arr):
@@ -192,15 +237,16 @@ class TGrad(GRAANK):
 
                     t_lag = self.get_fuzzy_time_lag(bin_data, t_diffs, gi_arr)
                     if t_lag.valid:
-                        gp = ExtGP()
-                        """:type gp: ExtGP"""
+                        tgp = TGP()
+                        """:type gp: TGP"""
                         for obj in gi_arr:
                             gi = GI(obj[0], obj[1].decode())
                             """:type gi: GI"""
-                            gp.add_gradual_item(gi)
-                        gp.set_support(sup)
-                        tgp = TGP(gp=gp, t_lag=t_lag)
-                        """:type tgp: TGP"""
+                            if gi.attribute_col == self.target_col:
+                                tgp.add_target_gradual_item(gi)
+                            else:
+                                tgp.add_temporal_gradual_item(gi, t_lag)
+                        tgp.set_support(sup)
                         gradual_patterns.append(tgp)
                     # else:
                     #    print(f"{t_lag.timestamp} - {gi_arr}")

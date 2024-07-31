@@ -10,7 +10,7 @@ Entry points that allow users to execute GUI or Cli programs.
 
 import so4gp as sgp
 from .configs.configs_loader import load_configs
-from .TGP.t_graank import TGrad
+# from .TGP.t_graank import TGrad
 from .TGP.tgrad_ami import TGradAMI
 
 
@@ -68,15 +68,15 @@ def execute_tgp(f_path: str, min_sup: float, tgt_col: int, min_rep: float, num_c
             if list_tgp:
                 count = len(list_tgp)
                 for tgp in list_tgp:
-                    output_txt += (str(tgp.to_string()) + ' : ' + str(tgp.support) +
-                                   ' | ' + str(tgp.time_lag.to_string()) + '\n')
+                    output_txt += f"{tgp.to_string()} :  {tgp.support}\n"
         else:
             for obj in list_tgp:
                 if obj:
                     for tgp in obj:
                         count += 1
-                        output_txt += (str(tgp.to_string()) + ' : ' + str(tgp.support) +
-                                       ' | ' + str(tgp.time_lag.to_string()) + '\n')
+                        # output_txt += (str(tgp.to_string()) + ' : ' + str(tgp.support) +
+                        #               ' | ' + str(tgp.time_lag.to_string()) + '\n')
+                        output_txt += f"{tgp.to_string()} :  {tgp.support}\n"
 
         output_txt += "\n\n Number of patterns: " + str(count) + '\n'
         return output_txt
