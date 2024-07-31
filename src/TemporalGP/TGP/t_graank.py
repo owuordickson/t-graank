@@ -12,7 +12,7 @@ import numpy as np
 import skfuzzy as fuzzy
 import multiprocessing as mp
 from so4gp import DataGP as Dataset
-from so4gp import GI, ExtGP, TimeLag, GRAANK
+from so4gp import GI, ExtGP, TimeDelay, GRAANK
 
 
 class TGP(ExtGP):
@@ -50,7 +50,7 @@ class TGP(ExtGP):
             :type item: so4gp.GI
 
             :param time_delay: time delay
-            :type time_delay: TimeLag
+            :type time_delay: TimeDelay
 
             :return: void
         """
@@ -68,7 +68,8 @@ class TGP(ExtGP):
         """
         pattern = [self.target_gradual_item.to_string()]
         for item, t_lag in self.temporal_gradual_items:
-            pattern.append([f"({item.to_string()}){t_lag.to_string()}"])
+            str_time = f"{t_lag.sign}{t_lag.formatted_time['value']} {t_lag.formatted_time['duration']}"
+            pattern.append([f"({item.to_string()}) {str_time}"])
         return pattern
 
     @staticmethod
@@ -259,7 +260,7 @@ class TGrad(GRAANK):
         # 1. Get Indices
         indices = np.argwhere(bin_data == 1)
 
-        # 2. Get TimeLags
+        # 2. Get TimeDelays
         pat_indices_flat = np.unique(indices.flatten())
         time_lags = list()
         for row, stamp_diff in time_diffs.items():  # {row: time-lag-stamp}
@@ -267,7 +268,7 @@ class TGrad(GRAANK):
                 time_lags.append(stamp_diff)
         time_lags = np.array(time_lags)
 
-        # 3. Approximate TimeLag using Fuzzy Membership
+        # 3. Approximate TimeDelay using Fuzzy Membership
         time_lag = TGrad.__approximate_fuzzy_time_lag__(time_lags)
         return time_lag
 
@@ -297,7 +298,7 @@ class TGrad(GRAANK):
     def __approximate_fuzzy_time_lag__(time_lags):
         if len(time_lags) <= 0:
             # if time_lags is blank return nothing
-            return TimeLag()
+            return TimeDelay()
         else:
             time_lags = np.absolute(np.array(time_lags))
             min_a = np.min(time_lags)
@@ -325,5 +326,5 @@ class TGrad(GRAANK):
                     sup1 = sup
                     center = boundaries[1]
                 if sup >= 0.5:
-                    return TimeLag(boundaries[1], sup)
-            return TimeLag(center, sup1)
+                    return TimeDelay(boundaries[1], sup)
+            return TimeDelay(center, sup1)
