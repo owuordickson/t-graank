@@ -24,9 +24,6 @@ class TGP(ExtGP):
         self.temporal_gradual_items = list()
         """:type temporal_gradual_items: list()"""
 
-    # def set_time_lag(self, t_lag):
-    #    self.time_lag = t_lag
-
     def add_target_gradual_item(self, item):
         """Description
 
@@ -271,6 +268,38 @@ class TGrad(GRAANK):
         # 3. Approximate TimeDelay using Fuzzy Membership
         time_lag = TGrad.__approximate_fuzzy_time_lag__(time_lags)
         return time_lag
+
+    def process_time(self):
+        """"""
+        size = self.row_count
+        n_cols = self.col_count
+
+        title_row = ['Timestamp']
+        for txt in self.titles:
+            col = int(txt[0])
+            if col not in self.time_cols:
+                title_row.append(str(txt[1].decode()))
+        all_data = title_row
+
+        for i in range(size):
+            stamp_1 = 0
+            for col in self.time_cols:  # sum timestamps from all time-columns
+                temp_1 = str(self.data[i][int(col)])
+                temp_stamp_1 = TGrad.get_timestamp(temp_1)
+                if not temp_stamp_1:
+                    # Unable to read time
+                    return False
+                else:
+                    stamp_1 += temp_stamp_1
+            temp_row = [float(stamp_1)]
+
+            for col_index in range(n_cols):
+                if col_index not in self.time_cols:
+                    # other attributes
+                    temp_row.append(self.data[i][int(col_index)])
+
+            all_data = np.vstack((all_data, temp_row))
+        return all_data
 
     @staticmethod
     def get_timestamp(time_data):
