@@ -10,7 +10,7 @@ The best slide is modelled as the bias, so we keep the weights constant and try 
 
 
 import numpy as np
-import tensorflow as tf
+# import tensorflow as tf
 from sklearn.preprocessing import MinMaxScaler
 
 
