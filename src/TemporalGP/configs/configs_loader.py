@@ -32,6 +32,7 @@ def load_configs():
         options_gp.min_sup = float(config.get('gradual-patterns', 'min_support'))
         options_gp.num_cores = int(config.get('computation', 'cpu_cores'))
         options_gp.allow_multiprocessing = int(config.get('computation', 'allow_multiprocessing'))
+        options_gp.eval_mode = int(config.get('computation', 'eval_mode'))
 
         # 2. (configs.ini) TGP Configurations
         options_tgp.target_column = int(config.get('temporal-gradual-patterns', 'target_column'))
@@ -43,6 +44,7 @@ def load_configs():
         options_gp.min_sup = 0.5
         options_gp.num_cores = 1
         options_gp.allow_multiprocessing = 1
+        options_gp.eval_mode = 0
 
         # 2. (Default) TGP Configurations
         options_tgp.target_column = 1
@@ -63,6 +65,11 @@ def load_configs():
                          dest='allowPara',
                          help='allow multiprocessing',
                          default=options_gp.allow_multiprocessing,
+                         type='int')
+    optparser.add_option('-x', '--evaluationMode',
+                         dest='evalMode',
+                         help='run in evaluation mode',
+                         default=options_gp.eval_mode,
                          type='int')
     optparser.add_option('-c', '--cores',
                          dest='numCores',

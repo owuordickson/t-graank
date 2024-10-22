@@ -14,7 +14,7 @@ from .configs.configs_loader import load_configs
 from .TGP.tgrad_ami import TGradAMI
 
 
-def execute_tgp(f_path: str, min_sup: float, tgt_col: int, min_rep: float, num_cores: int, allow_mp: bool, eq=False):
+def execute_tgp(f_path: str, min_sup: float, tgt_col: int, min_rep: float, num_cores: int, allow_mp: bool, eq=False, eval_mode=False):
     """
     Executes T-GRAANK algorithm using the user-specified configuration options.
 
@@ -25,6 +25,7 @@ def execute_tgp(f_path: str, min_sup: float, tgt_col: int, min_rep: float, num_c
     :param num_cores: number of available cores.
     :param allow_mp: allow multiprocessing.
     :param eq: assign equal values as valid?
+    :param eval_mode: run in 'evaluation/testing' mode?
     :return: results in string format.
     """
     try:
@@ -36,10 +37,30 @@ def execute_tgp(f_path: str, min_sup: float, tgt_col: int, min_rep: float, num_c
         tgp = TGradAMI(f_path, eq, min_sup, tgt_col, min_rep, num_cores)
         if allow_mp:
             msg_para = "True"
-            list_tgp = tgp.discover_tgp(parallel=True)
+            if eval_mode:
+                import ntpath
+                import numpy as np
+                f_name = ntpath.basename(f_path)
+                f_name = f_name.replace('.csv', '')
+
+                list_tgp, trans_data, time_data = tgp.discover_tgp(parallel=True, eval_mode=True)
+                np.savetxt(f_name + '_transformed_data.csv', trans_data, fmt='%s')
+                np.savetxt(f_name + '_time_data.csv', time_data, fmt='%s')
+            else:
+                list_tgp = tgp.discover_tgp(parallel=True)
         else:
             msg_para = "False"
-            list_tgp = tgp.discover_tgp()
+            if eval_mode:
+                import ntpath
+                import numpy as np
+                f_name = ntpath.basename(f_path)
+                f_name = f_name.replace('.csv', '')
+
+                list_tgp, trans_data, time_data = tgp.discover_tgp(parallel=True, eval_mode=True)
+                np.savetxt(f_name + '_transformed_data.csv', trans_data, fmt='%s')
+                np.savetxt(f_name + '_time_data.csv', time_data, fmt='%s')
+            else:
+                list_tgp = tgp.discover_tgp()
 
         if isinstance(tgp, TGradAMI):
             output_txt = "Algorithm: T-GRAANK AMI\n"
@@ -80,7 +101,7 @@ def execute_tgp(f_path: str, min_sup: float, tgt_col: int, min_rep: float, num_c
 
         output_txt += "\n\n Number of patterns: " + str(count) + '\n'
         return output_txt
-    except Exception as error:
+    except AttributeError as error:
         output_txt = "Failed: " + str(error)
         print(error)
         return output_txt
@@ -98,7 +119,7 @@ def main_cli():
 
     start = time.time()
     # tracemalloc.start()
-    res_text = execute_tgp(cfg.file, cfg.minSup, cfg.tgtCol, cfg.minRep, cfg.numCores, cfg.allowPara)
+    res_text = execute_tgp(cfg.file, cfg.minSup, cfg.tgtCol, cfg.minRep, cfg.numCores, cfg.allowPara, eval_mode=cfg.evalMode)
     # snapshot = tracemalloc.take_snapshot()
     end = time.time()
 

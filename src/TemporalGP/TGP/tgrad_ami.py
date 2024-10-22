@@ -94,7 +94,7 @@ class TGradAMI(TGrad):
         # print(f"{time_dict}\n")
         return delayed_data, np.array(time_data)
 
-    def discover_tgp(self, parallel=False):
+    def discover_tgp(self, parallel=False, eval_mode=False):
         """"""
 
         # 1. Compute mutual information
@@ -105,23 +105,23 @@ class TGradAMI(TGrad):
         absolute_error = np.sqrt(squared_diff)
         optimal_steps_arr = np.argmin(absolute_error, axis=0)
         max_step = (np.max(optimal_steps_arr) + 1)
-        print(f"Largest step delay: {max_step}\n")
+        # print(f"Largest step delay: {max_step}\n")
         # print(f"Abs.E.: {absolute_error}\n")
 
         # 3. Integrate feature indices with the computed steps
         # optimal_dict = dict(map(lambda key, val: (int(key), int(val+1)), self.feature_cols, optimal_steps_arr))
         optimal_dict = {int(self.feature_cols[i]): int(optimal_steps_arr[i] + 1) for i in range(len(self.feature_cols))}
-        print(f"Optimal Dict: {optimal_dict}\n")  # {col: steps}
+        # print(f"Optimal Dict: {optimal_dict}\n")  # {col: steps}
 
         # 4. Create final (and dynamic) delayed dataset
         delayed_data, time_data = self.gather_delayed_data(optimal_dict, max_step)
         # print(f"{delayed_data}\n")
-        print(f"Time Lags: {time_data}\n")
+        # print(f"Time Lags: {time_data}\n")
 
         # 5. Build triangular MF
         a, b, c = TGradAMI.build_mf(time_data)
         self.tri_mf_data = np.array([a, b, c])
-        print(f"Membership Function: {a}, {b}, {c}\n")
+        # print(f"Membership Function: {a}, {b}, {c}\n")
 
         # 6. Discover temporal-GPs from time-delayed data
         # 6a. Learn the best MF through slide-descent/sliding
@@ -131,7 +131,14 @@ class TGradAMI(TGrad):
         t_gps = self.discover(t_diffs=time_data, attr_data=delayed_data)
 
         if len(t_gps) > 0:
-            return t_gps
+            if eval_mode:
+                title_row = []
+                for txt in self.titles:
+                    title_row.append(str(txt[1].decode()))
+
+                return t_gps, np.vstack((title_row, delayed_data.T)), np.vstack((['Timestamp'], time_data.T))
+            else:
+                return t_gps
         return False
 
     def get_fuzzy_time_lag(self, bin_data: np.ndarray, time_diffs, gi_arr=None):
