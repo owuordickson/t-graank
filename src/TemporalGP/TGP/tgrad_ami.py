@@ -136,7 +136,7 @@ class TGradAMI(TGrad):
                 for txt in self.titles:
                     title_row.append(str(txt[1].decode()))
 
-                return t_gps, np.vstack((title_row, delayed_data.T)), np.vstack((['Timestamp'], time_data.T))
+                return t_gps, np.vstack((np.array(title_row), delayed_data.T)), time_data.T
             else:
                 return t_gps
         return False
