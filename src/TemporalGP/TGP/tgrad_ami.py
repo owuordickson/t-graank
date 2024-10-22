@@ -133,10 +133,14 @@ class TGradAMI(TGrad):
         if len(t_gps) > 0:
             if eval_mode:
                 title_row = []
+                time_title = []
                 for txt in self.titles:
+                    col = int(txt[0])
                     title_row.append(str(txt[1].decode()))
+                    if (col != self.target_col) and (col not in self.time_cols):
+                        time_title.append(str(txt[1].decode()))
 
-                return t_gps, np.vstack((np.array(title_row), delayed_data.T)), time_data.T
+                return t_gps, np.vstack((np.array(title_row), delayed_data.T)), np.vstack((np.array(time_title), time_data.T))
             else:
                 return t_gps
         return False

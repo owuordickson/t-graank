@@ -45,7 +45,7 @@ def execute_tgp(f_path: str, min_sup: float, tgt_col: int, min_rep: float, num_c
 
                 list_tgp, trans_data, time_data = tgp.discover_tgp(parallel=True, eval_mode=True)
                 np.savetxt(f_name + '_transformed_data.csv', trans_data, fmt='%s')
-                np.savetxt(f_name + '_time_data.csv', time_data, fmt='%s')
+                np.savetxt(f_name + '_timestamp_data.csv', time_data, fmt='%s')
             else:
                 list_tgp = tgp.discover_tgp(parallel=True)
         else:
@@ -58,7 +58,7 @@ def execute_tgp(f_path: str, min_sup: float, tgt_col: int, min_rep: float, num_c
 
                 list_tgp, trans_data, time_data = tgp.discover_tgp(parallel=True, eval_mode=True)
                 np.savetxt(f_name + '_transformed_data.csv', trans_data, fmt='%s')
-                np.savetxt(f_name + '_time_data.csv', time_data, fmt='%s')
+                np.savetxt(f_name + '_timestamp_data.csv', time_data, fmt='%s')
             else:
                 list_tgp = tgp.discover_tgp()
 
