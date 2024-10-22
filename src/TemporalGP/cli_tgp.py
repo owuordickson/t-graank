@@ -37,13 +37,7 @@ def execute_tgp(f_path: str, min_sup: float, tgt_col: int, min_rep: float, num_c
         tgp = TGradAMI(f_path, eq, min_sup, tgt_col, min_rep, num_cores)
         if eval_mode:
             list_tgp, trans_data, time_data = tgp.discover_tgp(parallel=allow_mp, eval_mode=True)
-
-            import ntpath
-            import numpy as np
-            f_name = ntpath.basename(f_path)
-            f_name = f_name.replace('.csv', '')
-            np.savetxt(f_name + '_transformed_data.csv', trans_data, fmt='%s', delimiter=',')
-            np.savetxt(f_name + '_timestamp_data.csv', time_data, fmt='%s', delimiter=',')
+            produce_eval_pdf(f_path, trans_data, time_data)
         else:
             list_tgp = tgp.discover_tgp(parallel=allow_mp)
 
@@ -101,6 +95,17 @@ def produce_output_txt(f_path, allow_mp, tgp, list_tgp):
 
     output_txt += "\n\n Number of patterns: " + str(count) + '\n'
     return output_txt
+
+
+def produce_eval_pdf(f_path, trans_data, time_data):
+    """"""
+    import ntpath
+    import numpy as np
+
+    f_name = ntpath.basename(f_path)
+    f_name = f_name.replace('.csv', '')
+    np.savetxt(f_name + '_transformed_data.csv', trans_data, fmt='%s', delimiter=',')
+    np.savetxt(f_name + '_timestamp_data.csv', time_data, fmt='%s', delimiter=',')
 
 
 def main_cli():
