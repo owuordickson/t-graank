@@ -35,76 +35,72 @@ def execute_tgp(f_path: str, min_sup: float, tgt_col: int, min_rep: float, num_c
 
         # tgp = TGrad(f_path, eq, min_sup, tgt_col, min_rep, num_cores)
         tgp = TGradAMI(f_path, eq, min_sup, tgt_col, min_rep, num_cores)
-        if allow_mp:
-            msg_para = "True"
-            if eval_mode:
-                import ntpath
-                import numpy as np
-                f_name = ntpath.basename(f_path)
-                f_name = f_name.replace('.csv', '')
+        if eval_mode:
+            list_tgp, trans_data, time_data = tgp.discover_tgp(parallel=allow_mp, eval_mode=True)
 
-                list_tgp, trans_data, time_data = tgp.discover_tgp(parallel=True, eval_mode=True)
-                np.savetxt(f_name + '_transformed_data.csv', trans_data, fmt='%s')
-                np.savetxt(f_name + '_timestamp_data.csv', time_data, fmt='%s')
-            else:
-                list_tgp = tgp.discover_tgp(parallel=True)
+            import ntpath
+            import numpy as np
+            f_name = ntpath.basename(f_path)
+            f_name = f_name.replace('.csv', '')
+            np.savetxt(f_name + '_transformed_data.csv', trans_data, fmt='%s', delimiter=',')
+            np.savetxt(f_name + '_timestamp_data.csv', time_data, fmt='%s', delimiter=',')
         else:
-            msg_para = "False"
-            if eval_mode:
-                import ntpath
-                import numpy as np
-                f_name = ntpath.basename(f_path)
-                f_name = f_name.replace('.csv', '')
+            list_tgp = tgp.discover_tgp(parallel=allow_mp)
 
-                list_tgp, trans_data, time_data = tgp.discover_tgp(parallel=True, eval_mode=True)
-                np.savetxt(f_name + '_transformed_data.csv', trans_data, fmt='%s')
-                np.savetxt(f_name + '_timestamp_data.csv', time_data, fmt='%s')
-            else:
-                list_tgp = tgp.discover_tgp()
-
-        if isinstance(tgp, TGradAMI):
-            output_txt = "Algorithm: T-GRAANK AMI\n"
-        else:
-            output_txt = "Algorithm: T-GRAANK \n"
-        output_txt += "No. of (dataset) attributes: " + str(tgp.col_count) + '\n'
-        output_txt += "No. of (dataset) tuples: " + str(tgp.row_count) + '\n'
-        output_txt += "Minimum support: " + str(min_sup) + '\n'
-        output_txt += "Minimum representativity: " + str(min_rep) + '\n'
-        output_txt += "Multi-core execution: " + str(msg_para) + '\n'
-        output_txt += "Number of cores: " + str(tgp.cores) + '\n'
-        output_txt += "Number of tasks: " + str(tgp.max_step) + '\n\n'
-
-        for txt in tgp.titles:
-            col = int(txt[0])
-            if col == tgt_col:
-                output_txt += (str(txt[0]) + '. ' + str(txt[1].decode()) + '**' + '\n')
-            else:
-                output_txt += (str(txt[0]) + '. ' + str(txt[1].decode()) + '\n')
-
-        output_txt += str("\nFile: " + f_path + '\n')
-        output_txt += str("\nPattern : Support" + '\n')
-
-        count = 0
-        if isinstance(tgp, TGradAMI):
-            if list_tgp:
-                count = len(list_tgp)
-                for tgp in list_tgp:
-                    output_txt += f"{tgp.to_string()} :  {tgp.support}\n"
-        else:
-            for obj in list_tgp:
-                if obj:
-                    for tgp in obj:
-                        count += 1
-                        # output_txt += (str(tgp.to_string()) + ' : ' + str(tgp.support) +
-                        #               ' | ' + str(tgp.time_lag.to_string()) + '\n')
-                        output_txt += f"{tgp.to_string()} :  {tgp.support}\n"
-
-        output_txt += "\n\n Number of patterns: " + str(count) + '\n'
+        output_txt = produce_output_txt(f_path, allow_mp, tgp, list_tgp)
         return output_txt
     except AttributeError as error:
         output_txt = "Failed: " + str(error)
         print(error)
         return output_txt
+
+
+def produce_output_txt(f_path, allow_mp, tgp, list_tgp):
+    """"""
+    if allow_mp:
+        msg_para = "True"
+    else:
+        msg_para = "False"
+
+    if isinstance(tgp, TGradAMI):
+        output_txt = "Algorithm: T-GRAANK AMI\n"
+    else:
+        output_txt = "Algorithm: T-GRAANK \n"
+    output_txt += "No. of (dataset) attributes: " + str(tgp.col_count) + '\n'
+    output_txt += "No. of (dataset) tuples: " + str(tgp.row_count) + '\n'
+    output_txt += "Minimum support: " + str(tgp.thd_supp) + '\n'
+    output_txt += "Minimum representativity: " + str(tgp.min_rep) + '\n'
+    output_txt += "Multi-core execution: " + str(msg_para) + '\n'
+    output_txt += "Number of cores: " + str(tgp.cores) + '\n'
+    output_txt += "Number of tasks: " + str(tgp.max_step) + '\n\n'
+
+    for txt in tgp.titles:
+        col = int(txt[0])
+        if col == tgp.target_col:
+            output_txt += (str(txt[0]) + '. ' + str(txt[1].decode()) + '**' + '\n')
+        else:
+            output_txt += (str(txt[0]) + '. ' + str(txt[1].decode()) + '\n')
+
+    output_txt += str("\nFile: " + f_path + '\n')
+    output_txt += str("\nPattern : Support" + '\n')
+
+    count = 0
+    if isinstance(tgp, TGradAMI):
+        if list_tgp:
+            count = len(list_tgp)
+            for tgp in list_tgp:
+                output_txt += f"{tgp.to_string()} :  {tgp.support}\n"
+    else:
+        for obj in list_tgp:
+            if obj:
+                for tgp in obj:
+                    count += 1
+                    # output_txt += (str(tgp.to_string()) + ' : ' + str(tgp.support) +
+                    #               ' | ' + str(tgp.time_lag.to_string()) + '\n')
+                    output_txt += f"{tgp.to_string()} :  {tgp.support}\n"
+
+    output_txt += "\n\n Number of patterns: " + str(count) + '\n'
+    return output_txt
 
 
 def main_cli():

@@ -104,6 +104,7 @@ class TGrad(GRAANK):
             print("Dataset Ok")
             self.time_ok = True
             self.target_col = target_col
+            self.min_rep = min_rep
             self.max_step = self.row_count - int(min_rep * self.row_count)
             self.full_attr_data = self.data.copy().T
             self.cores = num_cores
