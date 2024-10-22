@@ -37,7 +37,7 @@ def execute_tgp(f_path: str, min_sup: float, tgt_col: int, min_rep: float, num_c
         tgp = TGradAMI(f_path, eq, min_sup, tgt_col, min_rep, num_cores)
         if eval_mode:
             list_tgp, trans_data, time_data = tgp.discover_tgp(parallel=allow_mp, eval_mode=True)
-            produce_eval_pdf(f_path, trans_data, time_data)
+            produce_eval_pdf(f_path, tgt_col, trans_data, time_data)
         else:
             list_tgp = tgp.discover_tgp(parallel=allow_mp)
 
@@ -97,14 +97,39 @@ def produce_output_txt(f_path, allow_mp, tgp, list_tgp):
     return output_txt
 
 
-def produce_eval_pdf(f_path, trans_data, time_data):
+def produce_eval_pdf(f_path, tgt_col, trans_data, time_data):
     """"""
     import ntpath
     import numpy as np
+    import pandas as pd
+    from fastdtw import fastdtw
+    from scipy.spatial.distance import euclidean
+    from statsmodels.tsa.seasonal import seasonal_decompose
+
+    data_obj = TGradAMI.process_time(trans_data)
+    _, col_count = trans_data.shape
+    tgt_col =  tgt_col - (col_count-data_obj.col_count)
+    print(f"Target column: {tgt_col}")
+
+    # datetime_series = pd.to_datetime(data_obj.data[1:, 0].astype(float), unit='s')
+    # datetime_index = pd.DatetimeIndex(datetime_series, freq='h')
+    datetime_index = pd.date_range(start="2021-01-01", periods=(data_obj.row_count-1), freq="D")
+
+    ts_1 = pd.Series(data_obj.data[1:, tgt_col], index=datetime_index)
+    decomp_ts_1 = seasonal_decompose(ts_1, model='additive')
+    trend_1 = np.array(decomp_ts_1.trend)
+    trend_1 = trend_1[~np.isnan(trend_1)]
+    for col in data_obj.attr_cols:
+        ts_2 = pd.Series(data_obj.data[1:, col], index=datetime_index)
+        decomp_ts_2 = seasonal_decompose(ts_2, model='additive')
+        trend_2 = np.array(decomp_ts_2.trend)
+        trend_2 = trend_2[~np.isnan(trend_2)]
+        distance, path = fastdtw(trend_1.reshape(-1, 1), trend_2.reshape(-1, 1), dist=euclidean)
+        print(f"DTW Distance: {distance}")
 
     f_name = ntpath.basename(f_path)
     f_name = f_name.replace('.csv', '')
-    np.savetxt(f_name + '_transformed_data.csv', trans_data, fmt='%s', delimiter=',')
+    np.savetxt(f_name + '_transformed_data.csv', trans_data[:, data_obj.attr_cols], fmt='%s', delimiter=',')
     np.savetxt(f_name + '_timestamp_data.csv', time_data, fmt='%s', delimiter=',')
 
 
