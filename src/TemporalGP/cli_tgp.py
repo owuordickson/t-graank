@@ -106,6 +106,10 @@ def produce_eval_pdf(f_path, tgt_col, trans_data, time_data):
     from scipy.spatial.distance import euclidean
     from statsmodels.tsa.seasonal import seasonal_decompose
 
+    f_name = ntpath.basename(f_path)
+    f_name = f_name.replace('.csv', '')
+    pdf_file = f_name + "_results.pdf"
+
     data_obj = TGradAMI.process_time(trans_data)
     _, col_count = trans_data.shape
     tgt_col =  tgt_col - (col_count-data_obj.col_count)
@@ -120,15 +124,14 @@ def produce_eval_pdf(f_path, tgt_col, trans_data, time_data):
     trend_1 = np.array(decomp_ts_1.trend)
     trend_1 = trend_1[~np.isnan(trend_1)]
     for col in data_obj.attr_cols:
-        ts_2 = pd.Series(data_obj.data[1:, col], index=datetime_index)
-        decomp_ts_2 = seasonal_decompose(ts_2, model='additive')
-        trend_2 = np.array(decomp_ts_2.trend)
-        trend_2 = trend_2[~np.isnan(trend_2)]
-        distance, path = fastdtw(trend_1.reshape(-1, 1), trend_2.reshape(-1, 1), dist=euclidean)
-        print(f"DTW Distance: {distance}")
+        if col != tgt_col:
+            ts_2 = pd.Series(data_obj.data[1:, col], index=datetime_index)
+            decomp_ts_2 = seasonal_decompose(ts_2, model='additive')
+            trend_2 = np.array(decomp_ts_2.trend)
+            trend_2 = trend_2[~np.isnan(trend_2)]
+            distance, path = fastdtw(trend_1.reshape(-1, 1), trend_2.reshape(-1, 1), dist=euclidean)
+            print(f"DTW Distance: {distance}")
 
-    f_name = ntpath.basename(f_path)
-    f_name = f_name.replace('.csv', '')
     np.savetxt(f_name + '_transformed_data.csv', trans_data[:, data_obj.attr_cols], fmt='%s', delimiter=',')
     np.savetxt(f_name + '_timestamp_data.csv', time_data, fmt='%s', delimiter=',')
 
