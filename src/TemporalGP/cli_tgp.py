@@ -8,8 +8,9 @@
 Entry points that allow users to execute GUI or Cli programs.
 """
 
+import sys
+from optparse import OptionParser
 import so4gp as sgp
-from matplotlib.pyplot import xlabel
 
 from .configs.configs_loader import load_configs
 # from .TGP.t_graank import TGrad
@@ -86,7 +87,10 @@ def produce_output_txt(f_path, allow_mp, tgp, list_tgp):
         if list_tgp:
             count = len(list_tgp)
             for tgp in list_tgp:
-                output_txt += f"{tgp.to_string()} :  {tgp.support}\n"
+                gp_str = f"{tgp.to_string()} :  {tgp.support}"
+                if len(gp_str) > 100:
+                    gp_str = gp_str[:100] + '\n' + gp_str[100:]
+                output_txt += f"{gp_str}\n"
     else:
         for obj in list_tgp:
             if obj:
@@ -94,7 +98,10 @@ def produce_output_txt(f_path, allow_mp, tgp, list_tgp):
                     count += 1
                     # output_txt += (str(tgp.to_string()) + ' : ' + str(tgp.support) +
                     #               ' | ' + str(tgp.time_lag.to_string()) + '\n')
-                    output_txt += f"{tgp.to_string()} :  {tgp.support}\n"
+                    gp_str = f"{tgp.to_string()} :  {tgp.support}"
+                    if len(gp_str) > 100:
+                        gp_str = gp_str[:100] + '\n' + gp_str[100:]
+                    output_txt += f"{gp_str}\n"
 
     output_txt += "\n\n Number of patterns: " + str(count) + '\n'
     return output_txt
@@ -119,7 +126,6 @@ def produce_eval_pdf(f_path, tgt_col, out_txt, trans_data, time_data):
     col_count = trans_data.shape[1]
     tgt_col =  tgt_col - (col_count-data_obj.col_count)
     num_plts = data_obj.attr_cols.shape[0] - 1
-    print(f"Target column: {tgt_col}")
 
     # datetime_series = pd.to_datetime(data_obj.data[1:, 0].astype(float), unit='s')
     # datetime_index = pd.DatetimeIndex(datetime_series, freq='h')
@@ -151,7 +157,7 @@ def produce_eval_pdf(f_path, tgt_col, out_txt, trans_data, time_data):
             else:
                 # new Figure
                 max_plts = 4
-                fig = plt.Figure(figsize=(5, 5))
+                fig = plt.Figure(figsize=(6, 5))
                 ax = fig.add_subplot(1, 1, 1)
                 ax.set_title('DTW Warping Path')
                 ax.set(xlabel=tgt_title, ylabel='Time Series 2')
@@ -179,10 +185,53 @@ def main_cli():
         Initializes and starts terminal/CMD application.
         :return:
     """
+    options_gp, options_tgp = load_configs()
+
+    optparser = OptionParser()
+    optparser.add_option('-f', '--inputFile',
+                         dest='file',
+                         help='path to file containing csv',
+                         default=options_gp.file_path,
+                         type='string')
+    optparser.add_option('-s', '--minSupport',
+                         dest='minSup',
+                         help='minimum support value',
+                         default=options_gp.min_sup,
+                         type='float')
+    optparser.add_option('-p', '--allowMultiprocessing',
+                         dest='allowPara',
+                         help='allow multiprocessing',
+                         default=options_gp.allow_multiprocessing,
+                         type='int')
+    optparser.add_option('-x', '--evaluationMode',
+                         dest='evalMode',
+                         help='run in evaluation mode',
+                         default=options_gp.eval_mode,
+                         type='int')
+    optparser.add_option('-c', '--cores',
+                         dest='numCores',
+                         help='number of cores',
+                         default=options_gp.num_cores,
+                         type='int')
+    optparser.add_option('-t', '--targetColumn',
+                         dest='tgtCol',
+                         help='target column',
+                         default=options_tgp.target_column,
+                         type='int')
+    optparser.add_option('-r', '--minRepresentativity',
+                         dest='minRep',
+                         help='minimum representativity',
+                         default=options_tgp.min_rep,
+                         type='float')
+    (cfg, args) = optparser.parse_args()
+
+    if (cfg.file is None) or cfg.file == '':
+        print('No datasets-set filename specified, system with exit')
+        print("Basic Usage: TemporalGP -f filename.csv")
+        sys.exit('System will exit')
+
     import time
     # import tracemalloc
-
-    cfg = load_configs()
 
     start = time.time()
     # tracemalloc.start()
