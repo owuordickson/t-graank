@@ -9,6 +9,8 @@ Entry points that allow users to execute GUI or Cli programs.
 """
 
 import so4gp as sgp
+from matplotlib.pyplot import xlabel
+
 from .configs.configs_loader import load_configs
 # from .TGP.t_graank import TGrad
 from .TGP.tgrad_ami import TGradAMI
@@ -37,11 +39,12 @@ def execute_tgp(f_path: str, min_sup: float, tgt_col: int, min_rep: float, num_c
         tgp = TGradAMI(f_path, eq, min_sup, tgt_col, min_rep, num_cores)
         if eval_mode:
             list_tgp, trans_data, time_data = tgp.discover_tgp(parallel=allow_mp, eval_mode=True)
-            produce_eval_pdf(f_path, tgt_col, trans_data, time_data)
+            output_txt = produce_output_txt(f_path, allow_mp, tgp, list_tgp)
+            produce_eval_pdf(f_path, tgt_col, output_txt, trans_data, time_data)
         else:
             list_tgp = tgp.discover_tgp(parallel=allow_mp)
+            output_txt = produce_output_txt(f_path, allow_mp, tgp, list_tgp)
 
-        output_txt = produce_output_txt(f_path, allow_mp, tgp, list_tgp)
         return output_txt
     except AttributeError as error:
         output_txt = "Failed: " + str(error)
@@ -97,43 +100,78 @@ def produce_output_txt(f_path, allow_mp, tgp, list_tgp):
     return output_txt
 
 
-def produce_eval_pdf(f_path, tgt_col, trans_data, time_data):
+def produce_eval_pdf(f_path, tgt_col, out_txt, trans_data, time_data):
     """"""
     import ntpath
     import numpy as np
     import pandas as pd
+    import matplotlib.pyplot as plt
     from fastdtw import fastdtw
     from scipy.spatial.distance import euclidean
     from statsmodels.tsa.seasonal import seasonal_decompose
+    from matplotlib.backends.backend_pdf import PdfPages
 
     f_name = ntpath.basename(f_path)
     f_name = f_name.replace('.csv', '')
     pdf_file = f_name + "_results.pdf"
 
     data_obj = TGradAMI.process_time(trans_data)
-    _, col_count = trans_data.shape
+    col_count = trans_data.shape[1]
     tgt_col =  tgt_col - (col_count-data_obj.col_count)
+    num_plts = data_obj.attr_cols.shape[0] - 1
     print(f"Target column: {tgt_col}")
 
     # datetime_series = pd.to_datetime(data_obj.data[1:, 0].astype(float), unit='s')
     # datetime_index = pd.DatetimeIndex(datetime_series, freq='h')
     datetime_index = pd.date_range(start="2021-01-01", periods=(data_obj.row_count-1), freq="D")
-
     ts_1 = pd.Series(data_obj.data[1:, tgt_col], index=datetime_index)
     decomp_ts_1 = seasonal_decompose(ts_1, model='additive')
     trend_1 = np.array(decomp_ts_1.trend)
     trend_1 = trend_1[~np.isnan(trend_1)]
+    max_plts = 0
+    tgt_title = 'Target Col: ' + data_obj.titles[tgt_col][1].decode()
+    lst_figs = []
     for col in data_obj.attr_cols:
         if col != tgt_col:
+            col_title = data_obj.titles[col][1].decode()
             ts_2 = pd.Series(data_obj.data[1:, col], index=datetime_index)
             decomp_ts_2 = seasonal_decompose(ts_2, model='additive')
             trend_2 = np.array(decomp_ts_2.trend)
             trend_2 = trend_2[~np.isnan(trend_2)]
             distance, path = fastdtw(trend_1.reshape(-1, 1), trend_2.reshape(-1, 1), dist=euclidean)
-            print(f"DTW Distance: {distance}")
+            arr_path = np.array(path)
+            err = np.abs(arr_path[:, 0] - arr_path[:, 1])
+            avg_err = round(np.mean(err), 4)
+
+            if max_plts > 0:
+                # add plot
+                max_plts -= 1
+                ax.plot([p[0] for p in path], [p[1] for p in path], '-', label=f"{col_title}: {avg_err}")
+                ax.legend()
+            else:
+                # new Figure
+                max_plts = 4
+                fig = plt.Figure(figsize=(5, 5))
+                ax = fig.add_subplot(1, 1, 1)
+                ax.set_title('DTW Warping Path')
+                ax.set(xlabel=tgt_title, ylabel='Time Series 2')
+                ax.plot([p[0] for p in path], [p[1] for p in path], '-', label=f"{col_title}: {avg_err}")
+                ax.legend()
+                lst_figs.append(fig)
+
+    fig_res = plt.Figure(figsize=(8.5, 11), dpi=300)
+    ax_res = fig_res.add_subplot(1, 1, 1)
+    ax_res.set_axis_off()
+    ax_res.set_title("FTGP Results")
+    ax_res.text(0, 1, out_txt, horizontalalignment='left', verticalalignment='top', transform=ax_res.transAxes)
+    with (PdfPages(pdf_file)) as pdf:
+        pdf.savefig(fig_res)
+        for fig in lst_figs:
+            pdf.savefig(fig)
 
     np.savetxt(f_name + '_transformed_data.csv', trans_data[:, data_obj.attr_cols], fmt='%s', delimiter=',')
     np.savetxt(f_name + '_timestamp_data.csv', time_data, fmt='%s', delimiter=',')
+    return lst_figs
 
 
 def main_cli():
