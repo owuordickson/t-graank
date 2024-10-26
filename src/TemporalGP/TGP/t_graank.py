@@ -205,6 +205,7 @@ class TGrad(GRAANK):
                 time_diff = (stamp_2 - stamp_1)
                 if time_diff < 0:
                     # Error time CANNOT go backwards
+                    # print(f"Problem {i} and {i + step} - {self.time_cols}")
                     return False, [i + 1, i + step + 1]
                 time_diffs[int(i)] = float(time_diff)
         return True, time_diffs
