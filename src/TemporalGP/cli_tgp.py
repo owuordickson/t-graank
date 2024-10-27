@@ -109,6 +109,7 @@ def produce_output_txt(f_path, allow_mp, tgp, list_tgp):
 
 def produce_eval_pdf(f_path, tgt_col, out_txt, trans_data, time_data):
     """"""
+    import time
     import ntpath
     import numpy as np
     import pandas as pd
@@ -118,9 +119,10 @@ def produce_eval_pdf(f_path, tgt_col, out_txt, trans_data, time_data):
     from statsmodels.tsa.seasonal import seasonal_decompose
     from matplotlib.backends.backend_pdf import PdfPages
 
+    file_stamp = time.time()
     f_name = ntpath.basename(f_path)
     f_name = f_name.replace('.csv', '')
-    pdf_file = f_name + "_results.pdf"
+    pdf_file = f_name + str(file_stamp).replace('.', '', 1) + "_results.pdf"
 
     data_obj = TGradAMI.process_time(trans_data)
     col_count = trans_data.shape[1]
@@ -175,8 +177,8 @@ def produce_eval_pdf(f_path, tgt_col, out_txt, trans_data, time_data):
         for fig in lst_figs:
             pdf.savefig(fig)
 
-    np.savetxt(f_name + '_transformed_data.csv', trans_data[:, data_obj.attr_cols], fmt='%s', delimiter=',')
-    np.savetxt(f_name + '_timestamp_data.csv', time_data, fmt='%s', delimiter=',')
+    np.savetxt(f_name + str(file_stamp).replace('.', '', 1) +'_transformed_data.csv', trans_data[:, data_obj.attr_cols], fmt='%s', delimiter=',')
+    np.savetxt(f_name + str(file_stamp).replace('.', '', 1) +'_timestamp_data.csv', time_data, fmt='%s', delimiter=',')
     return lst_figs
 
 

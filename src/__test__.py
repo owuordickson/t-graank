@@ -21,4 +21,4 @@ print(f"x-data: {x}\n")
 # TGradAMI.learn_mf_hill_climbing(a, b, c, x)
 
 from so4gp import DataGP
-print(DataGP.test_time('24-01-2005'))
+print(DataGP.test_time('10-01-2005'))

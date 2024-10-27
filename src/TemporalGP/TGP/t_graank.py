@@ -203,11 +203,11 @@ class TGrad(GRAANK):
                         stamp_1 += temp_stamp_1
                         stamp_2 += temp_stamp_2
                 time_diff = (stamp_2 - stamp_1)
-                if time_diff < 0:
+                # if time_diff < 0:
                     # Error time CANNOT go backwards
                     # print(f"Problem {i} and {i + step} - {self.time_cols}")
-                    return False, [i + 1, i + step + 1]
-                time_diffs[int(i)] = float(time_diff)
+                #    return False, [i + 1, i + step + 1]
+                time_diffs[int(i)] = float(abs(time_diff))
         return True, time_diffs
 
     def discover(self, t_diffs=None, attr_data=None):
