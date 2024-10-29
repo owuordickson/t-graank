@@ -11,12 +11,11 @@ the random variables X and Y provide about one another.
 """
 
 import numpy as np
+import pandas as pd
 from sklearn.cluster import KMeans
+from so4gp import TimeDelay, DataGP, TGrad
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.feature_selection import mutual_info_regression
-
-from so4gp import TimeDelay
-from .t_graank import TGrad
 
 
 class TGradAMI(TGrad):
@@ -119,7 +118,7 @@ class TGradAMI(TGrad):
         # print(f"Time Lags: {time_data}\n")
 
         # 5. Build triangular MF
-        a, b, c = TGradAMI.build_mf(time_data)
+        a, b, c = TGradAMI.build_mf_w_clusters(time_data)
         self.tri_mf_data = np.array([a, b, c])
         # print(f"Membership Function: {a}, {b}, {c}\n")
 
@@ -146,7 +145,7 @@ class TGradAMI(TGrad):
         return False
 
     def get_fuzzy_time_lag(self, bin_data: np.ndarray, time_diffs, gi_arr=None):
-        """"""
+        """TO BE DELETED (ALREADY INCLUDED IN SO4GP)"""
 
         # 1. Get Indices
         indices = np.argwhere(bin_data == 1)
@@ -164,35 +163,42 @@ class TGradAMI(TGrad):
         selected_cols = np.array(selected_cols, dtype=int)
         t_lag_arr = time_diffs[np.ix_(selected_cols, selected_rows)]
 
-        # 3. Learn the best MF through slide-descent/sliding
-        a, b, c = self.tri_mf_data
+        # 3. Approximate TimeDelay value
         best_time_lag = TimeDelay(-1, 0)
-        fuzzy_set = []
-        for t_lags in t_lag_arr:
-            init_bias = abs(b-np.median(t_lags))
-            slide_val, loss = TGradAMI.select_mf_hill_climbing(a, b, c, t_lags, initial_bias=init_bias)
-            tstamp = int(b - slide_val)
-            sup = float(1-loss)
-            fuzzy_set.append([tstamp, float(loss)])
-            if sup >= best_time_lag.support and tstamp > best_time_lag.timestamp:
-                best_time_lag = TimeDelay(tstamp, sup)
-            # print(f"New Membership Fxn: {a - slide_val}, {b - slide_val}, {c - slide_val}")
-
-        # 4. Apply cartesian product on multiple MFs to pick the MF with the best center (inference logic)
-        # Mine tGPs and then compute Union of time-lag MFs,
-        # from this union select the MF with more members (little loss)
-
-        # print(f"indices {selected_cols}: {selected_rows}")
-        # print(f"GIs: {gi_arr}")
-        # print(f"Fuzzy Set: {fuzzy_set}")
-        # print(f"Selected Time Lag: {best_time_lag.to_string()}")
-        # print(f"time lags: {t_lag_arr}")
-        # print("\n")
+        if isinstance(self, TGradAMI):
+            # 3b. Learn the best MF through slide-descent/sliding
+            a, b, c = self.tri_mf_data
+            best_time_lag = TimeDelay(-1, 0)
+            fuzzy_set = []
+            for t_lags in t_lag_arr:
+                init_bias = abs(b-np.median(t_lags))
+                slide_val, loss = TGradAMI.approx_time_hill_climbing(a, b, c, t_lags, initial_bias=init_bias)
+                tstamp = int(b - slide_val)
+                sup = float(1-loss)
+                fuzzy_set.append([tstamp, float(loss)])
+                if sup >= best_time_lag.support and tstamp > best_time_lag.timestamp:
+                    best_time_lag = TimeDelay(tstamp, sup)
+                # print(f"New Membership Fxn: {a - slide_val}, {b - slide_val}, {c - slide_val}")
+            # 4. Apply cartesian product on multiple MFs to pick the MF with the best center (inference logic)
+            # Mine tGPs and then compute Union of time-lag MFs,
+            # from this union select the MF with more members (little loss)
+            # print(f"indices {selected_cols}: {selected_rows}")
+            # print(f"GIs: {gi_arr}")
+            # print(f"Fuzzy Set: {fuzzy_set}")
+            # print(f"Selected Time Lag: {best_time_lag.to_string()}")
+            # print(f"time lags: {t_lag_arr}")
+            # print("\n")
+            else:
+                # 3a. Approximate TimeDelay using Fuzzy Membership
+                for t_lags in t_lag_arr:
+                    time_lag = TGrad.__approximate_fuzzy_time_lag__(t_lags)
+                    if time_lag.support >= best_time_lag.support:
+                        best_time_lag = time_lag
 
         return best_time_lag
 
     @staticmethod
-    def build_mf(time_data: np.ndarray):
+    def build_mf_w_clusters(time_data: np.ndarray):
         """"""
 
         # Reshape into 1-column dataset
@@ -242,8 +248,8 @@ class TGradAMI(TGrad):
         return a, b, c
 
     @staticmethod
-    def select_mf_hill_climbing(a: float, b: float, c: float, x_train: np.ndarray,
-                                initial_bias: float = 0, step_size: float = 0.9, max_iterations: int = 10):
+    def approx_time_hill_climbing(a: float, b: float, c: float, x_train: np.ndarray,
+                                  initial_bias: float = 0, step_size: float = 0.9, max_iterations: int = 10):
         """"""
 
         # Normalize x_train
@@ -304,3 +310,50 @@ class TGradAMI(TGrad):
         loss = (((true_count - hat_count)/true_count) ** 2) ** 0.5
         # loss = abs(true_count - hat_count)
         return loss
+
+    @staticmethod
+    def process_time(data: np.ndarray):
+        """
+
+        A method that computes the corresponding timestamp of DataTime columns. The method replaces all the DateTime
+        columns with a single Timestamp column.
+
+        :param data: original data with raw DateTime columns.
+        :return: modified Pandas DF with computed timestamp column.
+        """
+
+        data_df = pd.DataFrame(data=data[1:, :], columns=data[0, :])
+        data_gp = DataGP(data_df)
+        new_data_gp = pd.DataFrame()
+        size = data_gp.row_count
+        n_cols = data_gp.col_count
+
+        title_row = ['Timestamp']
+        for txt in data_gp.titles:
+            col = int(txt[0])
+            if col not in data_gp.time_cols:
+                title_row.append(str(txt[1].decode()))
+        all_data = title_row
+
+        for i in range(size):
+            stamp_1 = 0
+            for col in data_gp.time_cols:  # sum timestamps from all time-columns
+                temp_1 = str(data_gp.data[i][int(col)])
+                temp_stamp_1 = TGrad.get_timestamp(temp_1)
+                if not temp_stamp_1:
+                    # Unable to read time
+                    return False
+                else:
+                    stamp_1 += temp_stamp_1
+            temp_row = [float(stamp_1)]
+
+            for col_index in range(n_cols):
+                if col_index not in data_gp.time_cols:
+                    # other attributes
+                    temp_row.append(data_gp.data[i][int(col_index)])
+
+            all_data = np.vstack((all_data, temp_row))
+            new_data_gp = DataGP(pd.DataFrame(data=all_data[1:, :], columns=all_data[0, :]))
+            new_data_gp.time_cols = np.array([0])
+            new_data_gp.attr_cols = np.arange(1, new_data_gp.col_count)
+        return new_data_gp
