@@ -18,58 +18,87 @@ from so4gp import DataGP, GI, TGP, TimeDelay, GRAANK
 
 
 class TGrad(GRAANK):
+    """Description of class TGrad.
 
+    TGrad is an algorithm that is used to extract temporal gradual patterns from numeric datasets. It uses technique published
+    in: https://ieeexplore.ieee.org/abstract/document/8858883.
+
+    """
     def __init__(self, f_path: str, eq: bool, min_sup: float, target_col: int, min_rep: float, num_cores: int):
-        """"""
+        """
+        TGrad is an algorithm that is used to extract temporal gradual patterns from numeric datasets.
+        
+        :param f_path: path to ddtaset file
+        :param eq: are equal object considered in GP matrix.
+        :param min_sup: minimum support value.
+        :param target_col: Target column.
+        :param min_rep: minimum representativity value.
+        :param num_cores: number of cores to use.
+        
+        >>> import so4gp as sgp
+        >>> import pandas
+        >>> dummy_data = [["2021-03", 30, 3, 1, 10], ["2021-03", 35, 2, 2, 8], ["2021-03", 40, 4, 2, 7], ["2021-03", 50, 1, 1, 6], ["2021-03", 52, 7, 1, 2]]
+        >>> dummy_df = pandas.DataFrame(dummy_data, columns=['Date', 'Age', 'Salary', 'Cars', 'Expenses'])
+        >>>
+        >>> mine_obj = sgp.TGrad(dummy_df, min_sup=0.5, target_col=1, min_rep=0.5)
+        >>> result_json = mine_obj.discover_tgp(parallel=True)
+        >>> print(result_json)
+        """
 
         super(TGrad, self).__init__(data_source=f_path, min_sup=min_sup, eq=eq)
+        self.target_col = target_col
+        """:type: target_col: int"""
+        self.min_rep = min_rep
+        """:type: min_rep: float"""
+        self.max_step = self.row_count - int(min_rep * self.row_count)
+        """:type: max_step: int"""
+        self.full_attr_data = self.data.copy().T
+        """:type: full_attr_data: numpy.ndarray"""
+        self.cores = num_cores
+        """:type: cores int"""
         if len(self.time_cols) > 0:
             print("Dataset Ok")
             self.time_ok = True
-            self.target_col = target_col
-            self.min_rep = min_rep
-            self.max_step = self.row_count - int(min_rep * self.row_count)
-            self.full_attr_data = self.data.copy().T
-            self.cores = num_cores
+            """:type: time_ok: bool"""
         else:
             print("Dataset Error")
             self.time_ok = False
+            """:type: time_ok: bool"""
             raise Exception('No date-time datasets found')
 
-    def discover_tgp(self, parallel=False):
-        """"""
+    def discover_tgp(self, parallel: bool = False):
+        """
+
+        Applies fuzzy-logic, data transformation and gradual pattern mining to mine for Fuzzy Temporal Gradual Patterns.
+
+        :param parallel: allow multi-processing.
+        :return: list
+        """
 
         if parallel:
             # implement parallel multi-processing
             steps = range(self.max_step)
             pool = mp.Pool(self.cores)
-            patterns = pool.map(self.fetch_patterns, steps)
+            patterns = pool.map(self.transform_and_mine, steps)
             pool.close()
             pool.join()
             return patterns
         else:
             patterns = list()
             for step in range(self.max_step):
-                t_gps = self.fetch_patterns(step + 1)  # because for-loop is not inclusive from range: 0 - max_step
+                t_gps = self.transform_and_mine(step + 1)  # because for-loop is not inclusive from range: 0 - max_step
                 if t_gps:
                     patterns.append(t_gps)
             return patterns
 
-    def fetch_patterns(self, step):
-        """"""
+    def transform_and_mine(self, step: int, return_patterns: bool = True):
+        """
+        A method that: (1) transforms data according to a step value and, (2) mines the transformed data for FTGPs.
 
-        # 1. Transform datasets
-        attr_data, time_diffs = self.transform_data(step)
-
-        # 2. Execute t-graank for each transformation
-        t_gps = self.discover(t_diffs=time_diffs, attr_data=attr_data)
-
-        if len(t_gps) > 0:
-            return t_gps
-        return False
-
-    def transform_data(self, step):
-        """"""
+        :param step: data transformation step.
+        :param return_patterns: allow method to mine TGPs.
+        :return: list of TGPs
+        """
         # NB: Restructure dataset based on target/reference col
         if self.time_ok:
             # 1. Calculate time difference using step
@@ -88,6 +117,7 @@ class TGrad(GRAANK):
                           "0 and " + str(self.col_count - 1)
                     raise Exception(msg)
                 else:
+                    # 2. Transform datasets
                     delayed_attr_data = None
                     n = self.row_count
                     for col_index in range(self.col_count):
@@ -104,13 +134,27 @@ class TGrad(GRAANK):
                     # print(f"Time Diffs: {time_diffs}\n")
                     # print(f"{self.full_attr_data}: {type(self.full_attr_data)}\n")
                     # print(f"{delayed_attr_data}: {type(delayed_attr_data)}\n")
-                    return delayed_attr_data, time_diffs
+
+                    if return_patterns:
+                        # 2. Execute t-graank for each transformation
+                        t_gps = self.discover(t_diffs=time_diffs, attr_data=delayed_attr_data)
+                        if len(t_gps) > 0:
+                            return t_gps
+                        return False
+                    else:
+                        return delayed_attr_data, time_diffs
         else:
             msg = "Fatal Error: Time format in column could not be processed"
             raise Exception(msg)
 
-    def get_time_diffs(self, step):  # optimized
-        """"""
+    def get_time_diffs(self, step: int):  # optimized
+        """
+
+        A method that computes the difference between 2 timestamps separated by a specific transformation step.
+
+        :param step: data transformation step.
+        :return: set of time delay values
+        """
         size = self.row_count
         time_diffs = {}  # {row: time-lag}
         for i in range(size):
@@ -136,8 +180,16 @@ class TGrad(GRAANK):
                 time_diffs[int(i)] = float(abs(time_diff))
         return True, time_diffs
 
-    def discover(self, t_diffs=None, attr_data=None):
-        """"""
+    def discover(self, t_diffs: dict = None, attr_data: np.ndarray = None):
+        """
+
+        Uses apriori algorithm to find GP candidates based on the target-attribute. The candidates are validated if
+        their computed support is greater than or equal to the minimum support threshold specified by the user.
+
+        :param t_diffs: time-delay values
+        :param attr_data: the transformed data.
+        :return: temporal-GPs as a list.
+        """
 
         self.fit_bitmap(attr_data)
 
@@ -180,8 +232,16 @@ class TGrad(GRAANK):
                     i += 1
         return gradual_patterns
 
-    def get_fuzzy_time_lag(self, bin_data: np.ndarray, time_diffs, gi_arr=None):
-        """"""
+    def get_fuzzy_time_lag(self, bin_data: np.ndarray, time_diffs: dict, gi_arr: set = None):
+        """
+
+        A method that uses fuzzy-logic to select the most accurate time-delay value.
+
+        :param bin_data: gradual item pairwise matrix.
+        :param time_diffs: time-delay values.
+        :param gi_arr: gradual item object.
+        :return: TimeDelay object.
+        """
 
         # 1. Get Indices
         indices = np.argwhere(bin_data == 1)
@@ -199,11 +259,101 @@ class TGrad(GRAANK):
         return time_lag
 
     @staticmethod
-    def process_time(data):
-        """"""
+    def get_timestamp(time_str: str):
+        """
+
+        A method that computes the corresponding timestamp from a DateTime string.
+
+        :param time_str: DateTime value as a string
+        :return: timestamp value
+        """
+        try:
+            ok, stamp = DataGP.test_time(time_str)
+            if ok:
+                return stamp
+            else:
+                return False
+        except ValueError:
+            return False
+
+    @staticmethod
+    def triangular_mf(x: float, a: float, b: float, c: float):
+        """
+
+        A method that implements the fuzzy triangular membership function and computes the membership degree of value w.r.t
+        the MF.
+
+        :param x: value to be tested.
+        :param a: left-side/minimum boundary of the triangular membership function.
+        :param b: center value of the triangular membership function.
+        :param c: maximum boundary value of the triangular membership function.
+        :return: membership degree of value x.
+        """
+        if a <= x <= b:
+            return (x - a) / (b - a)
+        elif b <= x <= c:
+            return (c - x) / (c - b)
+        else:
+            return 0
+
+    @staticmethod
+    def __approximate_fuzzy_time_lag__(time_lags: np.ndarray):
+        """
+
+        A method that selects the most appropriate time-delay value from a list of possible values.
+
+        :param time_lags: an array of all the possible time-delay values.
+        :return: the approximated TimeDelay object.
+        """
+
+        if len(time_lags) <= 0:
+            # if time_lags is blank return nothing
+            return TimeDelay()
+        else:
+            time_lags = np.absolute(np.array(time_lags))
+            min_a = np.min(time_lags)
+            max_c = np.max(time_lags)
+            count = time_lags.size + 3
+            tot_boundaries = np.linspace(min_a / 2, max_c + 1, num=count)
+
+            sup1 = 0
+            center = time_lags[0]
+            size = len(tot_boundaries)
+            for i in range(0, size, 2):
+                if (i + 3) <= size:
+                    boundaries = tot_boundaries[i:i + 3:1]
+                else:
+                    boundaries = tot_boundaries[size - 3:size:1]
+                memberships = fuzzy.membership.trimf(time_lags, boundaries)
+
+                # Compute Support
+                sup_count = np.count_nonzero(memberships > 0)
+                total = memberships.size
+                sup = sup_count / total
+                # sup = calculate_support(memberships)
+
+                if sup > sup1:
+                    sup1 = sup
+                    center = boundaries[1]
+                if sup >= 0.5:
+                    print(boundaries[1])
+                    return TimeDelay(int(boundaries[1]), sup)
+            return TimeDelay(center, sup1)
+
+    @staticmethod
+    def process_time(data: np.ndarray):
+        """
+
+        A method that computes the corresponding timestamp of DataTime columns. The method replaces all the DateTime
+        columns with a single Timestamp column.
+
+        :param data: original data with raw DateTime columns.
+        :return: modified Pandas DF with computed timestamp column.
+        """
 
         data_df = pd.DataFrame(data=data[1:, :], columns=data[0, :])
         data_gp = DataGP(data_df)
+        new_data_gp = pd.DataFrame()
         size = data_gp.row_count
         n_cols = data_gp.col_count
 
@@ -236,62 +386,3 @@ class TGrad(GRAANK):
             new_data_gp.time_cols = np.array([0])
             new_data_gp.attr_cols = np.arange(1, new_data_gp.col_count)
         return new_data_gp
-
-    @staticmethod
-    def get_timestamp(time_data):
-        """"""
-        try:
-            ok, stamp = DataGP.test_time(time_data)
-            if ok:
-                return stamp
-            else:
-                return False
-        except ValueError:
-            return False
-
-    @staticmethod
-    def triangular_mf(x, a, b, c):
-        """"""
-        if a <= x <= b:
-            return (x - a) / (b - a)
-        elif b <= x <= c:
-            return (c - x) / (c - b)
-        else:
-            return 0
-
-    @staticmethod
-    def __approximate_fuzzy_time_lag__(time_lags):
-        """"""
-
-        if len(time_lags) <= 0:
-            # if time_lags is blank return nothing
-            return TimeDelay()
-        else:
-            time_lags = np.absolute(np.array(time_lags))
-            min_a = np.min(time_lags)
-            max_c = np.max(time_lags)
-            count = time_lags.size + 3
-            tot_boundaries = np.linspace(min_a / 2, max_c + 1, num=count)
-
-            sup1 = 0
-            center = time_lags[0]
-            size = len(tot_boundaries)
-            for i in range(0, size, 2):
-                if (i + 3) <= size:
-                    boundaries = tot_boundaries[i:i + 3:1]
-                else:
-                    boundaries = tot_boundaries[size - 3:size:1]
-                memberships = fuzzy.membership.trimf(time_lags, boundaries)
-
-                # Compute Support
-                sup_count = np.count_nonzero(memberships > 0)
-                total = memberships.size
-                sup = sup_count / total
-                # sup = calculate_support(memberships)
-
-                if sup > sup1:
-                    sup1 = sup
-                    center = boundaries[1]
-                if sup >= 0.5:
-                    return TimeDelay(boundaries[1], sup)
-            return TimeDelay(center, sup1)

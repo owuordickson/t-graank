@@ -41,7 +41,7 @@ class TGradAMI(TGrad):
         # 1. Compute all the MI for every time-delay and store in list
         mi_list = []
         for step in range(self.max_step):
-            attr_data, _ = self.transform_data(step)
+            attr_data, _ = self.transform_and_mine(step, return_patterns=False)
             y = np.array(attr_data[self.target_col], dtype=float).T
             x_data = np.array(attr_data[self.feature_cols], dtype=float).T
             mutual_info = mutual_info_regression(x_data, y)
