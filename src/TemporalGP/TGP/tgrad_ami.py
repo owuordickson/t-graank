@@ -144,7 +144,7 @@ class TGradAMI(TGrad):
                 return t_gps
         return False
 
-    def get_fuzzy_time_lag(self, bin_data: np.ndarray, time_diffs, gi_arr=None):
+    def get_fuzzy_time_lag(self, bin_data: np.ndarray, time_diffs: np.ndarray, gi_arr=None):
         """TO BE DELETED (ALREADY INCLUDED IN SO4GP)"""
 
         # 1. Get Indices
@@ -188,12 +188,12 @@ class TGradAMI(TGrad):
             # print(f"Selected Time Lag: {best_time_lag.to_string()}")
             # print(f"time lags: {t_lag_arr}")
             # print("\n")
-            else:
-                # 3a. Approximate TimeDelay using Fuzzy Membership
-                for t_lags in t_lag_arr:
-                    time_lag = TGrad.__approximate_fuzzy_time_lag__(t_lags)
-                    if time_lag.support >= best_time_lag.support:
-                        best_time_lag = time_lag
+        else:
+            # 3a. Approximate TimeDelay using Fuzzy Membership
+            for t_lags in t_lag_arr:
+                time_lag = TGrad.approx_time_slide_calculate(t_lags)
+                if time_lag.support >= best_time_lag.support:
+                    best_time_lag = time_lag
 
         return best_time_lag
 
@@ -277,7 +277,7 @@ class TGradAMI(TGrad):
                 best_mse = new_mse
 
         # Make predictions using the optimal bias
-        y_train = x_train + bias
+        # y_train = x_train + bias
         # print(f"Optimal bias: {bias}")
         # print(f"Predictions: {y_train}")
         # print(f"Mean Squared Error: {best_mse*100}%")

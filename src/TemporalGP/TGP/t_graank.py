@@ -9,7 +9,6 @@ Algorithm for mining temporal gradual patterns using fuzzy membership functions.
 
 
 import numpy as np
-import pandas as pd
 import skfuzzy as fuzzy
 import multiprocessing as mp
 
@@ -214,7 +213,7 @@ class TGrad(GRAANK):
                     # Remove subsets
                     gradual_patterns = TGP.remove_subsets(gradual_patterns, set(gi_arr))
 
-                    t_lag = self.get_fuzzy_time_lag(bin_data, t_diffs, gi_arr)
+                    t_lag = TGrad.get_fuzzy_time_lag(bin_data, t_diffs)
                     if t_lag.valid:
                         tgp = TGP()
                         """:type gp: TGP"""
@@ -232,14 +231,14 @@ class TGrad(GRAANK):
                     i += 1
         return gradual_patterns
 
-    def get_fuzzy_time_lag(self, bin_data: np.ndarray, time_diffs: dict, gi_arr: set = None):
+    @staticmethod
+    def get_fuzzy_time_lag(bin_data: np.ndarray, time_diffs: dict):
         """
 
         A method that uses fuzzy-logic to select the most accurate time-delay value.
 
         :param bin_data: gradual item pairwise matrix.
         :param time_diffs: time-delay values.
-        :param gi_arr: gradual item object.
         :return: TimeDelay object.
         """
 
@@ -339,50 +338,3 @@ class TGrad(GRAANK):
                     print(boundaries[1])
                     return TimeDelay(int(boundaries[1]), sup)
             return TimeDelay(center, sup1)
-
-    @staticmethod
-    def process_time(data: np.ndarray):
-        """
-
-        A method that computes the corresponding timestamp of DataTime columns. The method replaces all the DateTime
-        columns with a single Timestamp column.
-
-        :param data: original data with raw DateTime columns.
-        :return: modified Pandas DF with computed timestamp column.
-        """
-
-        data_df = pd.DataFrame(data=data[1:, :], columns=data[0, :])
-        data_gp = DataGP(data_df)
-        new_data_gp = pd.DataFrame()
-        size = data_gp.row_count
-        n_cols = data_gp.col_count
-
-        title_row = ['Timestamp']
-        for txt in data_gp.titles:
-            col = int(txt[0])
-            if col not in data_gp.time_cols:
-                title_row.append(str(txt[1].decode()))
-        all_data = title_row
-
-        for i in range(size):
-            stamp_1 = 0
-            for col in data_gp.time_cols:  # sum timestamps from all time-columns
-                temp_1 = str(data_gp.data[i][int(col)])
-                temp_stamp_1 = TGrad.get_timestamp(temp_1)
-                if not temp_stamp_1:
-                    # Unable to read time
-                    return False
-                else:
-                    stamp_1 += temp_stamp_1
-            temp_row = [float(stamp_1)]
-
-            for col_index in range(n_cols):
-                if col_index not in data_gp.time_cols:
-                    # other attributes
-                    temp_row.append(data_gp.data[i][int(col_index)])
-
-            all_data = np.vstack((all_data, temp_row))
-            new_data_gp = DataGP(pd.DataFrame(data=all_data[1:, :], columns=all_data[0, :]))
-            new_data_gp.time_cols = np.array([0])
-            new_data_gp.attr_cols = np.arange(1, new_data_gp.col_count)
-        return new_data_gp
