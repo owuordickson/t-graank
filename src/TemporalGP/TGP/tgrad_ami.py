@@ -11,9 +11,8 @@ the random variables X and Y provide about one another.
 """
 
 import numpy as np
-import pandas as pd
 from sklearn.cluster import KMeans
-from so4gp import TimeDelay, DataGP, TGrad
+from so4gp import TimeDelay, TGrad
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.feature_selection import mutual_info_regression
 
@@ -197,6 +196,48 @@ class TGradAMI(TGrad):
 
         return best_time_lag
 
+    def evaluate_tgp(self, t_diffs, attr_data):
+        """"""
+        from so4gp import TGP, GI
+
+        self.fit_bitmap(attr_data)
+
+        bi_gradual_patterns = []
+        n = self.attr_size
+        valid_bins = self.valid_bins
+
+        invalid_count = 0
+        while len(valid_bins) > 0:
+            valid_bins, inv_count = self._gen_apriori_candidates(valid_bins, self.target_col)
+            invalid_count += inv_count
+            i = 0
+            while i < len(valid_bins) and valid_bins != []: # 2-attr candidates
+                gi_arr = valid_bins[i][0]
+                bin_data = valid_bins[i][1]
+                sup = float(np.sum(np.array(bin_data))) / float(n * (n - 1.0) / 2.0)
+                if sup < self.thd_supp:
+                    del valid_bins[i]
+                    invalid_count += 1
+                else:
+                    # Remove subsets
+                    bi_gradual_patterns = TGP.remove_subsets(bi_gradual_patterns, set(gi_arr))
+
+                    t_lag = self.get_fuzzy_time_lag(bin_data, t_diffs, gi_arr)
+                    if t_lag.valid:
+                        tgp = TGP()
+                        """:type gp: TGP"""
+                        for obj in gi_arr:
+                            gi = GI(obj[0], obj[1].decode())
+                            """:type gi: GI"""
+                            if gi.attribute_col == self.target_col:
+                                tgp.add_target_gradual_item(gi)
+                            else:
+                                tgp.add_temporal_gradual_item(gi, t_lag)
+                        tgp.set_support(sup)
+                        bi_gradual_patterns.append(tgp)
+                    i += 1
+        return bi_gradual_patterns
+
     @staticmethod
     def build_mf_w_clusters(time_data: np.ndarray):
         """"""
@@ -321,6 +362,8 @@ class TGradAMI(TGrad):
         :param data: original data with raw DateTime columns.
         :return: modified Pandas DF with computed timestamp column.
         """
+        import pandas as pd
+        from so4gp import DataGP
 
         data_df = pd.DataFrame(data=data[1:, :], columns=data[0, :])
         data_gp = DataGP(data_df)
