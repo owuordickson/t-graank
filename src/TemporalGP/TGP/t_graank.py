@@ -12,87 +12,9 @@ import numpy as np
 import pandas as pd
 import skfuzzy as fuzzy
 import multiprocessing as mp
-from so4gp import DataGP as Dataset, DataGP
-from so4gp import GI, ExtGP, TimeDelay, GRAANK
 
+from so4gp import DataGP, GI, TGP, TimeDelay, GRAANK
 
-class TGP(ExtGP):
-
-    def __init__(self):
-        super(TGP, self).__init__()
-        self.target_gradual_item = None
-        """:type target_gradual_item: GI"""
-        self.temporal_gradual_items = list()
-        """:type temporal_gradual_items: list()"""
-
-    def add_target_gradual_item(self, item):
-        """Description
-
-            Adds a target gradual item (fTGI) into the fuzzy temporal gradual pattern (fTGP)
-            :param item: gradual item
-            :type item: so4gp.GI
-
-            :return: void
-        """
-        if item.symbol == "-" or item.symbol == "+":
-            self.gradual_items.append(item)
-            self.target_gradual_item = item
-        else:
-            pass
-
-    def add_temporal_gradual_item(self, item, time_delay):
-        """Description
-
-            Adds a fuzzy temporal gradual item (fTGI) into the fuzzy temporal gradual pattern (fTGP)
-            :param item: gradual item
-            :type item: so4gp.GI
-
-            :param time_delay: time delay
-            :type time_delay: TimeDelay
-
-            :return: void
-        """
-        if item.symbol == "-" or item.symbol == "+":
-            self.gradual_items.append(item)
-            self.temporal_gradual_items.append([item, time_delay])
-        else:
-            pass
-
-    def to_string(self):
-        """Description
-
-        Returns the GP in string format
-        :return: string
-        """
-        pattern = [self.target_gradual_item.to_string()]
-        for item, t_lag in self.temporal_gradual_items:
-            str_time = f"{t_lag.sign}{t_lag.formatted_time['value']} {t_lag.formatted_time['duration']}"
-            pattern.append([f"({item.to_string()}) {str_time}"])
-        return pattern
-
-    @staticmethod
-    def remove_subsets(gp_list, gi_arr):
-        """
-        Description
-
-        Remove subset GPs from the list.
-
-        :param gp_list: list of existing GPs
-        :type gp_list: list[so4gp.ExtGP]
-
-        :param gi_arr: gradual items in an array
-        :type gi_arr: set
-
-        :return: list of GPs
-        """
-        mod_gp_list = []
-        for gp in gp_list:
-            result1 = set(gp.get_pattern()).issubset(gi_arr)
-            result2 = set(gp.inv_pattern()).issubset(gi_arr)
-            if not (result1 or result2):
-                mod_gp_list.append(gp)
-
-        return mod_gp_list
 
 
 class TGrad(GRAANK):
@@ -115,6 +37,8 @@ class TGrad(GRAANK):
             raise Exception('No date-time datasets found')
 
     def discover_tgp(self, parallel=False):
+        """"""
+
         if parallel:
             # implement parallel multi-processing
             steps = range(self.max_step)
@@ -132,6 +56,8 @@ class TGrad(GRAANK):
             return patterns
 
     def fetch_patterns(self, step):
+        """"""
+
         # 1. Transform datasets
         attr_data, time_diffs = self.transform_data(step)
 
@@ -275,7 +201,7 @@ class TGrad(GRAANK):
     @staticmethod
     def process_time(data):
         """"""
-        # %%
+
         data_df = pd.DataFrame(data=data[1:, :], columns=data[0, :])
         data_gp = DataGP(data_df)
         size = data_gp.row_count
@@ -315,7 +241,7 @@ class TGrad(GRAANK):
     def get_timestamp(time_data):
         """"""
         try:
-            ok, stamp = Dataset.test_time(time_data)
+            ok, stamp = DataGP.test_time(time_data)
             if ok:
                 return stamp
             else:
@@ -335,6 +261,8 @@ class TGrad(GRAANK):
 
     @staticmethod
     def __approximate_fuzzy_time_lag__(time_lags):
+        """"""
+
         if len(time_lags) <= 0:
             # if time_lags is blank return nothing
             return TimeDelay()

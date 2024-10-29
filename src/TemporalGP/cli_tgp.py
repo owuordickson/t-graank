@@ -114,6 +114,7 @@ def produce_eval_pdf(f_path, tgt_col, out_txt, trans_data, time_data):
     import numpy as np
     import pandas as pd
     import matplotlib.pyplot as plt
+    from numpy.linalg import norm
     from fastdtw import fastdtw
     from scipy.spatial.distance import euclidean
     from statsmodels.tsa.seasonal import seasonal_decompose
@@ -134,18 +135,29 @@ def produce_eval_pdf(f_path, tgt_col, out_txt, trans_data, time_data):
     datetime_index = pd.date_range(start="2021-01-01", periods=(data_obj.row_count-1), freq="D")
     ts_1 = pd.Series(data_obj.data[1:, tgt_col], index=datetime_index)
     decomp_ts_1 = seasonal_decompose(ts_1, model='additive')
-    trend_1 = np.array(decomp_ts_1.trend)
-    trend_1 = trend_1[~np.isnan(trend_1)]
-    max_plts = 0
-    tgt_title = 'Target Col: ' + data_obj.titles[tgt_col][1].decode()
-    lst_figs = []
+    # trend_1 = np.array(decomp_ts_1.trend)
+    seasonal_1 = np.array(decomp_ts_1.seasonal)
+    # trend_1 = trend_1[~np.isnan(trend_1)]
+    seasonal_1 = seasonal_1[~np.isnan(seasonal_1)]
+    # max_plts = 0
+    # tgt_title = 'Target Col: ' + data_obj.titles[tgt_col][1].decode()
+    tgt_title = data_obj.titles[tgt_col][1].decode() + '*'
+    lst_res = []
+    sim_txt = ""
     for col in data_obj.attr_cols:
         if col != tgt_col:
             col_title = data_obj.titles[col][1].decode()
             ts_2 = pd.Series(data_obj.data[1:, col], index=datetime_index)
             decomp_ts_2 = seasonal_decompose(ts_2, model='additive')
-            trend_2 = np.array(decomp_ts_2.trend)
-            trend_2 = trend_2[~np.isnan(trend_2)]
+            # trend_2 = np.array(decomp_ts_2.trend)
+            seasonal_2 = np.array(decomp_ts_2.seasonal)
+            # trend_2 = trend_2[~np.isnan(trend_2)]
+            seasonal_2 = seasonal_2[~np.isnan(seasonal_2)]
+            cos_similarity = np.dot(seasonal_1.ravel(), seasonal_2.ravel()) / (norm(seasonal_1.ravel()) * norm(seasonal_2.ravel()))
+            sim_txt += f"{tgt_title} - {col_title}: {round(cos_similarity, 4)}\n"
+            lst_res.append(f"{tgt_title} - {col_title}: {round(cos_similarity, 4)}")
+
+            """
             distance, path = fastdtw(trend_1.reshape(-1, 1), trend_2.reshape(-1, 1), dist=euclidean)
             arr_path = np.array(path)
             err = np.abs(arr_path[:, 0] - arr_path[:, 1])
@@ -166,20 +178,29 @@ def produce_eval_pdf(f_path, tgt_col, out_txt, trans_data, time_data):
                 ax.plot([p[0] for p in path], [p[1] for p in path], '-', label=f"{col_title}: {avg_err}")
                 ax.legend()
                 lst_figs.append(fig)
+    """
 
     fig_res = plt.Figure(figsize=(8.5, 11), dpi=300)
     ax_res = fig_res.add_subplot(1, 1, 1)
     ax_res.set_axis_off()
     ax_res.set_title("FTGP Results")
     ax_res.text(0, 1, out_txt, horizontalalignment='left', verticalalignment='top', transform=ax_res.transAxes)
+
+    fig_res1 = plt.Figure(figsize=(8.5, 11), dpi=300)
+    ax_res1 = fig_res1.add_subplot(1, 1, 1)
+    ax_res1.set_axis_off()
+    ax_res1.set_title("Cosine Similarity of Seasonal Trends")
+    ax_res1.text(0, 1, sim_txt, horizontalalignment='left', verticalalignment='top', transform=ax_res1.transAxes)
+
     with (PdfPages(pdf_file)) as pdf:
         pdf.savefig(fig_res)
-        for fig in lst_figs:
-            pdf.savefig(fig)
+        pdf.savefig(fig_res1)
+        # for fig in lst_figs:
+        #    pdf.savefig(fig)
 
     np.savetxt(f_name + str(file_stamp).replace('.', '', 1) +'_transformed_data.csv', trans_data[:, data_obj.attr_cols], fmt='%s', delimiter=',')
     np.savetxt(f_name + str(file_stamp).replace('.', '', 1) +'_timestamp_data.csv', time_data, fmt='%s', delimiter=',')
-    return lst_figs
+    return lst_res
 
 
 def main_cli():
