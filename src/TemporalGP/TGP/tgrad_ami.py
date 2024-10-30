@@ -132,7 +132,7 @@ class TGradAMI(TGrad):
             if eval_mode:
                 title_row = []
                 time_title = []
-                eval_data = self.evaluate_tgrad(t_diffs=time_data, attr_data=delayed_data)
+                eval_data = self.extract_ts_gradual_component(t_diffs=time_data, attr_data=delayed_data)
                 # print(eval_data)
                 for txt in self.titles:
                     col = int(txt[0])
@@ -146,7 +146,7 @@ class TGradAMI(TGrad):
                 return t_gps
         return False
 
-    def evaluate_tgrad(self, t_diffs, attr_data):
+    def extract_ts_gradual_component(self, t_diffs, attr_data):
         """"""
         from so4gp import TGP, GI
 
