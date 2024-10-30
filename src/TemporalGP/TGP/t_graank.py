@@ -7,13 +7,11 @@
 Algorithm for mining temporal gradual patterns using fuzzy membership functions.
 """
 
-
 import numpy as np
 import skfuzzy as fuzzy
 import multiprocessing as mp
 
 from so4gp import DataGP, GI, TGP, TimeDelay, GRAANK
-
 
 
 class TGrad(GRAANK):
@@ -23,6 +21,7 @@ class TGrad(GRAANK):
     in: https://ieeexplore.ieee.org/abstract/document/8858883.
 
     """
+
     def __init__(self, f_path: str, eq: bool, min_sup: float, target_col: int, min_rep: float, num_cores: int):
         """
         TGrad is an algorithm that is used to extract temporal gradual patterns from numeric datasets.
@@ -173,8 +172,8 @@ class TGrad(GRAANK):
                         stamp_2 += temp_stamp_2
                 time_diff = (stamp_2 - stamp_1)
                 # if time_diff < 0:
-                    # Error time CANNOT go backwards
-                    # print(f"Problem {i} and {i + step} - {self.time_cols}")
+                # Error time CANNOT go backwards
+                # print(f"Problem {i} and {i + step} - {self.time_cols}")
                 #    return False, [i + 1, i + step + 1]
                 time_diffs[int(i)] = float(abs(time_diff))
         return True, time_diffs
@@ -194,41 +193,32 @@ class TGrad(GRAANK):
 
         gradual_patterns = []
         """:type gradual_patterns: list"""
-        n = self.attr_size
         valid_bins = self.valid_bins
 
         invalid_count = 0
         while len(valid_bins) > 0:
             valid_bins, inv_count = self._gen_apriori_candidates(valid_bins, self.target_col)
             invalid_count += inv_count
-            i = 0
-            while i < len(valid_bins) and valid_bins != []:
-                gi_arr = valid_bins[i][0]
-                bin_data = valid_bins[i][1]
-                sup = float(np.sum(np.array(bin_data))) / float(n * (n - 1.0) / 2.0)
-                if sup < self.thd_supp:
-                    del valid_bins[i]
-                    invalid_count += 1
-                else:
-                    # Remove subsets
-                    gradual_patterns = TGP.remove_subsets(gradual_patterns, set(gi_arr))
+            for v_bin in valid_bins:
+                gi_arr = v_bin[0]
+                bin_data = v_bin[1]
+                sup = v_bin[2]
+                gradual_patterns = TGP.remove_subsets(gradual_patterns, set(gi_arr))
+                t_lag = TGrad.get_fuzzy_time_lag(bin_data, t_diffs)
 
-                    t_lag = TGrad.get_fuzzy_time_lag(bin_data, t_diffs)
-                    if t_lag.valid:
-                        tgp = TGP()
-                        """:type gp: TGP"""
-                        for obj in gi_arr:
-                            gi = GI(obj[0], obj[1].decode())
-                            """:type gi: GI"""
-                            if gi.attribute_col == self.target_col:
-                                tgp.add_target_gradual_item(gi)
-                            else:
-                                tgp.add_temporal_gradual_item(gi, t_lag)
-                        tgp.set_support(sup)
-                        gradual_patterns.append(tgp)
-                    # else:
-                    #    print(f"{t_lag.timestamp} - {gi_arr}")
-                    i += 1
+                if t_lag.valid:
+                    tgp = TGP()
+                    """:type gp: TGP"""
+                    for obj in gi_arr:
+                        gi = GI(obj[0], obj[1].decode())
+                        """:type gi: GI"""
+                        if gi.attribute_col == self.target_col:
+                            tgp.add_target_gradual_item(gi)
+                        else:
+                            tgp.add_temporal_gradual_item(gi, t_lag)
+                    tgp.set_support(sup)
+                    gradual_patterns.append(tgp)
+
         return gradual_patterns
 
     @staticmethod
@@ -257,6 +247,7 @@ class TGrad(GRAANK):
         time_lag = TGrad.__approximate_fuzzy_time_lag__(time_lags)
         return time_lag
 
+
     @staticmethod
     def get_timestamp(time_str: str):
         """
@@ -274,6 +265,7 @@ class TGrad(GRAANK):
                 return False
         except ValueError:
             return False
+
 
     @staticmethod
     def triangular_mf(x: float, a: float, b: float, c: float):
@@ -294,6 +286,7 @@ class TGrad(GRAANK):
             return (c - x) / (c - b)
         else:
             return 0
+
 
     @staticmethod
     def __approximate_fuzzy_time_lag__(time_lags: np.ndarray):

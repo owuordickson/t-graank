@@ -138,7 +138,8 @@ class TGradAMI(TGrad):
                     if (col != self.target_col) and (col not in self.time_cols):
                         time_title.append(str(txt[1].decode()))
 
-                return t_gps, np.vstack((np.array(title_row), delayed_data.T)), np.vstack((np.array(time_title), time_data.T))
+                return t_gps, np.vstack((np.array(title_row), delayed_data.T)), np.vstack(
+                    (np.array(time_title), time_data.T))
             else:
                 return t_gps
         return False
@@ -158,7 +159,7 @@ class TGradAMI(TGrad):
             if (col != self.target_col) and (col < self.target_col):
                 selected_cols.append(col - (len(self.time_cols)))
             elif (col != self.target_col) and (col > self.target_col):
-                selected_cols.append(col - (len(self.time_cols)+1))
+                selected_cols.append(col - (len(self.time_cols) + 1))
         selected_cols = np.array(selected_cols, dtype=int)
         t_lag_arr = time_diffs[np.ix_(selected_cols, selected_rows)]
 
@@ -170,10 +171,10 @@ class TGradAMI(TGrad):
             best_time_lag = TimeDelay(-1, 0)
             fuzzy_set = []
             for t_lags in t_lag_arr:
-                init_bias = abs(b-np.median(t_lags))
+                init_bias = abs(b - np.median(t_lags))
                 slide_val, loss = TGradAMI.approx_time_hill_climbing(a, b, c, t_lags, initial_bias=init_bias)
                 tstamp = int(b - slide_val)
-                sup = float(1-loss)
+                sup = float(1 - loss)
                 fuzzy_set.append([tstamp, float(loss)])
                 if sup >= best_time_lag.support and tstamp > best_time_lag.timestamp:
                     best_time_lag = TimeDelay(tstamp, sup)
@@ -201,41 +202,30 @@ class TGradAMI(TGrad):
         from so4gp import TGP, GI
 
         self.fit_bitmap(attr_data)
-
         bi_gradual_patterns = []
-        n = self.attr_size
         valid_bins = self.valid_bins
 
         invalid_count = 0
         while len(valid_bins) > 0:
             valid_bins, inv_count = self._gen_apriori_candidates(valid_bins, self.target_col)
             invalid_count += inv_count
-            i = 0
-            while i < len(valid_bins) and valid_bins != []: # 2-attr candidates
-                gi_arr = valid_bins[i][0]
-                bin_data = valid_bins[i][1]
-                sup = float(np.sum(np.array(bin_data))) / float(n * (n - 1.0) / 2.0)
-                if sup < self.thd_supp:
-                    del valid_bins[i]
-                    invalid_count += 1
-                else:
-                    # Remove subsets
-                    bi_gradual_patterns = TGP.remove_subsets(bi_gradual_patterns, set(gi_arr))
+            for v_bin in valid_bins:
+                gi_arr = v_bin[0]
+                bin_data = v_bin[1]
+                sup = v_bin[2]
+                bi_gradual_patterns = TGP.remove_subsets(bi_gradual_patterns, set(gi_arr))
+                t_lag = self.get_fuzzy_time_lag(bin_data, t_diffs, gi_arr)
+                if t_lag.valid:
+                    tgp = TGP()
+                    for obj in gi_arr:
+                        gi = GI(obj[0], obj[1].decode())
+                        if gi.attribute_col == self.target_col:
+                            tgp.add_target_gradual_item(gi)
+                        else:
+                            tgp.add_temporal_gradual_item(gi, t_lag)
+                    tgp.set_support(sup)
+                    bi_gradual_patterns.append(tgp)
 
-                    t_lag = self.get_fuzzy_time_lag(bin_data, t_diffs, gi_arr)
-                    if t_lag.valid:
-                        tgp = TGP()
-                        """:type gp: TGP"""
-                        for obj in gi_arr:
-                            gi = GI(obj[0], obj[1].decode())
-                            """:type gi: GI"""
-                            if gi.attribute_col == self.target_col:
-                                tgp.add_target_gradual_item(gi)
-                            else:
-                                tgp.add_temporal_gradual_item(gi, t_lag)
-                        tgp.set_support(sup)
-                        bi_gradual_patterns.append(tgp)
-                    i += 1
         return bi_gradual_patterns
 
     @staticmethod
@@ -288,6 +278,7 @@ class TGradAMI(TGrad):
             c = c + shift_by
         return a, b, c
 
+
     @staticmethod
     def approx_time_hill_climbing(a: float, b: float, c: float, x_train: np.ndarray,
                                   initial_bias: float = 0, step_size: float = 0.9, max_iterations: int = 10):
@@ -324,6 +315,7 @@ class TGradAMI(TGrad):
         # print(f"Mean Squared Error: {best_mse*100}%")
         return bias, best_mse
 
+
     @staticmethod
     def hill_climbing_cost_function(y_train: np.ndarray, tri_mf: np.ndarray, min_membership: float = 0.5):
         """
@@ -348,9 +340,10 @@ class TGradAMI(TGrad):
         # 3. Compute loss
         hat_count = np.count_nonzero(y_hat)
         true_count = len(y_hat)
-        loss = (((true_count - hat_count)/true_count) ** 2) ** 0.5
+        loss = (((true_count - hat_count) / true_count) ** 2) ** 0.5
         # loss = abs(true_count - hat_count)
         return loss
+
 
     @staticmethod
     def process_time(data: np.ndarray):
