@@ -39,7 +39,7 @@ def execute_tgp(f_path: str, min_sup: float, tgt_col: int, min_rep: float, num_c
         # tgp = TGrad(f_path, eq, min_sup, tgt_col, min_rep, num_cores)
         tgp = TGradAMI(f_path, eq, min_sup, tgt_col, min_rep, num_cores)
         if eval_mode:
-            list_tgp, trans_data, time_data = tgp.discover_tgp(parallel=allow_mp, eval_mode=True)
+            list_tgp, trans_data, time_data, eval_data = tgp.discover_tgp(parallel=allow_mp, eval_mode=True)
             output_txt = produce_output_txt(f_path, allow_mp, tgp, list_tgp)
             produce_eval_pdf(f_path, tgt_col, output_txt, trans_data, time_data)
         else:

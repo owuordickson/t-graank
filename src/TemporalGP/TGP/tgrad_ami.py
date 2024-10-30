@@ -132,6 +132,8 @@ class TGradAMI(TGrad):
             if eval_mode:
                 title_row = []
                 time_title = []
+                eval_data = self.evaluate_tgrad(t_diffs=time_data, attr_data=delayed_data)
+                # print(eval_data)
                 for txt in self.titles:
                     col = int(txt[0])
                     title_row.append(str(txt[1].decode()))
@@ -139,10 +141,37 @@ class TGradAMI(TGrad):
                         time_title.append(str(txt[1].decode()))
 
                 return t_gps, np.vstack((np.array(title_row), delayed_data.T)), np.vstack(
-                    (np.array(time_title), time_data.T))
+                    (np.array(time_title), time_data.T)), eval_data
             else:
                 return t_gps
         return False
+
+    def evaluate_tgrad(self, t_diffs, attr_data):
+        """"""
+        from so4gp import TGP, GI
+
+        self.fit_bitmap(attr_data)
+        bi_gradual_patterns = {}
+        valid_bins = self.valid_bins
+
+        valid_bins, inv_count = self._gen_apriori_candidates(valid_bins, self.target_col)
+        for i, v_bin in enumerate(valid_bins):
+            gi_arr = v_bin[0]
+            bin_data = v_bin[1]
+            sup = v_bin[2]
+
+            t_lag = self.get_fuzzy_time_lag(bin_data, t_diffs, gi_arr)
+            tgp = TGP()
+            for obj in gi_arr:
+                gi = GI(obj[0], obj[1].decode())
+                if gi.attribute_col == self.target_col:
+                    tgp.add_target_gradual_item(gi)
+                else:
+                    tgp.add_temporal_gradual_item(gi, t_lag)
+            tgp.set_support(sup)
+            bi_gradual_patterns[i] = {"tgp": tgp, "mat": np.array(bin_data, dtype=int)}
+            # bi_gradual_patterns.append(tgp)
+        return bi_gradual_patterns
 
     def get_fuzzy_time_lag(self, bin_data: np.ndarray, time_diffs: np.ndarray, gi_arr=None):
         """TO BE DELETED (ALREADY INCLUDED IN SO4GP)"""
@@ -196,37 +225,6 @@ class TGradAMI(TGrad):
                     best_time_lag = time_lag
 
         return best_time_lag
-
-    def evaluate_tgp(self, t_diffs, attr_data):
-        """"""
-        from so4gp import TGP, GI
-
-        self.fit_bitmap(attr_data)
-        bi_gradual_patterns = []
-        valid_bins = self.valid_bins
-
-        invalid_count = 0
-        while len(valid_bins) > 0:
-            valid_bins, inv_count = self._gen_apriori_candidates(valid_bins, self.target_col)
-            invalid_count += inv_count
-            for v_bin in valid_bins:
-                gi_arr = v_bin[0]
-                bin_data = v_bin[1]
-                sup = v_bin[2]
-                bi_gradual_patterns = TGP.remove_subsets(bi_gradual_patterns, set(gi_arr))
-                t_lag = self.get_fuzzy_time_lag(bin_data, t_diffs, gi_arr)
-                if t_lag.valid:
-                    tgp = TGP()
-                    for obj in gi_arr:
-                        gi = GI(obj[0], obj[1].decode())
-                        if gi.attribute_col == self.target_col:
-                            tgp.add_target_gradual_item(gi)
-                        else:
-                            tgp.add_temporal_gradual_item(gi, t_lag)
-                    tgp.set_support(sup)
-                    bi_gradual_patterns.append(tgp)
-
-        return bi_gradual_patterns
 
     @staticmethod
     def build_mf_w_clusters(time_data: np.ndarray):
