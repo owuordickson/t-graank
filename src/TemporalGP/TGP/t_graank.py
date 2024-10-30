@@ -247,7 +247,6 @@ class TGrad(GRAANK):
         time_lag = TGrad.__approximate_fuzzy_time_lag__(time_lags)
         return time_lag
 
-
     @staticmethod
     def get_timestamp(time_str: str):
         """
@@ -265,7 +264,6 @@ class TGrad(GRAANK):
                 return False
         except ValueError:
             return False
-
 
     @staticmethod
     def triangular_mf(x: float, a: float, b: float, c: float):
@@ -286,7 +284,6 @@ class TGrad(GRAANK):
             return (c - x) / (c - b)
         else:
             return 0
-
 
     @staticmethod
     def __approximate_fuzzy_time_lag__(time_lags: np.ndarray):

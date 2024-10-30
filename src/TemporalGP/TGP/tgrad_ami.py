@@ -276,7 +276,6 @@ class TGradAMI(TGrad):
             c = c + shift_by
         return a, b, c
 
-
     @staticmethod
     def approx_time_hill_climbing(a: float, b: float, c: float, x_train: np.ndarray,
                                   initial_bias: float = 0, step_size: float = 0.9, max_iterations: int = 10):
@@ -313,7 +312,6 @@ class TGradAMI(TGrad):
         # print(f"Mean Squared Error: {best_mse*100}%")
         return bias, best_mse
 
-
     @staticmethod
     def hill_climbing_cost_function(y_train: np.ndarray, tri_mf: np.ndarray, min_membership: float = 0.5):
         """
@@ -341,7 +339,6 @@ class TGradAMI(TGrad):
         loss = (((true_count - hat_count) / true_count) ** 2) ** 0.5
         # loss = abs(true_count - hat_count)
         return loss
-
 
     @staticmethod
     def process_time(data: np.ndarray):
