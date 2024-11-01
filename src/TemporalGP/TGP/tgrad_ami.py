@@ -194,7 +194,7 @@ class TGradAMI(TGrad):
 
         # 3. Approximate TimeDelay value
         best_time_lag = TimeDelay(-1, 0)
-        if not isinstance(self, TGradAMI):
+        if isinstance(self, TGradAMI):
             # 3b. Learn the best MF through slide-descent/sliding
             a, b, c = self.tri_mf_data
             best_time_lag = TimeDelay(-1, -1)
