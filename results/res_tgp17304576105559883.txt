@@ -1,12 +1,12 @@
-Run-time: 1.117236852645874 seconds
-Algorithm: T-GRAANK AMI (slide-calculate)
+Run-time: 1.0212349891662598 seconds
+Algorithm: T-GRAANK AMI (with Slide-Recalculate)
 No. of (dataset) attributes: 5
 No. of (dataset) tuples: 23
 Minimum support: 0.5
-Minimum representativity: 0.8
+Minimum representativity: 0.75
 Multi-core execution: True
 Number of cores: 8
-Number of tasks: 5
+Number of tasks: 6
 
 0. Date (Jul-Sep)
 1. NRB (EVI)**

@@ -1,5 +1,5 @@
 Run-time: 7.079909801483154 seconds
-Algorithm: T-GRAANK 
+Algorithm: T-GRAANK (with Slide-Recalculate)
 No. of (dataset) attributes: 5
 No. of (dataset) tuples: 23
 Minimum support: 0.5
