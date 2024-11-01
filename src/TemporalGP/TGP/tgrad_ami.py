@@ -19,15 +19,15 @@ from sklearn.feature_selection import mutual_info_regression
 
 class TGradAMI(TGrad):
 
-    def __init__(self, f_path: str, eq: bool, min_sup: float, target_col: int, err: float, num_cores: int):
+    def __init__(self, f_path: str, eq: bool, min_sup: float, target_col: int, min_rep: float, num_cores: int):
         """"""
         # Compute MI w.r.t. target-column with original dataset to get the actual relationship
         # between variables. Compute MI for every time-delay/time-lag: if the values are
         # almost equal to actual, then we have the most accurate time-delay. Instead of
         # min-representativity value, we propose error-margin.
 
-        super(TGradAMI, self).__init__(f_path, eq, min_sup, target_col=target_col, min_rep=0.25, num_cores=num_cores)
-        self.error_margin = err
+        super(TGradAMI, self).__init__(f_path, eq, min_sup, target_col=target_col, min_rep=min_rep, num_cores=num_cores)
+        # self.error_margin = err
         self.min_membership = 0.001
         self.tri_mf_data = None  # The a,b,c values of the triangular membership function in indices 0,1,2 respectively.
         self.feature_cols = np.setdiff1d(self.attr_cols, self.target_col)
@@ -194,10 +194,10 @@ class TGradAMI(TGrad):
 
         # 3. Approximate TimeDelay value
         best_time_lag = TimeDelay(-1, 0)
-        if isinstance(self, TGradAMI):
+        if not isinstance(self, TGradAMI):
             # 3b. Learn the best MF through slide-descent/sliding
             a, b, c = self.tri_mf_data
-            best_time_lag = TimeDelay(-1, 0)
+            best_time_lag = TimeDelay(-1, -1)
             fuzzy_set = []
             for t_lags in t_lag_arr:
                 init_bias = abs(b - np.median(t_lags))
@@ -205,7 +205,7 @@ class TGradAMI(TGrad):
                 tstamp = int(b - slide_val)
                 sup = float(1 - loss)
                 fuzzy_set.append([tstamp, float(loss)])
-                if sup >= best_time_lag.support and tstamp > best_time_lag.timestamp:
+                if sup >= best_time_lag.support and abs(tstamp) > abs(best_time_lag.timestamp):
                     best_time_lag = TimeDelay(tstamp, sup)
                 # print(f"New Membership Fxn: {a - slide_val}, {b - slide_val}, {c - slide_val}")
             # 4. Apply cartesian product on multiple MFs to pick the MF with the best center (inference logic)

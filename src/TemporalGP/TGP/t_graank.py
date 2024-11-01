@@ -325,6 +325,6 @@ class TGrad(GRAANK):
                     sup1 = sup
                     center = boundaries[1]
                 if sup >= 0.5:
-                    print(boundaries[1])
+                    # print(boundaries[1])
                     return TimeDelay(int(boundaries[1]), sup)
             return TimeDelay(center, sup1)

@@ -13,7 +13,7 @@ from optparse import OptionParser
 import so4gp as sgp
 
 from .configs.configs_loader import load_configs
-# from .TGP.t_graank import TGrad
+from .TGP.t_graank import TGrad
 from .TGP.tgrad_ami import TGradAMI
 
 
@@ -36,9 +36,9 @@ def execute_tgp(f_path: str, min_sup: float, tgt_col: int, min_rep: float, num_c
         if num_cores <= 1:
             num_cores = sgp.get_num_cores()
 
-        # tgp = TGrad(f_path, eq, min_sup, tgt_col, min_rep, num_cores)
+        #tgp = TGrad(f_path, eq, min_sup, tgt_col, min_rep, num_cores)
         tgp = TGradAMI(f_path, eq, min_sup, tgt_col, min_rep, num_cores)
-        if eval_mode:
+        if eval_mode and isinstance(tgp, TGradAMI):
             list_tgp, trans_data, time_data, eval_data = tgp.discover_tgp(parallel=allow_mp, eval_mode=True)
             output_txt = produce_output_txt(f_path, allow_mp, tgp, list_tgp)
             produce_eval_pdf(f_path, tgt_col, output_txt, trans_data, time_data)

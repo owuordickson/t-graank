@@ -1,0 +1,25 @@
+Run-time: 0.9450132846832275 seconds
+Algorithm: T-GRAANK AMI
+No. of (dataset) attributes: 5
+No. of (dataset) tuples: 23
+Minimum support: 0.5
+Minimum representativity: 0.75
+Multi-core execution: True
+Number of cores: 8
+Number of tasks: 6
+
+0. Date (Jul-Sep)
+1. NRB (EVI)**
+2. KAK (EVI)
+3. MAK (EVI)
+4. WAJ (EVI)
+
+File: ../datasets/ke_evi_data.csv
+
+Pattern : Support
+['1-', ['(2+) +12.0 months']] :  0.542
+['1-', ['(3-) +12.0 months']] :  0.505
+['1-', ['(4+) -1.0 years']] :  0.7
+
+
+ Number of patterns: 3
