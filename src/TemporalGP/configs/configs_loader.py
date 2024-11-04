@@ -35,7 +35,7 @@ def load_configs():
         # 2. (configs.ini) TGP Configurations
         options_tgp.target_column = int(config.get('temporal-gradual-patterns', 'target_column'))
         options_tgp.min_rep = float(config.get('temporal-gradual-patterns', 'min_representation'))
-        options_tgp.use_clustering = float(config.get('temporal-gradual-patterns', 'use_clustering_method'))
+        options_tgp.use_clustering = int(config.get('temporal-gradual-patterns', 'use_clustering_method'))
 
     except configparser.NoSectionError:
         print("Default configs!")

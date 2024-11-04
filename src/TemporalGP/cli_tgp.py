@@ -42,21 +42,22 @@ def execute_tgp(f_path: str, min_sup: float, tgt_col: int, min_rep: float, num_c
         tgp = TGradAMI(f_path, eq, min_sup, tgt_col, min_rep, num_cores)
         if eval_mode and isinstance(tgp, TGradAMI):
             list_tgp, trans_data, time_data, gp_components = tgp.discover_tgp(parallel=allow_mp,
-                                                                              use_clustering=allow_clustering, eval_mode=True)
-            output_txt = produce_output_txt(f_path, allow_mp, tgp, list_tgp)
+                                                                              use_clustering=allow_clustering,
+                                                                              eval_mode=True)
+            output_txt = produce_output_txt(f_path, allow_mp, allow_clustering, tgp, list_tgp)
             # produce_eval_pdf(f_path, tgt_col, output_txt, trans_data, time_data)
         else:
-            list_tgp = tgp.discover_tgp(parallel=allow_mp)
-            output_txt = produce_output_txt(f_path, allow_mp, tgp, list_tgp)
+            list_tgp = tgp.discover_tgp(parallel=allow_mp, use_clustering=allow_clustering)
+            output_txt = produce_output_txt(f_path, allow_mp, allow_clustering, tgp, list_tgp)
 
         return output_txt
-    except AttributeError as error:
+    except ZeroDivisionError as error:
         output_txt = "Failed: " + str(error)
         print(error)
         return output_txt
 
 
-def produce_output_txt(f_path, allow_mp, tgp, list_tgp):
+def produce_output_txt(f_path, allow_mp, allow_clustering, tgp, list_tgp):
     """"""
     if allow_mp:
         msg_para = "True"
@@ -64,9 +65,9 @@ def produce_output_txt(f_path, allow_mp, tgp, list_tgp):
         msg_para = "False"
 
     if isinstance(tgp, TGradAMI):
-        output_txt = "Algorithm: T-GRAANK AMI\n"
+        output_txt = f"Algorithm: T-GRAANK AMI {'(with KMeans & Hill-climbing)' if allow_clustering else '(with Slide-Recalculate)'}\n"
     else:
-        output_txt = "Algorithm: T-GRAANK \n"
+        output_txt = "Algorithm: T-GRAANK (with Slide-Recalculate)\n"
     output_txt += "No. of (dataset) attributes: " + str(tgp.col_count) + '\n'
     output_txt += "No. of (dataset) tuples: " + str(tgp.row_count) + '\n'
     output_txt += "Minimum support: " + str(tgp.thd_supp) + '\n'
@@ -253,8 +254,10 @@ def main_cli():
                          dest='useClusters',
                          help='use clustering method',
                          default=options_tgp.use_clustering,
-                         type='float')
+                         type='int')
     (cfg, args) = optparser.parse_args()
+    cfg.useClusters = bool(cfg.useClusters)
+    cfg.evalMode = bool(cfg.evalMode)
 
     if (cfg.file is None) or cfg.file == '':
         print('No datasets-set filename specified, system with exit')
@@ -266,7 +269,8 @@ def main_cli():
 
     start = time.time()
     # tracemalloc.start()
-    res_text = execute_tgp(cfg.file, cfg.minSup, cfg.tgtCol, cfg.minRep, cfg.numCores, cfg.allowPara, eval_mode=cfg.evalMode)
+    res_text = execute_tgp(cfg.file, cfg.minSup, cfg.tgtCol, cfg.minRep, cfg.numCores, cfg.allowPara,
+                           allow_clustering=cfg.useClusters, eval_mode=cfg.evalMode)
     # snapshot = tracemalloc.take_snapshot()
     end = time.time()
 

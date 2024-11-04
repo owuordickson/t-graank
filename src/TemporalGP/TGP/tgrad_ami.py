@@ -12,9 +12,10 @@ the random variables X and Y provide about one another.
 
 import numpy as np
 from sklearn.cluster import KMeans
-from so4gp import GI, TGP, TGrad
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.feature_selection import mutual_info_regression
+
+from so4gp import GI, TGP, TimeDelay, GRAANK, TGrad
 
 
 class TGradAMI(TGrad):
@@ -92,7 +93,7 @@ class TGradAMI(TGrad):
         # print(f"{time_dict}\n")
         return delayed_data, np.array(time_data)
 
-    def discover_tgp(self, parallel: bool = False, use_clustering: bool = False, eval_mode: bool =False):
+    def discover_tgp(self, parallel: bool = False, use_clustering: bool = False, eval_mode: bool = False):
         """"""
 
         # 1. Compute mutual information
@@ -132,7 +133,8 @@ class TGradAMI(TGrad):
             if eval_mode:
                 title_row = []
                 time_title = []
-                gp_components = self.extract_gradual_components(t_diffs=time_data, attr_data=delayed_data)
+                gp_components = self.extract_gradual_components(t_diffs=time_data, attr_data=delayed_data,
+                                                                clustering_method=use_clustering)
                 # print(eval_data)
                 for txt in self.titles:
                     col = int(txt[0])
@@ -146,7 +148,8 @@ class TGradAMI(TGrad):
                 return t_gps
         return False
 
-    def extract_gradual_components(self, t_diffs, attr_data):
+    def extract_gradual_components(self, t_diffs: np.ndarray | dict = None, attr_data: np.ndarray = None,
+                                   clustering_method: bool = False):
         """"""
 
         self.fit_bitmap(attr_data)
@@ -159,7 +162,7 @@ class TGradAMI(TGrad):
             attr_col = pairwise_obj[0][0]
             attr_name = pairwise_obj[0][1].decode()
             gi = GI(attr_col, attr_name)
-            gp_components[gi.to_string()] = TGradAMI.decompose_to_gp_component(pairwise_mat)
+            gp_components[gi.to_string()] = GRAANK.decompose_to_gp_component(pairwise_mat)
 
         invalid_count = 0
         while len(valid_bins) > 0:
@@ -169,7 +172,7 @@ class TGradAMI(TGrad):
                 gi_arr = v_bin[0]
                 bin_data = v_bin[1]
                 sup = v_bin[2]
-                t_lag = self.get_fuzzy_time_lag(bin_data, t_diffs, gi_arr, use_clustering_method=False)
+                t_lag = self.get_fuzzy_time_lag(bin_data, t_diffs, gi_arr, use_clustering_method=clustering_method)
 
                 if t_lag.valid:
                     tgp = TGP()
@@ -180,23 +183,73 @@ class TGradAMI(TGrad):
                         else:
                             tgp.add_temporal_gradual_item(gi, t_lag)
                     tgp.set_support(sup)
-                    gp_components[tgp.to_string()] = TGradAMI.decompose_to_gp_component(bin_data)
+                    gp_components[f"{tgp.to_string()}"] = GRAANK.decompose_to_gp_component(bin_data)
 
         return gp_components
 
-    @staticmethod
-    def decompose_to_gp_component(pairwise_mat: np.ndarray):
-        """
-        A method that decomposes the pairwise matrix of a gradual item/pattern into a warping path. This path is the
-        decomposed component of that gradual item/pattern.
+    def get_fuzzy_time_lag(self, bin_data: np.ndarray, time_diffs: np.ndarray | dict, gi_arr: set = None, use_clustering_method: bool = False):
+        """  TO BE DELETED (ALREADY IN  so4gp)
 
-        :param pairwise_mat:
-        :return: ndarray of warping path.
+        A method that uses fuzzy membership function to select the most accurate time-delay value. We implement two
+        methods: (1) uses classical slide and re-calculate dynamic programming to find best time-delay value and,
+        (2) uses metaheuristic hill-climbing to find the best time-delay value.
+
+        :param bin_data: gradual item pairwise matrix.
+        :param time_diffs: time-delay values.
+        :param gi_arr: gradual item object.
+        :param use_clustering_method: find and approximate best time-delay value using KMeans and Hill-climbing approach.
+        :return: TimeDelay object.
         """
 
-        edge_lst = [(i, j) for i, row in enumerate(pairwise_mat) for j, val in enumerate(row) if val]
-        """:type edge_lst: list"""
-        return edge_lst
+        # 1. Get Indices
+        indices = np.argwhere(bin_data == 1)
+
+        # 2. Get TimeDelay Array
+        selected_rows = np.unique(indices.flatten())
+        if isinstance(self, TGradAMI):
+            selected_cols = []
+            for obj in gi_arr:
+                # Ignore target-col and, remove time-cols and target-col from count
+                col = int(obj[0])
+                if (col != self.target_col) and (col < self.target_col):
+                    selected_cols.append(col - (len(self.time_cols)))
+                elif (col != self.target_col) and (col > self.target_col):
+                    selected_cols.append(col - (len(self.time_cols) + 1))
+            selected_cols = np.array(selected_cols, dtype=int)
+            t_lag_arr = time_diffs[np.ix_(selected_cols, selected_rows)]
+        else:
+            time_lags = []
+            for row, stamp_diff in time_diffs.items():  # {row: time-lag-stamp}
+                if int(row) in selected_rows:
+                    time_lags.append(stamp_diff)
+            t_lag_arr = np.array(time_lags)
+            best_time_lag = TGrad.approx_time_slide_calculate(t_lag_arr)
+            return best_time_lag
+
+        # 3. Approximate TimeDelay value
+        best_time_lag = TimeDelay(-1, 0)
+        """:type best_time_lag: so4gp.TimeDelay"""
+        if use_clustering_method:
+            # 3b. Learn the best MF through slide-descent/sliding
+            a, b, c = self.tri_mf_data
+            best_time_lag = TimeDelay(-1, -1)
+            fuzzy_set = []
+            for t_lags in t_lag_arr:
+                init_bias = abs(b - np.median(t_lags))
+                slide_val, loss = TGradAMI.approx_time_hill_climbing(a, b, c, t_lags, initial_bias=init_bias)
+                tstamp = int(b - slide_val)
+                sup = float(1 - loss)
+                fuzzy_set.append([tstamp, float(loss)])
+                if sup >= best_time_lag.support and abs(tstamp) > abs(best_time_lag.timestamp):
+                    best_time_lag = TimeDelay(tstamp, sup)
+                # print(f"New Membership Fxn: {a - slide_val}, {b - slide_val}, {c - slide_val}")
+        else:
+            # 3a. Approximate TimeDelay using Fuzzy Membership
+            for t_lags in t_lag_arr:
+                time_lag = TGrad.approx_time_slide_calculate(t_lags)
+                if time_lag.support >= best_time_lag.support:
+                    best_time_lag = time_lag
+        return best_time_lag
 
     @staticmethod
     def build_mf_w_clusters(time_data: np.ndarray):
