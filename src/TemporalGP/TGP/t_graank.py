@@ -12,6 +12,7 @@ import skfuzzy as fuzzy
 import multiprocessing as mp
 
 from so4gp import DataGP, GI, TGP, TimeDelay, GRAANK
+from .tgrad_ami import TGradAMI
 
 
 class TGrad(GRAANK):
@@ -178,7 +179,7 @@ class TGrad(GRAANK):
                 time_diffs[int(i)] = float(abs(time_diff))
         return True, time_diffs
 
-    def discover(self, t_diffs: dict = None, attr_data: np.ndarray = None):
+    def discover(self, t_diffs: np.ndarray | dict = None, attr_data: np.ndarray = None, clustering_method: bool = False):
         """
 
         Uses apriori algorithm to find GP candidates based on the target-attribute. The candidates are validated if
@@ -186,6 +187,7 @@ class TGrad(GRAANK):
 
         :param t_diffs: time-delay values
         :param attr_data: the transformed data.
+        :param clustering_method: find and approximate best time-delay value using KMeans and Hill-climbing approach.
         :return: temporal-GPs as a list.
         """
 
@@ -204,7 +206,7 @@ class TGrad(GRAANK):
                 bin_data = v_bin[1]
                 sup = v_bin[2]
                 gradual_patterns = TGP.remove_subsets(gradual_patterns, set(gi_arr))
-                t_lag = TGrad.get_fuzzy_time_lag(bin_data, t_diffs)
+                t_lag = self.get_fuzzy_time_lag(bin_data, t_diffs, gi_arr, clustering_method)
 
                 if t_lag.valid:
                     tgp = TGP()
@@ -221,31 +223,78 @@ class TGrad(GRAANK):
 
         return gradual_patterns
 
-    @staticmethod
-    def get_fuzzy_time_lag(bin_data: np.ndarray, time_diffs: dict):
+    def get_fuzzy_time_lag(self, bin_data: np.ndarray, time_diffs: np.ndarray | dict, gi_arr: set = None, use_clustering_method: bool = False):
         """
 
-        A method that uses fuzzy-logic to select the most accurate time-delay value.
+        A method that uses fuzzy membership function to select the most accurate time-delay value. We implement two
+        methods: (1) uses classical slide and re-calculate dynamic programming to find best time-delay value and,
+        (2) uses metaheuristic hill-climbing to find the best time-delay value.
 
         :param bin_data: gradual item pairwise matrix.
         :param time_diffs: time-delay values.
+        :param gi_arr: gradual item object.
+        :param use_clustering_method: find and approximate best time-delay value using KMeans and Hill-climbing approach.
         :return: TimeDelay object.
         """
 
         # 1. Get Indices
         indices = np.argwhere(bin_data == 1)
 
-        # 2. Get TimeDelays
-        pat_indices_flat = np.unique(indices.flatten())
-        time_lags = list()
-        for row, stamp_diff in time_diffs.items():  # {row: time-lag-stamp}
-            if int(row) in pat_indices_flat:
-                time_lags.append(stamp_diff)
-        time_lags = np.array(time_lags)
+        # 2. Get TimeDelay Array
+        selected_rows = np.unique(indices.flatten())
+        if isinstance(self, TGradAMI):
+            selected_cols = []
+            for obj in gi_arr:
+                # Ignore target-col and, remove time-cols and target-col from count
+                col = int(obj[0])
+                if (col != self.target_col) and (col < self.target_col):
+                    selected_cols.append(col - (len(self.time_cols)))
+                elif (col != self.target_col) and (col > self.target_col):
+                    selected_cols.append(col - (len(self.time_cols) + 1))
+            selected_cols = np.array(selected_cols, dtype=int)
+            t_lag_arr = time_diffs[np.ix_(selected_cols, selected_rows)]
+        else:
+            time_lags = []
+            for row, stamp_diff in time_diffs.items():  # {row: time-lag-stamp}
+                if int(row) in selected_rows:
+                    time_lags.append(stamp_diff)
+            t_lag_arr = np.array(time_lags)
+            best_time_lag = TGrad.approx_time_slide_calculate(t_lag_arr)
+            return best_time_lag
 
-        # 3. Approximate TimeDelay using Fuzzy Membership
-        time_lag = TGrad.__approximate_fuzzy_time_lag__(time_lags)
-        return time_lag
+        # 3. Approximate TimeDelay value
+        best_time_lag = TimeDelay(-1, 0)
+        """:type best_time_lag: so4gp.TimeDelay"""
+        if use_clustering_method:
+            # 3b. Learn the best MF through slide-descent/sliding
+            a, b, c = self.tri_mf_data
+            best_time_lag = TimeDelay(-1, -1)
+            fuzzy_set = []
+            for t_lags in t_lag_arr:
+                init_bias = abs(b - np.median(t_lags))
+                slide_val, loss = TGradAMI.approx_time_hill_climbing(a, b, c, t_lags, initial_bias=init_bias)
+                tstamp = int(b - slide_val)
+                sup = float(1 - loss)
+                fuzzy_set.append([tstamp, float(loss)])
+                if sup >= best_time_lag.support and abs(tstamp) > abs(best_time_lag.timestamp):
+                    best_time_lag = TimeDelay(tstamp, sup)
+                # print(f"New Membership Fxn: {a - slide_val}, {b - slide_val}, {c - slide_val}")
+            # 4. Apply cartesian product on multiple MFs to pick the MF with the best center (inference logic)
+            # Mine tGPs and then compute Union of time-lag MFs,
+            # from this union select the MF with more members (little loss)
+            # print(f"indices {selected_cols}: {selected_rows}")
+            # print(f"GIs: {gi_arr}")
+            # print(f"Fuzzy Set: {fuzzy_set}")
+            # print(f"Selected Time Lag: {best_time_lag.to_string()}")
+            # print(f"time lags: {t_lag_arr}")
+            # print("\n")
+        else:
+            # 3a. Approximate TimeDelay using Fuzzy Membership
+            for t_lags in t_lag_arr:
+                time_lag = TGrad.approx_time_slide_calculate(t_lags)
+                if time_lag.support >= best_time_lag.support:
+                    best_time_lag = time_lag
+        return best_time_lag
 
     @staticmethod
     def get_timestamp(time_str: str):
@@ -286,7 +335,7 @@ class TGrad(GRAANK):
             return 0
 
     @staticmethod
-    def __approximate_fuzzy_time_lag__(time_lags: np.ndarray):
+    def approx_time_slide_calculate(time_lags: np.ndarray):
         """
 
         A method that selects the most appropriate time-delay value from a list of possible values.

@@ -1,6 +1,6 @@
 numpy~=2.0.1
 pandas~=2.2.2
-so4gp~=0.5.2
+so4gp~=0.5.4
 scikit-learn~=1.5.1
 ypstruct~=0.0.2
 scikit-fuzzy~=0.4.2

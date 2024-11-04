@@ -17,7 +17,8 @@ from .TGP.t_graank import TGrad
 from .TGP.tgrad_ami import TGradAMI
 
 
-def execute_tgp(f_path: str, min_sup: float, tgt_col: int, min_rep: float, num_cores: int, allow_mp: bool, eq=False, eval_mode=False):
+def execute_tgp(f_path: str, min_sup: float, tgt_col: int, min_rep: float, num_cores: int, allow_mp: bool, eq=False,
+                allow_clustering=False, eval_mode=False):
     """
     Executes T-GRAANK algorithm using the user-specified configuration options.
 
@@ -28,6 +29,7 @@ def execute_tgp(f_path: str, min_sup: float, tgt_col: int, min_rep: float, num_c
     :param num_cores: number of available cores.
     :param allow_mp: allow multiprocessing.
     :param eq: assign equal values as valid?
+    :param allow_clustering: using clustering method to estimate time delays?
     :param eval_mode: run in 'evaluation/testing' mode?
     :return: results in string format.
     """
@@ -39,9 +41,10 @@ def execute_tgp(f_path: str, min_sup: float, tgt_col: int, min_rep: float, num_c
         #tgp = TGrad(f_path, eq, min_sup, tgt_col, min_rep, num_cores)
         tgp = TGradAMI(f_path, eq, min_sup, tgt_col, min_rep, num_cores)
         if eval_mode and isinstance(tgp, TGradAMI):
-            list_tgp, trans_data, time_data, eval_data = tgp.discover_tgp(parallel=allow_mp, eval_mode=True)
+            list_tgp, trans_data, time_data, gp_components = tgp.discover_tgp(parallel=allow_mp,
+                                                                              use_clustering=allow_clustering, eval_mode=True)
             output_txt = produce_output_txt(f_path, allow_mp, tgp, list_tgp)
-            produce_eval_pdf(f_path, tgt_col, output_txt, trans_data, time_data)
+            # produce_eval_pdf(f_path, tgt_col, output_txt, trans_data, time_data)
         else:
             list_tgp = tgp.discover_tgp(parallel=allow_mp)
             output_txt = produce_output_txt(f_path, allow_mp, tgp, list_tgp)
@@ -115,8 +118,8 @@ def produce_eval_pdf(f_path, tgt_col, out_txt, trans_data, time_data):
     import pandas as pd
     import matplotlib.pyplot as plt
     from numpy.linalg import norm
-    from fastdtw import fastdtw
-    from scipy.spatial.distance import euclidean
+    # from fastdtw import fastdtw
+    # from scipy.spatial.distance import euclidean
     from statsmodels.tsa.seasonal import seasonal_decompose
     from matplotlib.backends.backend_pdf import PdfPages
 
@@ -128,7 +131,7 @@ def produce_eval_pdf(f_path, tgt_col, out_txt, trans_data, time_data):
     data_obj = TGradAMI.process_time(trans_data)
     col_count = trans_data.shape[1]
     tgt_col =  tgt_col - (col_count-data_obj.col_count)
-    num_plts = data_obj.attr_cols.shape[0] - 1
+    # num_plts = data_obj.attr_cols.shape[0] - 1
 
     # datetime_series = pd.to_datetime(data_obj.data[1:, 0].astype(float), unit='s')
     # datetime_index = pd.DatetimeIndex(datetime_series, freq='h')
@@ -245,6 +248,11 @@ def main_cli():
                          dest='minRep',
                          help='minimum representativity',
                          default=options_tgp.min_rep,
+                         type='float')
+    optparser.add_option('-k', '--useClustering',
+                         dest='useClusters',
+                         help='use clustering method',
+                         default=options_tgp.use_clustering,
                          type='float')
     (cfg, args) = optparser.parse_args()
 
