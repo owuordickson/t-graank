@@ -40,14 +40,16 @@ def execute_tgp(f_path: str, min_sup: float, tgt_col: int, min_rep: float, num_c
 
         #tgp = TGrad(f_path, eq, min_sup, tgt_col, min_rep, num_cores)
         tgp = TGradAMI(f_path, eq, min_sup, tgt_col, min_rep, num_cores)
-        if eval_mode and isinstance(tgp, TGradAMI):
-            list_tgp, trans_data, time_data, gp_components = tgp.discover_tgp(parallel=allow_mp,
-                                                                              use_clustering=allow_clustering,
-                                                                              eval_mode=True)
-            output_txt = produce_output_txt(f_path, allow_mp, allow_clustering, tgp, list_tgp)
-            # produce_eval_pdf(f_path, tgt_col, output_txt, trans_data, time_data)
+        if isinstance(tgp, TGradAMI):
+            if eval_mode:
+                eval_dict = tgp.discover_tgp(parallel=allow_mp, use_clustering=allow_clustering, eval_mode=eval_mode)
+                output_txt = produce_output_txt(f_path, allow_mp, allow_clustering, tgp, eval_dict['TGPs'])
+                # produce_eval_pdf(f_path, tgt_col, output_txt, trans_data, time_data)
+            else:
+                t_gps = tgp.discover_tgp(parallel=allow_mp, use_clustering=allow_clustering, eval_mode=False)
+                output_txt = produce_output_txt(f_path, allow_mp, allow_clustering, tgp, t_gps)
         else:
-            list_tgp = tgp.discover_tgp(parallel=allow_mp, use_clustering=allow_clustering)
+            list_tgp = tgp.discover_tgp(parallel=allow_mp)
             output_txt = produce_output_txt(f_path, allow_mp, allow_clustering, tgp, list_tgp)
 
         return output_txt
