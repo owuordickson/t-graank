@@ -127,14 +127,17 @@ class TGradAMI(TGrad):
         # 6b. Apply cartesian product on multiple MFs to pick the MF with the best center (inference logic)
         # Mine tGPs and then compute Union of time-lag MFs,
         # from this union select the MF with more members (little loss)
-        t_gps = self.discover(t_diffs=time_data, attr_data=delayed_data, clustering_method=use_clustering)
+        if eval_mode:
+            t_gps, gp_components = self.extract_gradual_components(t_diffs=time_data, attr_data=delayed_data,
+                                                                clustering_method=use_clustering)
+        else:
+            t_gps = self.discover(t_diffs=time_data, attr_data=delayed_data, clustering_method=use_clustering)
+            gp_components = None
 
         if len(t_gps) > 0:
             if eval_mode:
                 title_row = []
                 time_title = []
-                gp_components = self.extract_gradual_components(t_diffs=time_data, attr_data=delayed_data,
-                                                                clustering_method=use_clustering)
                 # print(eval_data)
                 for txt in self.titles:
                     col = int(txt[0])
@@ -154,6 +157,7 @@ class TGradAMI(TGrad):
 
         self.fit_bitmap(attr_data)
         valid_bins = self.valid_bins
+        gradual_patterns = []
         gp_components = {}
         """:type gp_components: dict"""
 
@@ -172,6 +176,7 @@ class TGradAMI(TGrad):
                 gi_arr = v_bin[0]
                 bin_data = v_bin[1]
                 sup = v_bin[2]
+                gradual_patterns = TGP.remove_subsets(gradual_patterns, set(gi_arr))
                 t_lag = self.get_fuzzy_time_lag(bin_data, t_diffs, gi_arr, use_clustering_method=clustering_method)
 
                 if t_lag.valid:
@@ -183,9 +188,10 @@ class TGradAMI(TGrad):
                         else:
                             tgp.add_temporal_gradual_item(gi, t_lag)
                     tgp.set_support(sup)
+                    gradual_patterns.append(tgp)
                     gp_components[f"{tgp.to_string()}"] = GRAANK.decompose_to_gp_component(bin_data)
 
-        return gp_components
+        return gradual_patterns, gp_components
 
     def get_fuzzy_time_lag(self, bin_data: np.ndarray, time_diffs: np.ndarray | dict, gi_arr: set = None, use_clustering_method: bool = False):
         """  TO BE DELETED (ALREADY IN  so4gp)
