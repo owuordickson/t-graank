@@ -28,7 +28,7 @@ pip install .
 Use it a command line program with the local package:
 
 ```
-TemporalGP -f datasets/DATASET.csv -t targetColumn -s minSupport  -r minRepresentativity -p allowMultiprocessing -c numCPUs
+__main__.py -f datasets/DATASET.csv -t targetColumn -s minSupport  -r minRepresentativity -p allowMultiprocessing -c numCPUs
 ```
 
 The input parameters are: ```fileName.csv, targetColumn, minSupport, minRepresentativity```. You are required to use a <strong>file</strong> in csv format and make sure the <i>timestamp column</i> is the first column in the file. You specify:

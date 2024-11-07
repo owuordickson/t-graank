@@ -4,7 +4,7 @@
 # repository for complete details.
 
 """
-Functions for estimating time-lag using AMI and extending it to mining gradual patterns.
+Algorithm for estimating time-lag using AMI and extending it to mining gradual patterns.
 The average mutual information I(X; Y) is a measure of the amount of “information” that
 the random variables X and Y provide about one another.
 
@@ -15,28 +15,65 @@ from sklearn.cluster import KMeans
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.feature_selection import mutual_info_regression
 
-from so4gp import GI, TGP, TimeDelay, GRAANK, TGrad
+from so4gp import GI, TGP, GRAANK, TGrad
 
 
 class TGradAMI(TGrad):
+    """
+    Algorithm for estimating time-lag using Average Mutual Information (AMI) and KMeans clustering which is extended to
+    mining gradual patterns. The average mutual information I(X; Y) is a measure of the amount of “information” that
+    the random variables X and Y provide about one another.
 
-    def __init__(self, f_path: str, eq: bool, min_sup: float, target_col: int, min_rep: float, num_cores: int):
-        """"""
-        # Compute MI w.r.t. target-column with original dataset to get the actual relationship
-        # between variables. Compute MI for every time-delay/time-lag: if the values are
-        # almost equal to actual, then we have the most accurate time-delay. Instead of
-        # min-representativity value, we propose error-margin.
+    This algorithm extends the work published in: https://ieeexplore.ieee.org/abstract/document/8858883.
+    """
+    
+    def __init__(self, f_path: str, eq: bool, min_sup: float, target_col: int, min_rep: float, min_error: float, num_cores: int):
+        """
+        TGradAMI is an algorithm that improves the classical TGrad algorithm for extracting more accurate temporal
+        gradual patterns. It computes Mutual Information (MI) with respect to target-column with original dataset to
+        get the actual relationship between variables: by computing MI for every possible time-delay and if the
+        transformed dataset has same almost identical MI to the original dataset, then it selects that as the best
+        time-delay. Instead of min-representativity value, the algorithm relies on the error-margin between MIs.
+
+        :param f_path: path to dataset file
+        :param eq: are equal objects considered in GP matrix.
+        :param min_sup: minimum support value.
+        :param target_col: Target column.
+        :param min_rep: minimum representativity value.
+        :param min_error: minimum Mutual Information error margin.
+        :param num_cores: number of cores to use.
+
+        >>> import so4gp as sgp
+        >>> import pandas
+        >>> dummy_data = [["2021-03", 30, 3, 1, 10], ["2021-03", 35, 2, 2, 8], ["2021-03", 40, 4, 2, 7], ["2021-03", 50, 1, 1, 6], ["2021-03", 52, 7, 1, 2]]
+        >>> dummy_df = pandas.DataFrame(dummy_data, columns=['Date', 'Age', 'Salary', 'Cars', 'Expenses'])
+        >>>
+        >>> mine_obj = sgp.TGradAMI(dummy_df, min_sup=0.5, target_col=1, min_rep=0.5, min_error=0.1)
+        >>> result_json = mine_obj.discover_tgp(parallel=True, use_clustering=True, eval_mode=False)
+        >>> print(result_json)
+        """
 
         super(TGradAMI, self).__init__(f_path, eq, min_sup, target_col=target_col, min_rep=min_rep, num_cores=num_cores)
-        # self.error_margin = err
-        self.min_membership = 0.001
-        self.tri_mf_data = None  # The a,b,c values of the triangular membership function in indices 0,1,2 respectively.
+        self.error_margin = min_error
+        """:type error_margin: float"""
         self.feature_cols = np.setdiff1d(self.attr_cols, self.target_col)
-        self.initial_mutual_info = None
-        self.mi_arr = None
+        """:type feature_cols: numpy.ndarray"""
+        self.mi_error = 0
+        """:type mi_error: float"""
 
-    def compute_mutual_info(self):
-        """"""
+    def find_best_mutual_info(self):
+        """
+        A method that computes the mutual information I(X; Y) of the original dataset and all the transformed datasets
+        w.r.t. minimum representativity threshold.
+
+        We improve the computation of MI: if the MI of a dataset is 0 (0 indicates NO MI), we replace it with -1 (this
+        encoding allows our algorithm to treat that MI as useless). So now, the allows our algorithm to easily
+        distinguish very small MI values. This is beautiful because if initial MI is 0, then both will be -1 making it
+        the optimal MI with any other -1 in the time-delayed MIs.
+
+        :return: initial MI and MI for transformed datasets.
+        """
+
         # 1. Compute all the MI for every time-delay and store in list
         mi_list = []
         for step in range(self.max_step):
@@ -48,19 +85,41 @@ class TGradAMI(TGrad):
         mi_arr = np.array(mi_list, dtype=float)
 
         # 2. Standardize MI array
-        # We replace 0 with -1 because 0 indicates NO MI, so we make it useless by making it -1, so it allows small
-        # MI values to be considered and not 0. This is beautiful because if initial MI is 0, then both will be -1
-        # making it the optimal MI with any other -1 in the time-delayed MIs
         mi_arr[mi_arr == 0] = -1
-        # print(f"{mi_arr}\n")
-        self.initial_mutual_info = mi_arr[0]  # step 0 is the MI without any time delay (or step)
-        self.mi_arr = mi_arr[1:]
+        initial_mutual_info = float(mi_arr[0])  # step 0 is the MI without any time delay (or step)
+        """:type initial_mutual_info: float"""
+        mutual_info_arr = mi_arr[1:]
+        """:type mutual_info_arr: numpy.ndarray"""
+
+        # 3. Identify steps (for every feature w.r.t. target) with minimum error from initial MI
+        squared_diff = np.square(np.subtract(mi_arr, initial_mi))
+        absolute_error = np.sqrt(squared_diff)
+        optimal_steps_arr = np.argmin(absolute_error, axis=0)
+        max_step = int(np.max(optimal_steps_arr) + 1)
+        """:type max_step: int"""
+
+        # 4. Integrate feature indices with the computed steps
+        optimal_dict = {int(self.feature_cols[i]): int(optimal_steps_arr[i] + 1) for i in range(len(self.feature_cols))}
+        """:type optimal_dict: dict"""
+        # print(f"Optimal Dict: {optimal_dict}\n")  # {col: steps}
+
+        self.mi_error = absolute_error
+        self.min_rep = (self.row_count - max_step) / self.row_count
+        return optimal_dict, max_step
 
     def gather_delayed_data(self, optimal_dict: dict, max_step: int):
-        """"""
+        """
+        A method that combined attribute data with different data transformations and computes the corresponding
+        time-delay values for each attribute.
+
+        :param optimal_dict: raw transformed dataset.
+        :param max_step: largest data transformation step.
+        :return: combined transformed dataset with corresponding time-delay values.
+        """
+
         delayed_data = None
+        """:type delayed_data: numpy.ndarray | None"""
         time_data = []
-        # time_dict = {}
         n = self.row_count
         k = (n - max_step)  # No. of rows created by largest step-delay
         for col_index in range(self.col_count):
@@ -90,48 +149,36 @@ class TGradAMI(TGrad):
             delayed_data = temp_row if (delayed_data is None) \
                 else np.vstack((delayed_data, temp_row))
 
-        # print(f"{time_dict}\n")
-        return delayed_data, np.array(time_data)
+        time_data = np.array(time_data)
+        """:type time_data: numpy.ndarray"""
+        return delayed_data, time_data
 
     def discover_tgp(self, parallel: bool = False, use_clustering: bool = False, eval_mode: bool = False):
-        """"""
+        """
+        A method that applies mutual information concept, clustering and hill-climbing algorithm to find the best data
+        transformation that maintains MI, and estimate the best time-delay value of the mined Fuzzy Temporal Gradual
+        Patterns (FTGPs).
 
-        # 1. Compute mutual information
-        self.compute_mutual_info()
+        :param parallel: allow multiprocessing.
+        :param use_clustering: use clustering algorithm to estimate the best time-delay value.
+        :param eval_mode: run algorithm in evaluation mode.
+        :return: list of (FTGPs) or (FTGPs and evaluation data as a Python dict) when executed in evaluation mode.
+        """
 
-        # 2. Identify steps (for every feature w.r.t. target) with minimum error from initial MI
-        squared_diff = np.square(np.subtract(self.mi_arr, self.initial_mutual_info))
-        absolute_error = np.sqrt(squared_diff)
-        optimal_steps_arr = np.argmin(absolute_error, axis=0)
-        max_step = (np.max(optimal_steps_arr) + 1)
-        # print(f"Largest step delay: {max_step}\n")
-        # print(f"Abs.E.: {absolute_error}\n")
+        # 1. Compute and find the lowest mutual information
+        optimal_dict, max_step = self.find_best_mutual_info()
 
-        # 3. Integrate feature indices with the computed steps
-        # optimal_dict = dict(map(lambda key, val: (int(key), int(val+1)), self.feature_cols, optimal_steps_arr))
-        optimal_dict = {int(self.feature_cols[i]): int(optimal_steps_arr[i] + 1) for i in range(len(self.feature_cols))}
-        # print(f"Optimal Dict: {optimal_dict}\n")  # {col: steps}
-
-        # 4. Create final (and dynamic) delayed dataset
+        # 2. Create final (and dynamic) delayed dataset
         delayed_data, time_data = self.gather_delayed_data(optimal_dict, max_step)
-        # print(f"{delayed_data}\n")
-        # print(f"Time Lags: {time_data}\n")
 
-        # 5. Build triangular MF
-        a, b, c = TGradAMI.build_mf_w_clusters(time_data)
-        self.tri_mf_data = np.array([a, b, c])
-        # print(f"Membership Function: {a}, {b}, {c}\n")
-
-        # 6. Discover temporal-GPs from time-delayed data
-        # 6a. Learn the best MF through slide-descent/sliding
-        # 6b. Apply cartesian product on multiple MFs to pick the MF with the best center (inference logic)
-        # Mine tGPs and then compute Union of time-lag MFs,
-        # from this union select the MF with more members (little loss)
+        # 3. Discover temporal-GPs from time-delayed data
         if eval_mode:
-            t_gps, gp_components = self.extract_gradual_components(t_diffs=time_data, attr_data=delayed_data,
-                                                                clustering_method=use_clustering)
+            t_gps, gp_components = self.extract_gradual_components(time_data=time_data, attr_data=delayed_data,
+                                                                   clustering_method=use_clustering)
+            """:type t_gps: list"""
         else:
             t_gps = self.discover(t_diffs=time_data, attr_data=delayed_data, clustering_method=use_clustering)
+            """:type t_gps: list"""
             gp_components = None
 
         if len(t_gps) > 0:
@@ -150,18 +197,28 @@ class TGradAMI(TGrad):
                     'Transformed Data': np.vstack((np.array(time_title), time_data.T)),
                     'GP Components': gp_components
                 }
+                """:type eval_dict: dict"""
                 return eval_dict
             else:
                 return t_gps
         return False
 
-    def extract_gradual_components(self, t_diffs: np.ndarray | dict = None, attr_data: np.ndarray = None,
+    def extract_gradual_components(self, time_data: np.ndarray | dict = None, attr_data: np.ndarray = None,
                                    clustering_method: bool = False):
-        """"""
+        """
+        A method that decomposes a multi-variate timeseries dataset into gradual components. The gradual components are
+        warping paths represented as arrays. It also returns the mined fuzzy-temporal gradual patterns (FTGPs).
+
+        :param time_data: time-delay values as an array.
+        :param attr_data: the transformed data.
+        :param clustering_method: find and approximate best time-delay value using KMeans and Hill-climbing approach.
+        :return: temporal-GPs as a list and gradual components as a Python dict object.
+        """
 
         self.fit_bitmap(attr_data)
         valid_bins = self.valid_bins
         gradual_patterns = []
+        """:type gradual_patterns: list"""
         gp_components = {}
         """:type gp_components: dict"""
 
@@ -181,7 +238,7 @@ class TGradAMI(TGrad):
                 bin_data = v_bin[1]
                 sup = v_bin[2]
                 gradual_patterns = TGP.remove_subsets(gradual_patterns, set(gi_arr))
-                t_lag = self.get_fuzzy_time_lag(bin_data, t_diffs, gi_arr, use_clustering_method=clustering_method)
+                t_lag = self.get_fuzzy_time_lag(bin_data, time_data, gi_arr, use_clustering_method=clustering_method)
 
                 if t_lag.valid:
                     tgp = TGP()
@@ -199,31 +256,37 @@ class TGradAMI(TGrad):
 
     @staticmethod
     def build_mf_w_clusters(time_data: np.ndarray):
-        """"""
+        """
+        A method that builds the boundaries of a fuzzy Triangular membership function (MF) using Singular Value
+        Decomposition (to estimate the number of centers) and KMeans algorithm to group time data according to the
+        identified centers. We then use the largest cluster to build the MF.
 
-        # Reshape into 1-column dataset
+        :param time_data: time-delay values as an array.
+        :return: the a, b, c boundary values of the triangular membership function.
+        """
+
+        # 1. Reshape into 1-column dataset
         time_data = time_data.reshape(-1, 1)
 
-        # Standardize data
+        # 2. Standardize data
         scaler = MinMaxScaler()
         data_scaled = scaler.fit_transform(time_data)
 
-        # Apply SVD
+        # 3. Apply SVD
         u, s, vt = np.linalg.svd(data_scaled, full_matrices=False)
 
-        # Plot singular values to help determine the number of clusters
+        # 4. Plot singular values to help determine the number of clusters
         # Based on the plot, choose the number of clusters (e.g., 3 clusters)
         num_clusters = int(s[0])
 
-        # Perform k-means clustering
+        # 5. Perform k-means clustering
         kmeans = KMeans(n_clusters=num_clusters)
         kmeans.fit(data_scaled)
 
-        # Get cluster centers
+        # 6. Get cluster centers
         centers = kmeans.cluster_centers_.flatten()
 
-        # Define membership functions to ensure membership > 0.5
-        # mf_list = []
+        # 7. Define membership functions to ensure membership > 0.5
         largest_mf = [0, 0, 0]
         for center in centers:
             half_width = 0.5 / 2  # since membership value should be > 0.5
@@ -232,14 +295,13 @@ class TGradAMI(TGrad):
             c = center + half_width
             if abs(c - a) > abs(largest_mf[2] - largest_mf[0]):
                 largest_mf = [a, b, c]
-            # mf_list.append((a, b, c))
 
-        # Reverse the scaling
+        # 8. Reverse the scaling
         a = scaler.inverse_transform([[largest_mf[0]]])[0, 0]
         b = scaler.inverse_transform([[largest_mf[1]]])[0, 0]
         c = scaler.inverse_transform([[largest_mf[2]]])[0, 0]
 
-        # Shift to remove negative MF (we do not want negative timestamps)
+        # 9. Shift to remove negative MF (we do not want negative timestamps)
         if a < 0:
             shift_by = abs(a)
             a = a + shift_by
@@ -248,43 +310,45 @@ class TGradAMI(TGrad):
         return a, b, c
 
     @staticmethod
-    def approx_time_hill_climbing(a: float, b: float, c: float, x_train: np.ndarray,
-                                  initial_bias: float = 0, step_size: float = 0.9, max_iterations: int = 10):
-        """"""
+    def approx_time_hill_climbing(tri_mf: np.ndarray, x_train: np.ndarray, initial_bias: float = 0,
+                                  step_size: float = 0.9, max_iterations: int = 10):
+        """
+        A method that uses Hill-climbing algorithm to approximate the best time-delay value given a fuzzy triangular
+        membership function.
 
-        # Normalize x_train
+        :param tri_mf: fuzzy triangular membership function boundaries (a, b, c) as an array.
+        :param x_train: initial time-delay values as an array.
+        :param initial_bias: (hyperparameter) initial bias value for the hill-climbing algorithm.
+        :param step_size: (hyperparameter) step size for the hill-climbing algorithm.
+        :param max_iterations: (hyperparameter) maximum number of iterations for the hill-climbing algorithm.
+        :return: best position to move the triangular MF with its mean-squared-error.
+        """
+
+        # 1. Normalize x_train
         x_train = np.array(x_train, dtype=float)
-        # print(f"x-train: {x_train}")
 
-        # Perform hill climbing to find the optimal bias
-        min_membership = 0.001
+        # 2. Perform hill climbing to find the optimal bias
         bias = initial_bias
         y_train = x_train + bias
-        tri_mf = np.array([a, b, c])
-        best_mse = TGradAMI.hill_climbing_cost_function(y_train, tri_mf, min_membership)
+        best_mse = TGradAMI.hill_climbing_cost_function(y_train, tri_mf)
         for iteration in range(max_iterations):
-            # Generate a new candidate bias by perturbing the current bias
+            # a. Generate a new candidate bias by perturbing the current bias
             new_bias = bias + step_size * np.random.randn()
 
-            # Compute the predictions and the MSE with the new bias
+            # b. Compute the predictions and the MSE with the new bias
             y_train = x_train + new_bias
-            new_mse = TGradAMI.hill_climbing_cost_function(y_train, tri_mf, min_membership)
+            new_mse = TGradAMI.hill_climbing_cost_function(y_train, tri_mf)
 
-            # If the new MSE is lower, update the bias
+            # c. If the new MSE is lower, update the bias
             if new_mse < best_mse:
-                # print(f"new bias: {new_bias}")
                 bias = new_bias
                 best_mse = new_mse
 
         # Make predictions using the optimal bias
-        # y_train = x_train + bias
-        # print(f"Optimal bias: {bias}")
-        # print(f"Predictions: {y_train}")
-        # print(f"Mean Squared Error: {best_mse*100}%")
         return bias, best_mse
 
     @staticmethod
-    def hill_climbing_cost_function(y_train: np.ndarray, tri_mf: np.ndarray, min_membership: float = 0.5):
+    def hill_climbing_cost_function(y_train: np.ndarray, tri_mf: np.ndarray, min_membership: float = 0):
         """
         Computes the logistic regression cost function for a fuzzy set created from a
         triangular membership function.
@@ -298,15 +362,17 @@ class TGradAMI(TGrad):
         a, b, c = tri_mf[0], tri_mf[1], tri_mf[2]
 
         # 1. Generate fuzzy data set using MF from x_data
-        y_hat = np.where(y_train <= b,
+        memberships = np.where(y_train <= b,
                          (y_train - a) / (b - a),
                          (c - y_train) / (c - b))
+
         # 2. Generate y_train based on the given criteria (x>minimum_membership)
-        y_hat = np.where(y_hat >= min_membership, 1, 0)
+        y_hat = np.where(memberships >= min_membership, 1, 0)
 
         # 3. Compute loss
         hat_count = np.count_nonzero(y_hat)
         true_count = len(y_hat)
         loss = (((true_count - hat_count) / true_count) ** 2) ** 0.5
+        """:type loss: float"""
         # loss = abs(true_count - hat_count)
         return loss

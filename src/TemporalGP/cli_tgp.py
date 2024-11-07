@@ -17,8 +17,8 @@ from .TGP.t_graank import TGrad
 from .TGP.tgrad_ami import TGradAMI
 
 
-def execute_tgp(f_path: str, min_sup: float, tgt_col: int, min_rep: float, num_cores: int, allow_mp: bool, eq=False,
-                allow_clustering=False, eval_mode=False):
+def execute_tgp(f_path: str, min_sup: float, tgt_col: int, min_rep: float, min_error: float, num_cores: int,
+                allow_mp: bool, eq=False, allow_clustering=False, eval_mode=False):
     """
     Executes T-GRAANK algorithm using the user-specified configuration options.
 
@@ -26,6 +26,7 @@ def execute_tgp(f_path: str, min_sup: float, tgt_col: int, min_rep: float, num_c
     :param tgt_col: target/reference column of the data-set.
     :param min_sup: minimum support threshold.
     :param min_rep: minimum representativity threshold.
+    :param min_error: minimum mutual information error threshold.
     :param num_cores: number of available cores.
     :param allow_mp: allow multiprocessing.
     :param eq: assign equal values as valid?
@@ -39,7 +40,7 @@ def execute_tgp(f_path: str, min_sup: float, tgt_col: int, min_rep: float, num_c
             num_cores = sgp.get_num_cores()
 
         #tgp = TGrad(f_path, eq, min_sup, tgt_col, min_rep, num_cores)
-        tgp = TGradAMI(f_path, eq, min_sup, tgt_col, min_rep, num_cores)
+        tgp = TGradAMI(f_path, eq, min_sup, tgt_col, min_rep, min_error, num_cores)
         if isinstance(tgp, TGradAMI):
             if eval_mode:
                 eval_dict = tgp.discover_tgp(parallel=allow_mp, use_clustering=allow_clustering, eval_mode=eval_mode)
@@ -252,6 +253,11 @@ def main_cli():
                          help='minimum representativity',
                          default=options_tgp.min_rep,
                          type='float')
+    optparser.add_option('-m', '--minMIError',
+                         dest='minError',
+                         help='minimum mutual information error',
+                         default=options_tgp.min_mi_error,
+                         type='float')
     optparser.add_option('-k', '--useClustering',
                          dest='useClusters',
                          help='use clustering method',
@@ -271,7 +277,7 @@ def main_cli():
 
     start = time.time()
     # tracemalloc.start()
-    res_text = execute_tgp(cfg.file, cfg.minSup, cfg.tgtCol, cfg.minRep, cfg.numCores, cfg.allowPara,
+    res_text = execute_tgp(cfg.file, cfg.minSup, cfg.tgtCol, cfg.minRep, cfg.minError, cfg.numCores, cfg.allowPara,
                            allow_clustering=cfg.useClusters, eval_mode=cfg.evalMode)
     # snapshot = tracemalloc.take_snapshot()
     end = time.time()
