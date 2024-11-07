@@ -230,7 +230,10 @@ class TGrad(GRAANK):
                 bin_data = v_bin[1]
                 sup = v_bin[2]
                 gradual_patterns = TGP.remove_subsets(gradual_patterns, set(gi_arr))
-                t_lag = self.get_fuzzy_time_lag(bin_data, time_delay_data, gi_arr=None, tri_mf_data=tri_mf_data)
+                if type(self) is TGrad:
+                    t_lag = self.get_fuzzy_time_lag(bin_data, time_delay_data, gi_arr=None, tri_mf_data=tri_mf_data)
+                else:
+                    t_lag = self.get_fuzzy_time_lag(bin_data, time_delay_data, gi_arr, tri_mf_data)
 
                 if t_lag.valid:
                     tgp = TGP()
@@ -291,7 +294,7 @@ class TGrad(GRAANK):
         best_time_lag = TimeDelay(-1, 0)
         """:type best_time_lag: so4gp.TimeDelay"""
         if tri_mf_data is not None:
-            # 3b. Learn the best MF through slide-descent/sliding
+            # 3b. Learn the best MF through KMeans and Hill-Climbing
             a, b, c = tri_mf_data
             best_time_lag = TimeDelay(-1, -1)
             fuzzy_set = []
@@ -305,7 +308,7 @@ class TGrad(GRAANK):
                     best_time_lag = TimeDelay(tstamp, sup)
                 # print(f"New Membership Fxn: {a - slide_val}, {b - slide_val}, {c - slide_val}")
         else:
-            # 3a. Approximate TimeDelay using Fuzzy Membership
+            # 3a. Learn the best MF through slide-descent/sliding
             for t_lags in t_lag_arr:
                 time_lag = TGrad.approx_time_slide_calculate(t_lags)
                 if time_lag.support >= best_time_lag.support:
