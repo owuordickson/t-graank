@@ -39,14 +39,14 @@ def execute_tgp(f_path: str, min_sup: float, tgt_col: int, min_rep: float, min_e
         if num_cores <= 1:
             num_cores = sgp.get_num_cores()
 
-        # t_grad = TGrad(f_path, eq, min_sup, tgt_col, min_rep, num_cores)
+        #t_grad = TGrad(f_path, eq, min_sup, tgt_col, min_rep, num_cores)
         t_grad = TGradAMI(f_path, eq, min_sup, tgt_col, min_rep, min_error, num_cores)
         if isinstance(t_grad, TGradAMI):
             res_dict = t_grad.discover_tgp(parallel=allow_mp, use_clustering=allow_clustering, eval_mode=eval_mode)
         else:
             res = t_grad.discover_tgp(parallel=allow_mp)
             res_dict = json.loads(res)
-        print(res_dict)
+        #print(res_dict)
         output_txt = produce_output_txt(f_path, allow_mp, allow_clustering, t_grad)
         # produce_eval_pdf(f_path, tgt_col, output_txt, trans_data, time_data)
         return output_txt
