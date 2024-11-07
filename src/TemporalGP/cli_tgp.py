@@ -9,6 +9,7 @@ Entry points that allow users to execute GUI or Cli programs.
 """
 
 import sys
+import json
 from optparse import OptionParser
 import so4gp as sgp
 
@@ -35,24 +36,19 @@ def execute_tgp(f_path: str, min_sup: float, tgt_col: int, min_rep: float, min_e
     :return: results in string format.
     """
     try:
-
         if num_cores <= 1:
             num_cores = sgp.get_num_cores()
 
-        #tgp = TGrad(f_path, eq, min_sup, tgt_col, min_rep, num_cores)
-        tgp = TGradAMI(f_path, eq, min_sup, tgt_col, min_rep, min_error, num_cores)
-        if isinstance(tgp, TGradAMI):
-            if eval_mode:
-                eval_dict = tgp.discover_tgp(parallel=allow_mp, use_clustering=allow_clustering, eval_mode=eval_mode)
-                output_txt = produce_output_txt(f_path, allow_mp, allow_clustering, tgp, eval_dict['TGPs'])
-                # produce_eval_pdf(f_path, tgt_col, output_txt, trans_data, time_data)
-            else:
-                t_gps = tgp.discover_tgp(parallel=allow_mp, use_clustering=allow_clustering, eval_mode=False)
-                output_txt = produce_output_txt(f_path, allow_mp, allow_clustering, tgp, t_gps)
+        # t_grad = TGrad(f_path, eq, min_sup, tgt_col, min_rep, num_cores)
+        t_grad = TGradAMI(f_path, eq, min_sup, tgt_col, min_rep, min_error, num_cores)
+        if isinstance(t_grad, TGradAMI):
+            res_dict = t_grad.discover_tgp(parallel=allow_mp, use_clustering=allow_clustering, eval_mode=eval_mode)
         else:
-            list_tgp = tgp.discover_tgp(parallel=allow_mp)
-            output_txt = produce_output_txt(f_path, allow_mp, allow_clustering, tgp, list_tgp)
-
+            res = t_grad.discover_tgp(parallel=allow_mp)
+            res_dict = json.loads(res)
+        print(res_dict)
+        output_txt = produce_output_txt(f_path, allow_mp, allow_clustering, t_grad)
+        # produce_eval_pdf(f_path, tgt_col, output_txt, trans_data, time_data)
         return output_txt
     except ZeroDivisionError as error:
         output_txt = "Failed: " + str(error)
@@ -60,28 +56,31 @@ def execute_tgp(f_path: str, min_sup: float, tgt_col: int, min_rep: float, min_e
         return output_txt
 
 
-def produce_output_txt(f_path, allow_mp, allow_clustering, tgp, list_tgp):
+def produce_output_txt(f_path, allow_mp, allow_clustering, t_grad):
     """"""
     if allow_mp:
         msg_para = "True"
     else:
         msg_para = "False"
 
-    if isinstance(tgp, TGradAMI):
+    if isinstance(t_grad, TGradAMI):
         output_txt = f"Algorithm: T-GRAANK AMI {'(with KMeans & Hill-climbing)' if allow_clustering else '(with Slide-Recalculate)'}\n"
     else:
         output_txt = "Algorithm: T-GRAANK (with Slide-Recalculate)\n"
-    output_txt += "No. of (dataset) attributes: " + str(tgp.col_count) + '\n'
-    output_txt += "No. of (dataset) tuples: " + str(tgp.row_count) + '\n'
-    output_txt += "Minimum support: " + str(tgp.thd_supp) + '\n'
-    output_txt += "Minimum representativity: " + str(tgp.min_rep) + '\n'
+    output_txt += "No. of (dataset) attributes: " + str(t_grad.col_count) + '\n'
+    output_txt += "No. of (dataset) tuples: " + str(t_grad.row_count) + '\n'
+    output_txt += "Minimum support: " + str(t_grad.thd_supp) + '\n'
+    output_txt += "Minimum representativity: " + str(t_grad.min_rep) + '\n'
+    if isinstance(t_grad, TGradAMI):
+        output_txt += "MI minimum error: " + str(t_grad.error_margin) + '\n'
+        output_txt += "MI error: " + str(t_grad.mi_error) + '\n'
     output_txt += "Multi-core execution: " + str(msg_para) + '\n'
-    output_txt += "Number of cores: " + str(tgp.cores) + '\n'
-    output_txt += "Number of tasks: " + str(tgp.max_step) + '\n\n'
+    output_txt += "Number of cores: " + str(t_grad.cores) + '\n'
+    output_txt += "Number of tasks: " + str(t_grad.max_step) + '\n\n'
 
-    for txt in tgp.titles:
+    for txt in t_grad.titles:
         col = int(txt[0])
-        if col == tgp.target_col:
+        if col == t_grad.target_col:
             output_txt += (str(txt[0]) + '. ' + str(txt[1].decode()) + '**' + '\n')
         else:
             output_txt += (str(txt[0]) + '. ' + str(txt[1].decode()) + '\n')
@@ -89,28 +88,14 @@ def produce_output_txt(f_path, allow_mp, allow_clustering, tgp, list_tgp):
     output_txt += str("\nFile: " + f_path + '\n')
     output_txt += str("\nPattern : Support" + '\n')
 
-    count = 0
-    if isinstance(tgp, TGradAMI):
-        if list_tgp:
-            count = len(list_tgp)
-            for tgp in list_tgp:
-                gp_str = f"{tgp.to_string()} :  {tgp.support}"
-                if len(gp_str) > 100:
-                    gp_str = gp_str[:100] + '\n' + gp_str[100:]
-                output_txt += f"{gp_str}\n"
-    else:
-        for obj in list_tgp:
-            if obj:
-                for tgp in obj:
-                    count += 1
-                    # output_txt += (str(tgp.to_string()) + ' : ' + str(tgp.support) +
-                    #               ' | ' + str(tgp.time_lag.to_string()) + '\n')
-                    gp_str = f"{tgp.to_string()} :  {tgp.support}"
-                    if len(gp_str) > 100:
-                        gp_str = gp_str[:100] + '\n' + gp_str[100:]
-                    output_txt += f"{gp_str}\n"
+    list_tgp = t_grad.gradual_patterns
+    for tgp in list_tgp:
+        gp_str = f"{tgp.to_string()} :  {tgp.support}"
+        if len(gp_str) > 100:
+            gp_str = gp_str[:100] + '\n' + gp_str[100:]
+        output_txt += f"{gp_str}\n"
 
-    output_txt += "\n\n Number of patterns: " + str(count) + '\n'
+    output_txt += "\n\n Number of patterns: " + str(len(list_tgp)) + '\n'
     return output_txt
 
 
