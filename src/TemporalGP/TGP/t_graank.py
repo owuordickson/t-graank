@@ -26,7 +26,7 @@ class TGrad(GRAANK):
 
     """
 
-    def __init__(self, *args, target_col: int, min_rep: float = 0.5):
+    def __init__(self, *args, target_col: int, min_rep: float = 0.5, **kwargs):
         """
         TGrad is an algorithm that is used to extract temporal gradual patterns from numeric datasets.
 
@@ -36,7 +36,7 @@ class TGrad(GRAANK):
 
         >>> import so4gp as sgp
         >>> import pandas
-        >>> dummy_data = [["2021-03", 30, 3, 1, 10], ["2021-03", 35, 2, 2, 8], ["2021-03", 40, 4, 2, 7], ["2021-03", 50, 1, 1, 6], ["2021-03", 52, 7, 1, 2]]
+        >>> dummy_data = [["2021-03", 30, 3, 1, 10], ["2021-04", 35, 2, 2, 8], ["2021-05", 40, 4, 2, 7], ["2021-06", 50, 1, 1, 6], ["2021-07", 52, 7, 1, 2]]
         >>> dummy_df = pandas.DataFrame(dummy_data, columns=['Date', 'Age', 'Salary', 'Cars', 'Expenses'])
         >>>
         >>> mine_obj = sgp.TGrad(dummy_df, min_sup=0.5, target_col=1, min_rep=0.5)
@@ -44,7 +44,7 @@ class TGrad(GRAANK):
         >>> print(result_json)
         """
 
-        super(TGrad, self).__init__(*args)
+        super(TGrad, self).__init__(*args, **kwargs)
         self.target_col = target_col
         """:type: target_col: int"""
         self.min_rep = min_rep
@@ -165,7 +165,7 @@ class TGrad(GRAANK):
         A method that computes the difference between 2 timestamps separated by a specific transformation step.
 
         :param step: data transformation step.
-        :return: set of time delay values
+        :return: dict of time delay values
         """
         size = self.row_count
         time_diffs = {}  # {row: time-lag}
@@ -192,8 +192,7 @@ class TGrad(GRAANK):
                 time_diffs[int(i)] = float(abs(time_diff))
         return True, time_diffs
 
-    def discover(self, time_delay_data: np.ndarray | dict = None, attr_data: np.ndarray = None,
-                 clustering_method: bool = False):
+    def discover(self, time_delay_data: np.ndarray | dict = None, attr_data: np.ndarray = None, clustering_method: bool = False):
         """
 
         Uses apriori algorithm to find GP candidates based on the target-attribute. The candidates are validated if
@@ -246,8 +245,7 @@ class TGrad(GRAANK):
                     gradual_patterns.append(tgp)
         return gradual_patterns
 
-    def get_fuzzy_time_lag(self, bin_data: np.ndarray, time_data: np.ndarray | dict, gi_arr: set = None,
-                           tri_mf_data: np.ndarray | None = None):
+    def get_fuzzy_time_lag(self, bin_data: np.ndarray, time_data: np.ndarray | dict, gi_arr: set = None, tri_mf_data: np.ndarray | None = None):
         """
 
         A method that uses fuzzy membership function to select the most accurate time-delay value. We implement two

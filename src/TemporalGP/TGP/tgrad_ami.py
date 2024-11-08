@@ -36,11 +36,13 @@ class TGradAMI(TGrad):
         transformed dataset has same almost identical MI to the original dataset, then it selects that as the best
         time-delay. Instead of min-representativity value, the algorithm relies on the error-margin between MIs.
 
+        :param args: [required] data source path of Pandas DataFrame, [optional] minimum-support, [optional] eq
+        :param kwargs: [required] target-column or attribute or feature, [optional] minimum representativity
         :param min_error: [optional] minimum Mutual Information error margin.
 
         >>> import so4gp as sgp
         >>> import pandas
-        >>> dummy_data = [["2021-03", 30, 3, 1, 10], ["2021-03", 35, 2, 2, 8], ["2021-03", 40, 4, 2, 7], ["2021-03", 50, 1, 1, 6], ["2021-03", 52, 7, 1, 2]]
+        >>> dummy_data = [["2021-03", 30, 3, 1, 10], ["2021-04", 35, 2, 2, 8], ["2021-05", 40, 4, 2, 7], ["2021-06", 50, 1, 1, 6], ["2021-07", 52, 7, 1, 2]]
         >>> dummy_df = pandas.DataFrame(dummy_data, columns=['Date', 'Age', 'Salary', 'Cars', 'Expenses'])
         >>>
         >>> mine_obj = sgp.TGradAMI(dummy_df, min_sup=0.5, target_col=1, min_rep=0.5, min_error=0.1)
@@ -81,7 +83,14 @@ class TGradAMI(TGrad):
             attr_data, _ = self.transform_and_mine(step, return_patterns=False)
             y = np.array(attr_data[self.target_col], dtype=float).T
             x_data = np.array(attr_data[self.feature_cols], dtype=float).T
-            mi_vals = np.array(mutual_info_regression(x_data, y), dtype=float)
+            try:
+                mi_vals = np.array(mutual_info_regression(x_data, y), dtype=float)
+            except ValueError:
+                optimal_dict = {int(self.feature_cols[i]): step for i in range(len(self.feature_cols))}
+                """:type optimal_dict: dict"""
+                self.mi_error = -1
+                self.min_rep = round(((self.row_count - step) / self.row_count), 5)
+                return optimal_dict, step
 
             # Compute MI error
             squared_diff = np.square(np.subtract(mi_vals, init_mi_info))
@@ -100,6 +109,7 @@ class TGradAMI(TGrad):
         mi_info_arr[mi_info_arr == 0] = -1
 
         # 4. Identify steps (for every feature w.r.t. target) with minimum error from initial MI
+        print(f"{init_mi_info}\n{mi_info_arr}\n{self.max_step}")
         squared_diff = np.square(np.subtract(mi_info_arr, init_mi_info))
         mse_arr = np.sqrt(squared_diff)
         # mse_arr[mse_arr < self.error_margin] = -1
@@ -390,8 +400,8 @@ class TGradAMI(TGrad):
 
         # 1. Generate fuzzy data set using MF from x_data
         memberships = np.where(y_train <= b,
-                         (y_train - a) / (b - a),
-                         (c - y_train) / (c - b))
+                               (y_train - a) / (b - a),
+                               (c - y_train) / (c - b))
 
         # 2. Generate y_train based on the given criteria (x>minimum_membership)
         y_hat = np.where(memberships >= min_membership, 1, 0)
