@@ -20,22 +20,20 @@ from .tgrad_ami import TGradAMI
 class TGrad(GRAANK):
     """Description of class TGrad.
 
-    TGrad is an algorithm that is used to extract temporal gradual patterns from numeric datasets. It uses technique published
+    TGrad is an algorithm that is used to extract temporal gradual patterns from numeric datasets. An algorithm for
+    mining temporal gradual patterns using fuzzy membership functions. It uses technique published
     in: https://ieeexplore.ieee.org/abstract/document/8858883.
 
     """
 
-    def __init__(self, f_path: str, eq: bool, min_sup: float, target_col: int, min_rep: float, num_cores: int):
+    def __init__(self, *args, target_col: int, min_rep: float = 0.5):
         """
         TGrad is an algorithm that is used to extract temporal gradual patterns from numeric datasets.
-        
-        :param f_path: path to ddtaset file
-        :param eq: are equal object considered in GP matrix.
-        :param min_sup: minimum support value.
-        :param target_col: Target column.
-        :param min_rep: minimum representativity value.
-        :param num_cores: number of cores to use.
-        
+
+        :param args: [required] data source path of Pandas DataFrame, [optional] minimum-support, [optional] eq
+        :param target_col: [required] Target column.
+        :param min_rep: [optional] minimum representativity value.
+
         >>> import so4gp as sgp
         >>> import pandas
         >>> dummy_data = [["2021-03", 30, 3, 1, 10], ["2021-03", 35, 2, 2, 8], ["2021-03", 40, 4, 2, 7], ["2021-03", 50, 1, 1, 6], ["2021-03", 52, 7, 1, 2]]
@@ -46,7 +44,7 @@ class TGrad(GRAANK):
         >>> print(result_json)
         """
 
-        super(TGrad, self).__init__(data_source=f_path, min_sup=min_sup, eq=eq)
+        super(TGrad, self).__init__(*args)
         self.target_col = target_col
         """:type: target_col: int"""
         self.min_rep = min_rep
@@ -55,8 +53,6 @@ class TGrad(GRAANK):
         """:type: max_step: int"""
         self.full_attr_data = self.data.copy().T
         """:type: full_attr_data: numpy.ndarray"""
-        self.cores = num_cores
-        """:type: cores int"""
         if len(self.time_cols) > 0:
             print("Dataset Ok")
             self.time_ok = True
@@ -67,12 +63,13 @@ class TGrad(GRAANK):
             """:type: time_ok: bool"""
             raise Exception('No date-time datasets found')
 
-    def discover_tgp(self, parallel: bool = False):
+    def discover_tgp(self, parallel: bool = False, num_cores: int = 1):
         """
 
         Applies fuzzy-logic, data transformation and gradual pattern mining to mine for Fuzzy Temporal Gradual Patterns.
 
         :param parallel: allow multiprocessing.
+        :param num_cores: number of CPU cores for algorithm to use.
         :return: list of FTGPs as JSON object
         """
 
@@ -84,7 +81,7 @@ class TGrad(GRAANK):
         if parallel:
             # implement parallel multi-processing
             steps = range(self.max_step)
-            pool = mp.Pool(self.cores)
+            pool = mp.Pool(num_cores)
             patterns = pool.map(self.transform_and_mine, steps)
             pool.close()
             pool.join()

@@ -28,7 +28,7 @@ class TGradAMI(TGrad):
     This algorithm extends the work published in: https://ieeexplore.ieee.org/abstract/document/8858883.
     """
 
-    def __init__(self, f_path: str, eq: bool, min_sup: float, target_col: int, min_rep: float, min_error: float, num_cores: int):
+    def __init__(self, *args, min_error: float = 0.0001, **kwargs):
         """
         TGradAMI is an algorithm that improves the classical TGrad algorithm for extracting more accurate temporal
         gradual patterns. It computes Mutual Information (MI) with respect to target-column with original dataset to
@@ -36,13 +36,7 @@ class TGradAMI(TGrad):
         transformed dataset has same almost identical MI to the original dataset, then it selects that as the best
         time-delay. Instead of min-representativity value, the algorithm relies on the error-margin between MIs.
 
-        :param f_path: path to dataset file
-        :param eq: are equal objects considered in GP matrix.
-        :param min_sup: minimum support value.
-        :param target_col: Target column.
-        :param min_rep: minimum representativity value.
-        :param min_error: minimum Mutual Information error margin.
-        :param num_cores: number of cores to use.
+        :param min_error: [optional] minimum Mutual Information error margin.
 
         >>> import so4gp as sgp
         >>> import pandas
@@ -50,11 +44,11 @@ class TGradAMI(TGrad):
         >>> dummy_df = pandas.DataFrame(dummy_data, columns=['Date', 'Age', 'Salary', 'Cars', 'Expenses'])
         >>>
         >>> mine_obj = sgp.TGradAMI(dummy_df, min_sup=0.5, target_col=1, min_rep=0.5, min_error=0.1)
-        >>> result_json = mine_obj.discover_tgp(parallel=True, use_clustering=True, eval_mode=False)
+        >>> result_json = mine_obj.discover_tgp(use_clustering=True, eval_mode=False)
         >>> print(result_json)
         """
 
-        super(TGradAMI, self).__init__(f_path, eq, min_sup, target_col=target_col, min_rep=min_rep, num_cores=num_cores)
+        super(TGradAMI, self).__init__(*args, **kwargs)
         self.error_margin = min_error
         """:type error_margin: float"""
         self.feature_cols = np.setdiff1d(self.attr_cols, self.target_col)
@@ -167,13 +161,12 @@ class TGradAMI(TGrad):
         """:type time_data: numpy.ndarray"""
         return delayed_data, time_data
 
-    def discover_tgp(self, parallel: bool = False, use_clustering: bool = False, eval_mode: bool = False):
+    def discover_tgp(self, use_clustering: bool = False, eval_mode: bool = False):
         """
         A method that applies mutual information concept, clustering and hill-climbing algorithm to find the best data
         transformation that maintains MI, and estimate the best time-delay value of the mined Fuzzy Temporal Gradual
         Patterns (FTGPs).
 
-        :param parallel: allow multiprocessing.
         :param use_clustering: use clustering algorithm to estimate the best time-delay value.
         :param eval_mode: run algorithm in evaluation mode.
         :return: list of (FTGPs as JSON object) or (FTGPs and evaluation data as a Python dict) when executed in evaluation mode.

@@ -39,15 +39,15 @@ def execute_tgp(f_path: str, min_sup: float, tgt_col: int, min_rep: float, min_e
         if num_cores <= 1:
             num_cores = sgp.get_num_cores()
 
-        #t_grad = TGrad(f_path, eq, min_sup, tgt_col, min_rep, num_cores)
-        t_grad = TGradAMI(f_path, eq, min_sup, tgt_col, min_rep, min_error, num_cores)
+        #t_grad = TGrad(f_path, min_sup, eq, target_col=tgt_col, min_rep=min_rep)
+        t_grad = TGradAMI(f_path, min_sup, eq, target_col=tgt_col, min_rep=min_rep, min_error=min_error)
         if isinstance(t_grad, TGradAMI):
-            res_dict = t_grad.discover_tgp(parallel=allow_mp, use_clustering=allow_clustering, eval_mode=eval_mode)
+            res_dict = t_grad.discover_tgp(use_clustering=allow_clustering, eval_mode=eval_mode)
         else:
-            res = t_grad.discover_tgp(parallel=allow_mp)
+            res = t_grad.discover_tgp(parallel=allow_mp, num_cores=num_cores)
             res_dict = json.loads(res)
         #print(res_dict)
-        output_txt = produce_output_txt(f_path, allow_mp, allow_clustering, t_grad)
+        output_txt = produce_output_txt(f_path,num_cores, allow_mp, allow_clustering, t_grad)
         # produce_eval_pdf(f_path, tgt_col, output_txt, trans_data, time_data)
         return output_txt
     except ZeroDivisionError as error:
@@ -56,7 +56,7 @@ def execute_tgp(f_path: str, min_sup: float, tgt_col: int, min_rep: float, min_e
         return output_txt
 
 
-def produce_output_txt(f_path, allow_mp, allow_clustering, t_grad):
+def produce_output_txt(f_path, cores, allow_mp, allow_clustering, t_grad):
     """"""
     if allow_mp:
         msg_para = "True"
@@ -75,7 +75,7 @@ def produce_output_txt(f_path, allow_mp, allow_clustering, t_grad):
         output_txt += "MI minimum error: " + str(t_grad.error_margin) + '\n'
         output_txt += "MI error: " + str(t_grad.mi_error) + '\n'
     output_txt += "Multi-core execution: " + str(msg_para) + '\n'
-    output_txt += "Number of cores: " + str(t_grad.cores) + '\n'
+    output_txt += "Number of cores: " + str(cores) + '\n'
     output_txt += "Number of tasks: " + str(t_grad.max_step) + '\n\n'
 
     for txt in t_grad.titles:
