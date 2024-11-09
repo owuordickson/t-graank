@@ -109,7 +109,6 @@ class TGradAMI(TGrad):
         mi_info_arr[mi_info_arr == 0] = -1
 
         # 4. Identify steps (for every feature w.r.t. target) with minimum error from initial MI
-        print(f"{init_mi_info}\n{mi_info_arr}\n{self.max_step}")
         squared_diff = np.square(np.subtract(mi_info_arr, init_mi_info))
         mse_arr = np.sqrt(squared_diff)
         # mse_arr[mse_arr < self.error_margin] = -1
