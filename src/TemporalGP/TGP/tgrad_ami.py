@@ -42,11 +42,14 @@ class TGradAMI(TGrad):
 
         >>> import so4gp as sgp
         >>> import pandas
+        >>> import json
         >>> dummy_data = [["2021-03", 30, 3, 1, 10], ["2021-04", 35, 2, 2, 8], ["2021-05", 40, 4, 2, 7], ["2021-06", 50, 1, 1, 6], ["2021-07", 52, 7, 1, 2]]
         >>> dummy_df = pandas.DataFrame(dummy_data, columns=['Date', 'Age', 'Salary', 'Cars', 'Expenses'])
         >>>
         >>> mine_obj = sgp.TGradAMI(dummy_df, min_sup=0.5, target_col=1, min_rep=0.5, min_error=0.1)
         >>> result_json = mine_obj.discover_tgp(use_clustering=True, eval_mode=False)
+        >>> result = json.loads(result_json)
+        >>> # print(result['Patterns'])
         >>> print(result_json)
         """
 
@@ -197,7 +200,7 @@ class TGradAMI(TGrad):
                                                                    clustering_method=use_clustering)
             """:type t_gps: list"""
         else:
-            list_tgp = self.discover(time_delay_data=time_data, attr_data=delayed_data, clustering_method=use_clustering)
+            list_tgp = self.__mine(time_delay_data=time_data, attr_data=delayed_data, clustering_method=use_clustering)
             """:type t_gps: list"""
             gp_components = None
 
@@ -267,7 +270,7 @@ class TGradAMI(TGrad):
 
         invalid_count = 0
         while len(valid_bins) > 0:
-            valid_bins, inv_count = self._gen_apriori_candidates(valid_bins, self.target_col)
+            valid_bins, inv_count = self.__gen_apriori_candidates(valid_bins, target_col=self.target_col)
             invalid_count += inv_count
             for v_bin in valid_bins:
                 gi_arr = v_bin[0]

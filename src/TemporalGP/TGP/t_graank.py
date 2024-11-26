@@ -36,11 +36,14 @@ class TGrad(GRAANK):
 
         >>> import so4gp as sgp
         >>> import pandas
+        >>> import json
         >>> dummy_data = [["2021-03", 30, 3, 1, 10], ["2021-04", 35, 2, 2, 8], ["2021-05", 40, 4, 2, 7], ["2021-06", 50, 1, 1, 6], ["2021-07", 52, 7, 1, 2]]
         >>> dummy_df = pandas.DataFrame(dummy_data, columns=['Date', 'Age', 'Salary', 'Cars', 'Expenses'])
         >>>
         >>> mine_obj = sgp.TGrad(dummy_df, min_sup=0.5, target_col=1, min_rep=0.5)
         >>> result_json = mine_obj.discover_tgp(parallel=True)
+        >>> result = json.loads(result_json)
+        >>> # print(result['Patterns'])
         >>> print(result_json)
         """
 
@@ -149,7 +152,7 @@ class TGrad(GRAANK):
 
                     if return_patterns:
                         # 2. Execute t-graank for each transformation
-                        t_gps = self.discover(time_delay_data=time_diffs, attr_data=delayed_attr_data)
+                        t_gps = self.__mine(time_delay_data=time_diffs, attr_data=delayed_attr_data)
                         if len(t_gps) > 0:
                             return t_gps
                         return False
@@ -158,6 +161,59 @@ class TGrad(GRAANK):
         else:
             msg = "Fatal Error: Time format in column could not be processed"
             raise Exception(msg)
+
+    def __mine(self, time_delay_data: np.ndarray | dict = None, attr_data: np.ndarray = None, clustering_method: bool = False):
+        """
+
+        Uses apriori algorithm to find GP candidates based on the target-attribute. The candidates are validated if
+        their computed support is greater than or equal to the minimum support threshold specified by the user.
+
+        :param time_delay_data: time-delay values
+        :param attr_data: the transformed data.
+        :param clustering_method: find and approximate best time-delay value using KMeans and Hill-climbing approach.
+        :return: temporal-GPs as a list.
+        """
+
+        self.fit_bitmap(attr_data)
+
+        gradual_patterns = []
+        """:type gradual_patterns: list"""
+        valid_bins = self.valid_bins
+
+        if clustering_method:
+            # Build the main triangular MF using clustering algorithm
+            a, b, c = TGradAMI.build_mf_w_clusters(time_delay_data)
+            tri_mf_data = np.array([a, b, c])
+        else:
+            tri_mf_data = None
+
+        invalid_count = 0
+        while len(valid_bins) > 0:
+            valid_bins, inv_count = self.__gen_apriori_candidates(valid_bins, target_col=self.target_col)
+            invalid_count += inv_count
+            for v_bin in valid_bins:
+                gi_arr = v_bin[0]
+                bin_data = v_bin[1]
+                sup = v_bin[2]
+                gradual_patterns = TGP.remove_subsets(gradual_patterns, set(gi_arr))
+                if type(self) is TGrad:
+                    t_lag = self.get_fuzzy_time_lag(bin_data, time_delay_data, gi_arr=None, tri_mf_data=tri_mf_data)
+                else:
+                    t_lag = self.get_fuzzy_time_lag(bin_data, time_delay_data, gi_arr, tri_mf_data)
+
+                if t_lag.valid:
+                    tgp = TGP()
+                    """:type gp: TGP"""
+                    for obj in gi_arr:
+                        gi = GI(obj[0], obj[1].decode())
+                        """:type gi: GI"""
+                        if gi.attribute_col == self.target_col:
+                            tgp.add_target_gradual_item(gi)
+                        else:
+                            tgp.add_temporal_gradual_item(gi, t_lag)
+                    tgp.set_support(sup)
+                    gradual_patterns.append(tgp)
+        return gradual_patterns
 
     def get_time_diffs(self, step: int):  # optimized
         """
@@ -191,59 +247,6 @@ class TGrad(GRAANK):
                 #    return False, [i + 1, i + step + 1]
                 time_diffs[int(i)] = float(abs(time_diff))
         return True, time_diffs
-
-    def discover(self, time_delay_data: np.ndarray | dict = None, attr_data: np.ndarray = None, clustering_method: bool = False):
-        """
-
-        Uses apriori algorithm to find GP candidates based on the target-attribute. The candidates are validated if
-        their computed support is greater than or equal to the minimum support threshold specified by the user.
-
-        :param time_delay_data: time-delay values
-        :param attr_data: the transformed data.
-        :param clustering_method: find and approximate best time-delay value using KMeans and Hill-climbing approach.
-        :return: temporal-GPs as a list.
-        """
-
-        self.fit_bitmap(attr_data)
-
-        gradual_patterns = []
-        """:type gradual_patterns: list"""
-        valid_bins = self.valid_bins
-
-        if clustering_method:
-            # Build the main triangular MF using clustering algorithm
-            a, b, c = TGradAMI.build_mf_w_clusters(time_delay_data)
-            tri_mf_data = np.array([a, b, c])
-        else:
-            tri_mf_data = None
-
-        invalid_count = 0
-        while len(valid_bins) > 0:
-            valid_bins, inv_count = self._gen_apriori_candidates(valid_bins, self.target_col)
-            invalid_count += inv_count
-            for v_bin in valid_bins:
-                gi_arr = v_bin[0]
-                bin_data = v_bin[1]
-                sup = v_bin[2]
-                gradual_patterns = TGP.remove_subsets(gradual_patterns, set(gi_arr))
-                if type(self) is TGrad:
-                    t_lag = self.get_fuzzy_time_lag(bin_data, time_delay_data, gi_arr=None, tri_mf_data=tri_mf_data)
-                else:
-                    t_lag = self.get_fuzzy_time_lag(bin_data, time_delay_data, gi_arr, tri_mf_data)
-
-                if t_lag.valid:
-                    tgp = TGP()
-                    """:type gp: TGP"""
-                    for obj in gi_arr:
-                        gi = GI(obj[0], obj[1].decode())
-                        """:type gi: GI"""
-                        if gi.attribute_col == self.target_col:
-                            tgp.add_target_gradual_item(gi)
-                        else:
-                            tgp.add_temporal_gradual_item(gi, t_lag)
-                    tgp.set_support(sup)
-                    gradual_patterns.append(tgp)
-        return gradual_patterns
 
     def get_fuzzy_time_lag(self, bin_data: np.ndarray, time_data: np.ndarray | dict, gi_arr: set = None, tri_mf_data: np.ndarray | None = None):
         """
