@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: GNU GPL v3
-# This file is dual licensed under the terms of the GNU General Public, Version
-# 3.0.  See the LICENSE file in the root of this
+# This file is dual licensed under the terms of the GNU GPL v3.0
+# See the LICENSE file in the root of this
 # repository for complete details.
 
 """
