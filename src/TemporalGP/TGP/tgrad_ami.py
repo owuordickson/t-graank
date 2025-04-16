@@ -223,8 +223,8 @@ class TGradAMI(TGrad):
             eval_dict = {
                 'Algorithm': 'TGradAMI',
                 'Patterns': str_gps,
-                'Time Data': np.vstack((np.array(title_row), delayed_data.T)),
-                'Transformed Data': np.vstack((np.array(time_title), time_data.T)),
+                'Time Data': np.vstack((np.array(time_title), time_data.T)),
+                'Transformed Data': np.vstack((np.array(title_row), delayed_data.T)),
                 'GP Components': gp_components
             }
             # Output
@@ -270,7 +270,7 @@ class TGradAMI(TGrad):
 
         invalid_count = 0
         while len(valid_bins) > 0:
-            valid_bins, inv_count = self.__gen_apriori_candidates(valid_bins, target_col=self.target_col)
+            valid_bins, inv_count = self._gen_apriori_candidates(valid_bins, target_col=self.target_col)
             invalid_count += inv_count
             for v_bin in valid_bins:
                 gi_arr = v_bin[0]
