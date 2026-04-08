@@ -1,12 +1,15 @@
 language: python
 
 python:
-    - "3.11"
+  - "3.11"
 
 before_install:
-  - sudo apt-get -y install libopenmpi-dev
-  - "pip install -r requirements.txt"
+  - sudo apt-get update -y
+  - sudo apt-get install -y libopenmpi-dev
 
-install: pip install .
+install:
+  - pip install -r requirements.txt
+  - pip install .
 
-script: TemporalGP -f datasets/DATASET.csv
+script:
+  - TemporalGP -f datasets/DATASET.csv
