@@ -16,7 +16,8 @@ from sklearn.cluster import KMeans
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.feature_selection import mutual_info_regression
 
-from so4gp import GI, TGP, GRAANK, TGrad
+from so4gp import GI, TGP
+from so4gp.algorithms import GRAANK, TGrad
 
 
 class TGradAMI(TGrad):
@@ -46,8 +47,8 @@ class TGradAMI(TGrad):
         >>> dummy_data = [["2021-03", 30, 3, 1, 10], ["2021-04", 35, 2, 2, 8], ["2021-05", 40, 4, 2, 7], ["2021-06", 50, 1, 1, 6], ["2021-07", 52, 7, 1, 2]]
         >>> dummy_df = pandas.DataFrame(dummy_data, columns=['Date', 'Age', 'Salary', 'Cars', 'Expenses'])
         >>>
-        >>> mine_obj = sgp.TGradAMI(dummy_df, min_sup=0.5, target_col=1, min_rep=0.5, min_error=0.1)
-        >>> result_json = mine_obj.discover_tgp(use_clustering=True, eval_mode=False)
+        >>> mine_obj = sgp.algorithms.TGradAMI(dummy_df, min_sup=0.5, target_col=1, min_rep=0.5, min_error=0.1)
+        >>> result_json = mine_obj.discover_tgp(use_clustering=False, eval_mode=False)
         >>> result = json.loads(result_json)
         >>> # print(result['Patterns'])
         >>> print(result_json)
@@ -184,8 +185,7 @@ class TGradAMI(TGrad):
         :return: list of (FTGPs as JSON object) or (FTGPs and evaluation data as a Python dict) when executed in evaluation mode.
         """
 
-        self.gradual_patterns = []
-        """:type: gradual_patterns: list(so4gp.TGP)"""
+        self.clear_gradual_patterns()
         str_gps = []
 
         # 1. Compute and find the lowest mutual information
@@ -207,7 +207,7 @@ class TGradAMI(TGrad):
         # 4. Organize FTGPs into a single list
         if list_tgp:
             for tgp in list_tgp:
-                self.gradual_patterns.append(tgp)
+                self.add_gradual_pattern(tgp)
                 str_gps.append(tgp.print(self.titles))
 
         # 5. Check if algorithm is in evaluation mode
@@ -215,11 +215,10 @@ class TGradAMI(TGrad):
             title_row = []
             time_title = []
             # print(eval_data)
-            for txt in self.titles:
-                col = int(txt[0])
-                title_row.append(str(txt[1].decode()))
+            for col, txt in enumerate(self.titles):
+                title_row.append(str(txt))
                 if (col != self.target_col) and (col not in self.time_cols):
-                    time_title.append(str(txt[1].decode()))
+                    time_title.append(str(txt))
             eval_dict = {
                 'Algorithm': 'TGradAMI',
                 'Patterns': str_gps,
@@ -261,33 +260,30 @@ class TGradAMI(TGrad):
         else:
             tri_mf_data = None
 
-        for pairwise_obj in valid_bins:
-            pairwise_mat = pairwise_obj[1]
-            attr_col = pairwise_obj[0][0]
-            attr_name = pairwise_obj[0][1].decode()
-            gi = GI(attr_col, attr_name)
-            gp_components[gi.to_string()] = GRAANK.decompose_to_gp_component(pairwise_mat)
+        for gi_str, pairwise_mat in valid_bins.items():
+            gi = GI.from_string(gi_str)
+            gp_components[gi.to_string()] = GRAANK.decompose_to_gp_component(pairwise_mat.bin_mat)
 
         invalid_count = 0
         while len(valid_bins) > 0:
             valid_bins, inv_count = self._gen_apriori_candidates(valid_bins, target_col=self.target_col)
             invalid_count += inv_count
-            for v_bin in valid_bins:
-                gi_arr = v_bin[0]
-                bin_data = v_bin[1]
-                sup = v_bin[2]
-                gradual_patterns = TGP.remove_subsets(gradual_patterns, set(gi_arr))
+            for gi_arr, pair_mat in valid_bins.items():
+                bin_data = pair_mat.bin_mat
+                sup = pair_mat.support
+                self.remove_subsets(set(gi_arr), gradual_patterns=gradual_patterns)
                 t_lag = self.get_fuzzy_time_lag(bin_data, time_delay_data, gi_arr, tri_mf_data)
 
                 if t_lag.valid:
                     tgp = TGP()
-                    for obj in gi_arr:
-                        gi = GI(obj[0], obj[1].decode())
+                    for gi_str in gi_arr:
+                        #print(gi_str)
+                        gi = GI.from_string(gi_str)
                         if gi.attribute_col == self.target_col:
-                            tgp.add_target_gradual_item(gi)
+                            tgp.target_gradual_item = gi
                         else:
                             tgp.add_temporal_gradual_item(gi, t_lag)
-                    tgp.set_support(sup)
+                    tgp.support = sup
                     gradual_patterns.append(tgp)
                     gp_components[f"{tgp.to_string()}"] = GRAANK.decompose_to_gp_component(bin_data)
 

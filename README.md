@@ -1,4 +1,6 @@
+[![Build Status](https://app.travis-ci.com/owuordickson/t-graank.svg?token=znzzxEXjtje37KzpoMSH)](https://app.travis-ci.com/owuordickson/t-graank)
 [![Build Status](https://travis-ci.org/owuordickson/t-graank.svg?branch=main)](https://travis-ci.org/owuordickson/t-graank)
+
 ## T-GRAANK
 A python implementation of the <i>Temporal-GRAdual rANKing</i> algorithm. The algorithm extends the <i>GRAANK</i> algorithm to the case of temporal gradual tendencies. We have optimized the implementation of the algorithm by: (1) using Numpy functions for operations that are time-consuming and, (2) allowed parallel multiprocessing. The research paper is available via:
 

@@ -13,7 +13,8 @@ import numpy as np
 import skfuzzy as fuzzy
 import multiprocessing as mp
 
-from so4gp import DataGP, GI, TGP, TimeDelay, GRAANK
+from so4gp import DataGP, GI, TGP, TimeDelay
+from so4gp.algorithms import GRAANK
 from .tgrad_ami import TGradAMI
 
 
@@ -40,7 +41,7 @@ class TGrad(GRAANK):
         >>> dummy_data = [["2021-03", 30, 3, 1, 10], ["2021-04", 35, 2, 2, 8], ["2021-05", 40, 4, 2, 7], ["2021-06", 50, 1, 1, 6], ["2021-07", 52, 7, 1, 2]]
         >>> dummy_df = pandas.DataFrame(dummy_data, columns=['Date', 'Age', 'Salary', 'Cars', 'Expenses'])
         >>>
-        >>> mine_obj = sgp.TGrad(dummy_df, min_sup=0.5, target_col=1, min_rep=0.5)
+        >>> mine_obj = sgp.algorithms.TGrad(dummy_df, min_sup=0.5, target_col=1, min_rep=0.5)
         >>> result_json = mine_obj.discover_tgp(parallel=True)
         >>> result = json.loads(result_json)
         >>> # print(result['Patterns'])
@@ -76,8 +77,7 @@ class TGrad(GRAANK):
         :return: list of FTGPs as JSON object
         """
 
-        self.gradual_patterns = []
-        """:type: gradual_patterns: list(so4gp.TGP)"""
+        self.clear_gradual_patterns()
         str_gps = []
 
         # 1. Mine FTGPs
@@ -99,7 +99,7 @@ class TGrad(GRAANK):
         for lst_obj in patterns:
             if lst_obj:
                 for tgp in lst_obj:
-                    self.gradual_patterns.append(tgp)
+                    self.add_gradual_pattern(tgp)
                     str_gps.append(tgp.print(self.titles))
         # Output
         out = json.dumps({"Algorithm": "TGrad", "Patterns": str_gps})
@@ -175,7 +175,6 @@ class TGrad(GRAANK):
         """
 
         self.fit_bitmap(attr_data)
-
         gradual_patterns = []
         """:type gradual_patterns: list"""
         valid_bins = self.valid_bins
@@ -195,7 +194,7 @@ class TGrad(GRAANK):
                 gi_arr = v_bin[0]
                 bin_data = v_bin[1]
                 sup = v_bin[2]
-                gradual_patterns = TGP.remove_subsets(gradual_patterns, set(gi_arr))
+                self.remove_subsets(set(gi_arr), gradual_patterns=gradual_patterns)
                 if type(self) is TGrad:
                     t_lag = self.get_fuzzy_time_lag(bin_data, time_delay_data, gi_arr=None, tri_mf_data=tri_mf_data)
                 else:
@@ -208,10 +207,10 @@ class TGrad(GRAANK):
                         gi = GI(obj[0], obj[1].decode())
                         """:type gi: GI"""
                         if gi.attribute_col == self.target_col:
-                            tgp.add_target_gradual_item(gi)
+                            tgp.target_gradual_item = gi
                         else:
                             tgp.add_temporal_gradual_item(gi, t_lag)
-                    tgp.set_support(sup)
+                    tgp.support = sup
                     gradual_patterns.append(tgp)
         return gradual_patterns
 

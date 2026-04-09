@@ -2,23 +2,20 @@ import numpy as np
 from TemporalGP.TGP.tgrad_ami import TGradAMI
 
 
-# f_path = "../../datasets/DATASET.csv"
-# f_path = "../../datasets/rain_temp2013-2015.csv"
-f_path = "../../datasets/air_quality25.csv"
-# f_path = "../../datasets/air_quality1k.csv"
+# f_path = "../datasets/DATASET.csv"
+# f_path = "../datasets/rain_temp2013-2015.csv"
+# f_path = "../datasets/air_quality25.csv"
+# f_path = "../datasets/air_quality1k.csv"
+f_path = "../datasets/ke_rain_data_2k.csv"
 
-tgp = TGradAMI(f_path, False, 0.5, 4, 1, 1)
-# tgp.discover_tgp()
+eq = False
+min_sup = 0.5
+tgt_col = 1
+min_rep = 0.75
+mi_err_margin = 0.0001
+eval_mode = True
+clustering_method = False
 
-a = 2
-b = 4
-c = 6
-x = np.array([1, 2, 3, 4, 8])
-
-print(f"a: {a}, b: {b}, c: {c}")
-print(f"x-data: {x}\n")
-# TGradAMI.learn_best_mf_w_ml(a, b, c, x)
-# TGradAMI.learn_mf_hill_climbing(a, b, c, x)
-
-from so4gp import DataGP
-print(DataGP.test_time('10-01-2005'))
+t_grad = TGradAMI(f_path, min_sup, eq, target_col=tgt_col, min_rep=min_rep, min_error=mi_err_margin)
+eval_dict = t_grad.discover_tgp(use_clustering=clustering_method, eval_mode=eval_mode)
+#print(eval_dict)
