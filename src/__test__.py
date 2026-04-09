@@ -1,5 +1,6 @@
 import numpy as np
 from TemporalGP.TGP.tgrad_ami import TGradAMI
+from TemporalGP.TGP.t_graank import TGrad
 
 
 # f_path = "../datasets/DATASET.csv"
@@ -16,6 +17,7 @@ mi_err_margin = 0.0001
 eval_mode = True
 clustering_method = False
 
-t_grad = TGradAMI(f_path, min_sup, eq, target_col=tgt_col, min_rep=min_rep, min_error=mi_err_margin)
-eval_dict = t_grad.discover_tgp(use_clustering=clustering_method, eval_mode=eval_mode)
-#print(eval_dict)
+# t_grad = TGradAMI(f_path, min_sup, eq, target_col=tgt_col, min_rep=min_rep, min_error=mi_err_margin)
+t_grad = TGrad(f_path, min_sup, eq, target_col=tgt_col, min_rep=min_rep)
+eval_dict = t_grad.discover_tgp()
+print(eval_dict)

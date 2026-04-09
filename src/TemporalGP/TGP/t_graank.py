@@ -190,10 +190,9 @@ class TGrad(GRAANK):
         while len(valid_bins) > 0:
             valid_bins, inv_count = self._gen_apriori_candidates(valid_bins, target_col=self.target_col)
             invalid_count += inv_count
-            for v_bin in valid_bins:
-                gi_arr = v_bin[0]
-                bin_data = v_bin[1]
-                sup = v_bin[2]
+            for gi_arr, pair_mat in valid_bins.items():
+                bin_data = pair_mat.bin_mat
+                sup = pair_mat.support
                 self.remove_subsets(set(gi_arr), gradual_patterns=gradual_patterns)
                 if type(self) is TGrad:
                     t_lag = self.get_fuzzy_time_lag(bin_data, time_delay_data, gi_arr=None, tri_mf_data=tri_mf_data)
@@ -203,8 +202,9 @@ class TGrad(GRAANK):
                 if t_lag.valid:
                     tgp = TGP()
                     """:type gp: TGP"""
-                    for obj in gi_arr:
-                        gi = GI(obj[0], obj[1].decode())
+                    for gi_str in gi_arr:
+                        # print(gi_str)
+                        gi = GI.from_string(gi_str)
                         """:type gi: GI"""
                         if gi.attribute_col == self.target_col:
                             tgp.target_gradual_item = gi
