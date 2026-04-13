@@ -16,7 +16,7 @@ from sklearn.cluster import KMeans
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.feature_selection import mutual_info_regression
 
-from so4gp import GI, TGP
+from so4gp import GI, TGP, gen_gradual_warping_path
 from so4gp.algorithms import GRAANK, TGrad
 
 
@@ -259,7 +259,7 @@ class TGradAMI(TGrad):
 
         for gi_str, pairwise_mat in valid_bins.items():
             gi = GI.from_string(gi_str)
-            warping_path_dict[gi.to_string()] = GRAANK.decompose_to_gp_component(pairwise_mat.bin_mat)
+            warping_path_dict[gi.to_string()] = gen_gradual_warping_path(pairwise_mat.bin_mat)
 
         invalid_count = 0
         while len(valid_bins) > 0:
@@ -282,7 +282,7 @@ class TGradAMI(TGrad):
                             tgp.add_temporal_gradual_item(gi, t_lag)
                     tgp.support = sup
                     t_gps.append(tgp)
-                    warping_path_dict[f"{tgp.to_string()}"] = GRAANK.decompose_to_gp_component(bin_data)
+                    warping_path_dict[f"{tgp.to_string()}"] = gen_gradual_warping_path(bin_data)
 
         return t_gps, warping_path_dict
 
