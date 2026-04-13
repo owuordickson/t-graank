@@ -199,7 +199,7 @@ class TGradAMI(TGrad):
             list_tgp, warping_path_dict = self.extract_gradual_components(time_delay_data=time_data, attr_data=delayed_data,
                                                                    clustering_method=use_clustering)
         else:
-            list_tgp = self.__mine(time_delay_data=time_data, attr_data=delayed_data, clustering_method=use_clustering)
+            list_tgp = self._mine_gps_at_step(time_delay_data=time_data, attr_data=delayed_data, clustering_method=use_clustering)
             warping_path_dict = None
 
         # 4. Organize FTGPs into a single list
