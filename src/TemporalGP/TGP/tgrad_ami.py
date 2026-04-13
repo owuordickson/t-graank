@@ -196,13 +196,11 @@ class TGradAMI(TGrad):
 
         # 3. Discover temporal-GPs from time-delayed data
         if eval_mode:
-            list_tgp, gp_components = self.extract_gradual_components(time_delay_data=time_data, attr_data=delayed_data,
+            list_tgp, warping_path_dict = self.extract_gradual_components(time_delay_data=time_data, attr_data=delayed_data,
                                                                    clustering_method=use_clustering)
-            """:type t_gps: list"""
         else:
             list_tgp = self.__mine(time_delay_data=time_data, attr_data=delayed_data, clustering_method=use_clustering)
-            """:type t_gps: list"""
-            gp_components = None
+            warping_path_dict = None
 
         # 4. Organize FTGPs into a single list
         if list_tgp:
@@ -224,7 +222,7 @@ class TGradAMI(TGrad):
                 'Patterns': str_gps,
                 'Time Data': np.vstack((np.array(time_title), time_data.T)),
                 'Transformed Data': np.vstack((np.array(title_row), delayed_data.T)),
-                'GP Components': gp_components
+                'Warping Paths': warping_path_dict
             }
             # Output
             return eval_dict
@@ -248,10 +246,9 @@ class TGradAMI(TGrad):
 
         self.fit_bitmap(attr_data)
         valid_bins = self.valid_bins
-        gradual_patterns = []
-        """:type gradual_patterns: list"""
-        gp_components = {}
-        """:type gp_components: dict"""
+        t_gps: list[TGP] = []
+        warping_path_dict = {}
+        """:type warping_path_dict: dict"""
 
         if clustering_method:
             # Build the main triangular MF using clustering algorithm
@@ -262,7 +259,7 @@ class TGradAMI(TGrad):
 
         for gi_str, pairwise_mat in valid_bins.items():
             gi = GI.from_string(gi_str)
-            gp_components[gi.to_string()] = GRAANK.decompose_to_gp_component(pairwise_mat.bin_mat)
+            warping_path_dict[gi.to_string()] = GRAANK.decompose_to_gp_component(pairwise_mat.bin_mat)
 
         invalid_count = 0
         while len(valid_bins) > 0:
@@ -271,7 +268,7 @@ class TGradAMI(TGrad):
             for gi_arr, pair_mat in valid_bins.items():
                 bin_data = pair_mat.bin_mat
                 sup = pair_mat.support
-                self.remove_subsets(set(gi_arr), gradual_patterns=gradual_patterns)
+                self.remove_subsets(set(gi_arr), gradual_patterns=t_gps)
                 t_lag = self.get_fuzzy_time_lag(bin_data, time_delay_data, gi_arr, tri_mf_data)
 
                 if t_lag.valid:
@@ -284,10 +281,10 @@ class TGradAMI(TGrad):
                         else:
                             tgp.add_temporal_gradual_item(gi, t_lag)
                     tgp.support = sup
-                    gradual_patterns.append(tgp)
-                    gp_components[f"{tgp.to_string()}"] = GRAANK.decompose_to_gp_component(bin_data)
+                    t_gps.append(tgp)
+                    warping_path_dict[f"{tgp.to_string()}"] = GRAANK.decompose_to_gp_component(bin_data)
 
-        return gradual_patterns, gp_components
+        return t_gps, warping_path_dict
 
     @staticmethod
     def build_mf_w_clusters(time_data: np.ndarray):

@@ -175,8 +175,7 @@ class TGrad(GRAANK):
         """
 
         self.fit_bitmap(attr_data)
-        gradual_patterns = []
-        """:type gradual_patterns: list"""
+        t_gps: list[TGP] = []
         valid_bins = self.valid_bins
 
         if clustering_method:
@@ -193,7 +192,7 @@ class TGrad(GRAANK):
             for gi_arr, pair_mat in valid_bins.items():
                 bin_data = pair_mat.bin_mat
                 sup = pair_mat.support
-                self.remove_subsets(set(gi_arr), gradual_patterns=gradual_patterns)
+                self.remove_subsets(set(gi_arr), gradual_patterns=t_gps)
                 if type(self) is TGrad:
                     t_lag = self.get_fuzzy_time_lag(bin_data, time_delay_data, gi_arr=None, tri_mf_data=tri_mf_data)
                 else:
@@ -211,8 +210,8 @@ class TGrad(GRAANK):
                         else:
                             tgp.add_temporal_gradual_item(gi, t_lag)
                     tgp.support = sup
-                    gradual_patterns.append(tgp)
-        return gradual_patterns
+                    t_gps.append(tgp)
+        return t_gps
 
     def get_time_diffs(self, step: int):  # optimized
         """
