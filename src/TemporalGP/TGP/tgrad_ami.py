@@ -17,7 +17,7 @@ from sklearn.preprocessing import MinMaxScaler
 from sklearn.feature_selection import mutual_info_regression
 
 from so4gp import GI, TGP, gen_gradual_warping_path
-from so4gp.algorithms import GRAANK, TGrad
+from so4gp.algorithms import TGrad
 
 
 class TGradAMI(TGrad):
