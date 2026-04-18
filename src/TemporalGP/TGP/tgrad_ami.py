@@ -191,7 +191,7 @@ class TGradAMI(TGrad):
         # 1. Compute and find the lowest mutual information
         optimal_dict, max_step = self.find_best_mutual_info()
 
-        # 2. Create final (and dynamic) delayed dataset
+        # 2. Create the final (and dynamic) delayed dataset
         delayed_data, time_data = self.gather_delayed_data(optimal_dict, max_step)
 
         # 3. Discover temporal-GPs from time-delayed data
@@ -208,7 +208,7 @@ class TGradAMI(TGrad):
                 self.add_gradual_pattern(tgp)
                 str_gps.append(tgp.print(self.titles))
 
-        # 5. Check if algorithm is in evaluation mode
+        # 5. Check if the algorithm is in evaluation mode
         if eval_mode:
             title_row = []
             time_title = []

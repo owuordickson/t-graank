@@ -116,7 +116,7 @@ class TGrad(GRAANK):
         """
         # NB: Restructure dataset based on target/reference col
         if self.time_ok:
-            # 1. Calculate time difference using step
+            # 1. Calculate the time difference using a step
             ok, time_diffs = self.get_time_diffs(step)
             if not ok:
                 msg = "Error: Time in row " + str(time_diffs[0]) \
