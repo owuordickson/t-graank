@@ -9,6 +9,7 @@ Algorithm for mining temporal gradual patterns using fuzzy membership functions.
 
 
 import json
+import time
 import numpy as np
 import skfuzzy as fuzzy
 import multiprocessing as mp
@@ -33,14 +34,12 @@ class TGrad(GRAANK):
 
         >>> import so4gp.algorithms import TGrad
         >>> import pandas
-        >>> import json
         >>>
         >>> dummy_data = [["2021-03", 30, 3, 1, 10], ["2021-04", 35, 2, 2, 8], ["2021-05", 40, 4, 2, 7], ["2021-06", 50, 1, 1, 6], ["2021-07", 52, 7, 1, 2]]
         >>> dummy_df = pandas.DataFrame(dummy_data, columns=['Date', 'Age', 'Salary', 'Cars', 'Expenses'])
         >>>
         >>> mine_obj = TGrad(dummy_df, min_sup=0.5, target_col=1, min_rep=0.5)
         >>> result_json = mine_obj.discover_tgp(parallel=True)
-        >>> result = json.loads(result_json)
         >>> # print(result['Patterns'])
         >>> print(result_json)
         """
@@ -88,6 +87,7 @@ class TGrad(GRAANK):
         :return: List of FTGPs as JSON object
         """
 
+        start = time.time()
         self.clear_gradual_patterns()
         # 1. Mine FTGPs
         if parallel:
@@ -113,10 +113,15 @@ class TGrad(GRAANK):
                 if isinstance(pat, TGP):
                     self.add_gradual_pattern(pat)
 
-        # Output
-        out = json.dumps({"Algorithm": "TGrad", "Patterns": self.str_gradual_patterns},
-                         indent=4)
-        """:type out: object"""
+        duration = time.time() - start
+        out_dict: dict[str, str | list] = {
+            "Algorithm": "TGrad",
+            # "Memory Usage (MiB)": f{mem_use)}"
+            "Run-time": f"{duration:.6f} seconds"}
+        self.generate_output_files(out_dict)
+
+        out_dict.update({"Patterns": self.display_patterns})
+        out: object = json.dumps(out_dict, indent=4)
         return out
 
     def transform_and_mine(self, step: int, return_patterns: bool = True):
@@ -183,7 +188,7 @@ class TGrad(GRAANK):
             print(f"Error at step {step}: {e}")
             return None
 
-    def _mine_gps_at_step(self, time_delay_data: np.ndarray | dict, attr_data: np.ndarray = None, clustering_method: bool = False, decompose: bool = False) -> list[TGP] | tuple[list[TGP], dict]:
+    def _mine_gps_at_step(self, time_delay_data: np.ndarray | dict, attr_data: np.ndarray = None, clustering_method: bool = False) -> list[TGP] | tuple[list[TGP], dict]:
         """
         Uses apriori algorithm to find GP candidates based on the target-attribute. The candidates are validated if
         their computed support is greater than or equal to the minimum support threshold specified by the user.
@@ -202,7 +207,6 @@ class TGrad(GRAANK):
 
         t_gps: list[TGP] = []
         valid_bins_dict: dict = (self.valid_bins or {}).copy()
-        tgp_warping_set: dict = {}
 
         if clustering_method and isinstance(time_delay_data, np.ndarray):
             # Build the main triangular MF using the clustering algorithm
@@ -210,10 +214,6 @@ class TGrad(GRAANK):
             tri_mf_data = np.array([a, b, c])
         else:
             tri_mf_data = None
-
-        if decompose:
-            self.fit_warpingset()
-            tgp_warping_set = (self.warping_set or {}).copy()
 
         invalid_count = 0
         while len(valid_bins_dict) > 0:
@@ -238,10 +238,7 @@ class TGrad(GRAANK):
                     DataGP.gen_gradual_warping_set(gi_data.bin_mat, as_array=True))
                     tgp.compute_descriptors(warping_set_arr, obj_count=self.row_count)
                     t_gps.append(tgp)
-        if decompose:
-            return t_gps, tgp_warping_set
-        else:
-            return t_gps
+        return t_gps
 
     def get_time_diffs(self, step: int):  # optimized
         """

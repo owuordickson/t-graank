@@ -3,14 +3,7 @@
 # See the LICENSE file in the root of this
 # repository for complete details.
 
-"""
-Algorithm for estimating time-lag using AMI and extending it to mining gradual patterns.
-The average mutual information I(X; Y) is a measure of the amount of “information” that
-the random variables X and Y provide about one another.
-
-"""
-
-import json
+import time
 import numpy as np
 from sklearn.feature_selection import mutual_info_regression
 
@@ -180,9 +173,10 @@ class TGradAMI(TGrad):
 
         :param use_clustering: Use a clustering algorithm to estimate the best time-delay value.
         :param eval_mode: Run algorithm in evaluation mode.
-        :return: List of (FTGPs as JSON object) or (FTGPs and evaluation data as a Python dict) when executed in evaluation mode.
+        :return: List of (FTGPs as DICT object) or (FTGPs and evaluation data as a Python dict) when executed in evaluation mode.
         """
 
+        start = time.time()
         self.clear_gradual_patterns()
         # 1. Compute and find the lowest mutual information
         optimal_dict, max_step = self.find_best_mutual_info()
@@ -191,11 +185,7 @@ class TGradAMI(TGrad):
         delayed_data, time_data = self.gather_delayed_data(optimal_dict, max_step)
 
         # 3. Discover temporal-GPs from time-delayed data
-        if eval_mode:
-            lst_tgp, warping_path_dict = self._mine_gps_at_step(time_delay_data=time_data, attr_data=delayed_data, clustering_method=use_clustering, decompose=True)
-        else:
-            lst_tgp = self._mine_gps_at_step(time_delay_data=time_data, attr_data=delayed_data, clustering_method=use_clustering)
-            warping_path_dict = None
+        lst_tgp = self._mine_gps_at_step(time_delay_data=time_data, attr_data=delayed_data, clustering_method=use_clustering)
 
         # 4. Organize FTGPs into a single list
         if lst_tgp:
@@ -206,23 +196,24 @@ class TGradAMI(TGrad):
         if eval_mode:
             title_row = []
             time_title = []
-            # print(eval_data)
             for col, txt in enumerate(self.titles):
                 title_row.append(txt)
                 if (col != self.target_col) and (col not in self.time_cols):
                     time_title.append(txt)
-            eval_dict = {
-                'Algorithm': 'TGradAMI',
-                'Patterns': self.str_gradual_patterns,
+            add_dict = {
+                'Patterns': self.display_patterns,
                 'Time Data': np.vstack((np.array(time_title), time_data.T)),
                 'Transformed Data': np.vstack((np.array(title_row), delayed_data.T if delayed_data is not None else np.array([]))),
-                'Warping Paths': warping_path_dict
             }
-            # Output
-            return eval_dict
         else:
-            # Output
-            out = json.dumps({"Algorithm": "TGradAMI", "Patterns": self.str_gradual_patterns},
-                             indent=4)
-            """:type out: object"""
-            return out
+            add_dict = {"Patterns": self.display_patterns}
+
+        duration = time.time() - start
+        out_dict: dict[str, str | list | np.ndarray | None | dict] = {
+            "Algorithm": "TGradAMI",
+            # "Memory Usage (MiB)": f{mem_use)}"
+            "Run-time": f"{duration:.6f} seconds"}
+        self.generate_output_files(out_dict)
+
+        out_dict.update(add_dict)
+        return out_dict
