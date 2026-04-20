@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: GNU GPL v3
-# This file is dual licensed under the terms of the GNU GPL v3.0
+# This file is licensed under the terms of the GNU GPL v3.0
 # See the LICENSE file in the root of this
 # repository for complete details.
 
@@ -38,16 +38,15 @@ class TGradAMI(TGrad):
 
         >>> from so4gp.algorithms import TGradAMI
         >>> import pandas
-        >>> import json
         >>>
         >>> dummy_data = [["2021-03", 30, 3, 1, 10], ["2021-04", 35, 2, 2, 8], ["2021-05", 40, 4, 2, 7], ["2021-06", 50, 1, 1, 6], ["2021-07", 52, 7, 1, 2]]
         >>> dummy_df = pandas.DataFrame(dummy_data, columns=['Date', 'Age', 'Salary', 'Cars', 'Expenses'])
         >>>
         >>> mine_obj = TGradAMI(dummy_df, min_sup=0.5, target_col=1, min_rep=0.5, min_error=0.1)
-        >>> result_json = mine_obj.discover_tgp(use_clustering=True, eval_mode=False)
+        >>> result_dict = mine_obj.discover_tgp(use_clustering=True, eval_mode=False)
         >>>
         >>> # print(result['Patterns'])
-        >>> print(result_json)
+        >>> print(result_dict)
         """
 
         super(TGradAMI, self).__init__(*args, **kwargs)

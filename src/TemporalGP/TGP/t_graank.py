@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: GNU GPL v3
-# This file is dual licensed under the terms of the GNU GPL v3.0
+# This file is licensed under the terms of the GNU GPL v3.0
 # See the LICENSE file in the root of this
 # repository for complete details.
 
@@ -113,14 +113,6 @@ class TGrad(GRAANK):
                 if isinstance(pat, TGP):
                     self.add_gradual_pattern(pat)
 
-        """for lst_obj in pattern_data:
-            if lst_obj:
-                for lst_tgp in lst_obj:
-                    if isinstance(lst_tgp, TGP):
-                        self.add_gradual_pattern(lst_tgp)
-                    else:
-                        for tgp in lst_tgp:
-                            self.add_gradual_pattern(tgp)"""
         # Output
         out = json.dumps({"Algorithm": "TGrad", "Patterns": self.str_gradual_patterns},
                          indent=4)

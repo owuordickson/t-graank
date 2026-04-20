@@ -51,7 +51,7 @@ def execute_tgp(f_path: str, min_sup: float, tgt_col: int, min_rep: float, min_e
             return "Invalid algorithm specified"
 
         print(res_dict)
-        output_txt = produce_output_txt(f_path,num_cores, allow_mp, allow_clustering, t_grad)
+        output_txt = generate_output(f_path, num_cores, allow_mp, allow_clustering, t_grad)
         # produce_eval_pdf(f_path, tgt_col, output_txt, trans_data, time_data)
         return output_txt
     except ZeroDivisionError as error:
@@ -60,7 +60,7 @@ def execute_tgp(f_path: str, min_sup: float, tgt_col: int, min_rep: float, min_e
         return output_txt
 
 
-def produce_output_txt(f_path, cores, allow_mp, allow_clustering, t_grad):
+def generate_output(f_path, cores, allow_mp, allow_clustering, t_grad):
     """"""
     if allow_mp:
         msg_para = "True"
@@ -104,7 +104,7 @@ def produce_output_txt(f_path, cores, allow_mp, allow_clustering, t_grad):
     return output_txt
 
 
-def generate_pdf(f_path, tgt_col, out_txt, trans_data, time_data):
+def generate_files(f_path, tgt_col, out_txt, trans_data, time_data):
     """"""
 
     """
