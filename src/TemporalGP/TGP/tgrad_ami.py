@@ -211,7 +211,11 @@ class TGradAMI(TGrad):
         duration = time.time() - start
         out_dict: dict[str, str | list | np.ndarray | None | dict] = {
             "Algorithm": "TGradAMI",
-            # "Memory Usage (MiB)": f{mem_use)}"
+            # "Memory Usage (MiB)": f{mem_use)}",
+            "Minimum Representation": f"{self.min_rep:.2f}",
+            "MI Minimum Error": f"{self.error_margin:.2f}",
+            "MI Error": f"{self.mi_error:.2f}",
+            "Target Column": f"{self._target_col}",
             "Run-time": f"{duration:.6f} seconds"}
         self.generate_output_files(out_dict)
 
