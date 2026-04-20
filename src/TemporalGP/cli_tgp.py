@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 # SPDX-License-Identifier: GNU GPL v3
-# This file is dual licensed under the terms of the GNU GPL v3.0
+# This file is licensed under the terms of the GNU GPL v3.0
 # See the LICENSE file in the root of this
 # repository for complete details.
 
@@ -19,34 +19,38 @@ from .TGP.tgrad_ami import TGradAMI
 
 
 def execute_tgp(f_path: str, min_sup: float, tgt_col: int, min_rep: float, min_error: float, num_cores: int,
-                allow_mp: bool, eq=False, allow_clustering=False, eval_mode=False):
+                allow_mp: bool, eq: bool=False, allow_clustering: bool=False, eval_mode=False, algorithm: int=0):
     """
-    Executes T-GRAANK algorithm using the user-specified configuration options.
+    Executes T-GRAANK algorithm using the user-specified configuration options
 
-    :param f_path: input path of a CSV file/Pandas DataFrame.
-    :param tgt_col: target/reference column of the data-set.
-    :param min_sup: minimum support threshold.
-    :param min_rep: minimum representativity threshold.
-    :param min_error: minimum mutual information error threshold.
-    :param num_cores: number of available cores.
-    :param allow_mp: allow multiprocessing.
-    :param eq: assign equal values as valid?
-    :param allow_clustering: using clustering method to estimate time delays?
-    :param eval_mode: run in 'evaluation/testing' mode?
-    :return: results in string format.
+    :param f_path: input path of a CSV file/Pandas DataFrame
+    :param tgt_col: target/reference column of the data-set
+    :param min_sup: minimum support threshold
+    :param min_rep: minimum representativity threshold
+    :param min_error: minimum mutual information error threshold
+    :param num_cores: number of available cores
+    :param allow_mp: allow multiprocessing
+    :param eq: to assign equal values as valid
+    :param allow_clustering: using clustering method to estimate time delays
+    :param eval_mode: run in 'evaluation/testing' mode
+    :param algorithm: algorithm to use (T-Grad or TGradAMI)
+    :return: results in string format
     """
     try:
         if num_cores <= 1:
             num_cores = sgp.get_num_cores()
 
-        #t_grad = TGrad(f_path, min_sup, eq, target_col=tgt_col, min_rep=min_rep)
-        t_grad = TGradAMI(f_path, min_sup, eq, target_col=tgt_col, min_rep=min_rep, min_error=min_error)
-        if isinstance(t_grad, TGradAMI):
-            res_dict = t_grad.discover_tgp(use_clustering=allow_clustering, eval_mode=eval_mode)
-        else:
+        if algorithm == 0:
+            t_grad = TGrad(f_path, min_sup, eq, target_col=tgt_col, min_rep=min_rep)
             res = t_grad.discover_tgp(parallel=allow_mp, num_cores=num_cores)
             res_dict = json.loads(res)
-        #print(res_dict)
+        elif algorithm == 1:
+            t_grad = TGradAMI(f_path, min_sup, eq, target_col=tgt_col, min_rep=min_rep, min_error=min_error)
+            res_dict = t_grad.discover_tgp(use_clustering=allow_clustering, eval_mode=eval_mode)
+        else:
+            return "Invalid algorithm specified"
+
+        print(res_dict)
         output_txt = produce_output_txt(f_path,num_cores, allow_mp, allow_clustering, t_grad)
         # produce_eval_pdf(f_path, tgt_col, output_txt, trans_data, time_data)
         return output_txt
@@ -89,18 +93,21 @@ def produce_output_txt(f_path, cores, allow_mp, allow_clustering, t_grad):
     output_txt += str("\nPattern : Support" + '\n')
 
     list_tgp = t_grad.gradual_patterns
-    for tgp in list_tgp:
+    for tgp in (list_tgp or []):
         gp_str = f"{tgp.to_string()} :  {tgp.support}"
         if len(gp_str) > 100:
             gp_str = gp_str[:100] + '\n' + gp_str[100:]
         output_txt += f"{gp_str}\n"
 
-    output_txt += "\n\n Number of patterns: " + str(len(list_tgp)) + '\n'
+    tgp_count = len(list_tgp) if list_tgp is not None else 0
+    output_txt += "\n\n Number of patterns: " + str(tgp_count) + '\n'
     return output_txt
 
 
-def produce_eval_pdf(f_path, tgt_col, out_txt, trans_data, time_data):
+def generate_pdf(f_path, tgt_col, out_txt, trans_data, time_data):
     """"""
+
+    """
     import time
     import ntpath
     import numpy as np
@@ -120,7 +127,7 @@ def produce_eval_pdf(f_path, tgt_col, out_txt, trans_data, time_data):
     data_obj = TGradAMI.process_time(trans_data)
     col_count = trans_data.shape[1]
     tgt_col =  tgt_col - (col_count-data_obj.col_count)
-    # num_plts = data_obj.attr_cols.shape[0] - 1
+    # num_plt = data_obj.attr_cols.shape[0] - 1
 
     # datetime_series = pd.to_datetime(data_obj.data[1:, 0].astype(float), unit='s')
     # datetime_index = pd.DatetimeIndex(datetime_series, freq='h')
@@ -131,7 +138,7 @@ def produce_eval_pdf(f_path, tgt_col, out_txt, trans_data, time_data):
     seasonal_1 = np.array(decomp_ts_1.seasonal)
     # trend_1 = trend_1[~np.isnan(trend_1)]
     seasonal_1 = seasonal_1[~np.isnan(seasonal_1)]
-    # max_plts = 0
+    # max_plt = 0
     # tgt_title = 'Target Col: ' + data_obj.titles[tgt_col][1].decode()
     tgt_title = data_obj.titles[tgt_col][1].decode() + '*'
     lst_res = []
@@ -148,29 +155,6 @@ def produce_eval_pdf(f_path, tgt_col, out_txt, trans_data, time_data):
             cos_similarity = np.dot(seasonal_1.ravel(), seasonal_2.ravel()) / (norm(seasonal_1.ravel()) * norm(seasonal_2.ravel()))
             sim_txt += f"{tgt_title} - {col_title}: {round(cos_similarity, 4)}\n"
             lst_res.append(f"{tgt_title} - {col_title}: {round(cos_similarity, 4)}")
-
-            """
-            distance, path = fastdtw(trend_1.reshape(-1, 1), trend_2.reshape(-1, 1), dist=euclidean)
-            arr_path = np.array(path)
-            err = np.abs(arr_path[:, 0] - arr_path[:, 1])
-            avg_err = round(np.mean(err), 4)
-
-            if max_plts > 0:
-                # add plot
-                max_plts -= 1
-                ax.plot([p[0] for p in path], [p[1] for p in path], '-', label=f"{col_title}: {avg_err}")
-                ax.legend()
-            else:
-                # new Figure
-                max_plts = 4
-                fig = plt.Figure(figsize=(6, 5))
-                ax = fig.add_subplot(1, 1, 1)
-                ax.set_title('DTW Warping Path')
-                ax.set(xlabel=tgt_title, ylabel='Time Series 2')
-                ax.plot([p[0] for p in path], [p[1] for p in path], '-', label=f"{col_title}: {avg_err}")
-                ax.legend()
-                lst_figs.append(fig)
-    """
 
     fig_res = plt.Figure(figsize=(8.5, 11), dpi=300)
     ax_res = fig_res.add_subplot(1, 1, 1)
@@ -193,11 +177,13 @@ def produce_eval_pdf(f_path, tgt_col, out_txt, trans_data, time_data):
     np.savetxt(f_name + str(file_stamp).replace('.', '', 1) +'_transformed_data.csv', trans_data[:, data_obj.attr_cols], fmt='%s', delimiter=',')
     np.savetxt(f_name + str(file_stamp).replace('.', '', 1) +'_timestamp_data.csv', time_data, fmt='%s', delimiter=',')
     return lst_res
+    """
+    return f_path, tgt_col, out_txt, trans_data, time_data
 
 
 def main_cli():
     """
-        Initializes and starts terminal/CMD application.
+        Initializes and starts a terminal / CMD application.
         :return:
     """
     options_gp, options_tgp = load_configs()
