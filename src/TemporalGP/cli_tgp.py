@@ -51,134 +51,9 @@ def execute_tgp(f_path: str, min_sup: float, tgt_col: int, min_rep: float, min_e
             return "Invalid algorithm specified"
 
         print(res_dict)
-        output_txt = generate_output(f_path, num_cores, allow_mp, allow_clustering, t_grad)
         # produce_eval_pdf(f_path, tgt_col, output_txt, trans_data, time_data)
-        return output_txt
     except ZeroDivisionError as error:
-        output_txt = "Failed: " + str(error)
-        print(error)
-        return output_txt
-
-
-def generate_output(f_path, cores, allow_mp, allow_clustering, t_grad):
-    """"""
-    if allow_mp:
-        msg_para = "True"
-    else:
-        msg_para = "False"
-
-    if isinstance(t_grad, TGradAMI):
-        output_txt = f"Algorithm: T-GRAANK AMI {'(with KMeans & Hill-climbing)' if allow_clustering else '(with Slide-Recalculate)'}\n"
-    else:
-        output_txt = "Algorithm: T-GRAANK (with Slide-Recalculate)\n"
-    output_txt += "No. of (dataset) attributes: " + str(t_grad.col_count) + '\n'
-    output_txt += "No. of (dataset) tuples: " + str(t_grad.row_count) + '\n'
-    output_txt += "Minimum support: " + str(t_grad.thd_supp) + '\n'
-    output_txt += "Minimum representativity: " + str(t_grad.min_rep) + '\n'
-    if isinstance(t_grad, TGradAMI):
-        output_txt += "MI minimum error: " + str(t_grad.error_margin) + '\n'
-        output_txt += "MI error: " + str(t_grad.mi_error) + '\n'
-    output_txt += "Multi-core execution: " + str(msg_para) + '\n'
-    output_txt += "Number of cores: " + str(cores) + '\n'
-    output_txt += "Number of tasks: " + str(t_grad.max_step) + '\n\n'
-
-    for txt in t_grad.titles:
-        col = int(txt[0])
-        if col == t_grad.target_col:
-            output_txt += (str(txt[0]) + '. ' + str(txt[1].decode()) + '**' + '\n')
-        else:
-            output_txt += (str(txt[0]) + '. ' + str(txt[1].decode()) + '\n')
-
-    output_txt += str("\nFile: " + f_path + '\n')
-    output_txt += str("\nPattern : Support" + '\n')
-
-    list_tgp = t_grad.gradual_patterns
-    for tgp in (list_tgp or []):
-        gp_str = f"{tgp.to_string()} :  {tgp.support}"
-        if len(gp_str) > 100:
-            gp_str = gp_str[:100] + '\n' + gp_str[100:]
-        output_txt += f"{gp_str}\n"
-
-    tgp_count = len(list_tgp) if list_tgp is not None else 0
-    output_txt += "\n\n Number of patterns: " + str(tgp_count) + '\n'
-    return output_txt
-
-
-def generate_files(f_path, tgt_col, out_txt, trans_data, time_data):
-    """"""
-
-    """
-    import time
-    import ntpath
-    import numpy as np
-    import pandas as pd
-    import matplotlib.pyplot as plt
-    from numpy.linalg import norm
-    # from fastdtw import fastdtw
-    # from scipy.spatial.distance import euclidean
-    from statsmodels.tsa.seasonal import seasonal_decompose
-    from matplotlib.backends.backend_pdf import PdfPages
-
-    file_stamp = time.time()
-    f_name = ntpath.basename(f_path)
-    f_name = f_name.replace('.csv', '')
-    pdf_file = f_name + str(file_stamp).replace('.', '', 1) + "_results.pdf"
-
-    data_obj = TGradAMI.process_time(trans_data)
-    col_count = trans_data.shape[1]
-    tgt_col =  tgt_col - (col_count-data_obj.col_count)
-    # num_plt = data_obj.attr_cols.shape[0] - 1
-
-    # datetime_series = pd.to_datetime(data_obj.data[1:, 0].astype(float), unit='s')
-    # datetime_index = pd.DatetimeIndex(datetime_series, freq='h')
-    datetime_index = pd.date_range(start="2021-01-01", periods=(data_obj.row_count-1), freq="D")
-    ts_1 = pd.Series(data_obj.data[1:, tgt_col], index=datetime_index)
-    decomp_ts_1 = seasonal_decompose(ts_1, model='additive')
-    # trend_1 = np.array(decomp_ts_1.trend)
-    seasonal_1 = np.array(decomp_ts_1.seasonal)
-    # trend_1 = trend_1[~np.isnan(trend_1)]
-    seasonal_1 = seasonal_1[~np.isnan(seasonal_1)]
-    # max_plt = 0
-    # tgt_title = 'Target Col: ' + data_obj.titles[tgt_col][1].decode()
-    tgt_title = data_obj.titles[tgt_col][1].decode() + '*'
-    lst_res = []
-    sim_txt = ""
-    for col in data_obj.attr_cols:
-        if col != tgt_col:
-            col_title = data_obj.titles[col][1].decode()
-            ts_2 = pd.Series(data_obj.data[1:, col], index=datetime_index)
-            decomp_ts_2 = seasonal_decompose(ts_2, model='additive')
-            # trend_2 = np.array(decomp_ts_2.trend)
-            seasonal_2 = np.array(decomp_ts_2.seasonal)
-            # trend_2 = trend_2[~np.isnan(trend_2)]
-            seasonal_2 = seasonal_2[~np.isnan(seasonal_2)]
-            cos_similarity = np.dot(seasonal_1.ravel(), seasonal_2.ravel()) / (norm(seasonal_1.ravel()) * norm(seasonal_2.ravel()))
-            sim_txt += f"{tgt_title} - {col_title}: {round(cos_similarity, 4)}\n"
-            lst_res.append(f"{tgt_title} - {col_title}: {round(cos_similarity, 4)}")
-
-    fig_res = plt.Figure(figsize=(8.5, 11), dpi=300)
-    ax_res = fig_res.add_subplot(1, 1, 1)
-    ax_res.set_axis_off()
-    ax_res.set_title("FTGP Results")
-    ax_res.text(0, 1, out_txt, horizontalalignment='left', verticalalignment='top', transform=ax_res.transAxes)
-
-    fig_res1 = plt.Figure(figsize=(8.5, 11), dpi=300)
-    ax_res1 = fig_res1.add_subplot(1, 1, 1)
-    ax_res1.set_axis_off()
-    ax_res1.set_title("Cosine Similarity of Seasonal Trends")
-    ax_res1.text(0, 1, sim_txt, horizontalalignment='left', verticalalignment='top', transform=ax_res1.transAxes)
-
-    with (PdfPages(pdf_file)) as pdf:
-        pdf.savefig(fig_res)
-        pdf.savefig(fig_res1)
-        # for fig in lst_figs:
-        #    pdf.savefig(fig)
-
-    np.savetxt(f_name + str(file_stamp).replace('.', '', 1) +'_transformed_data.csv', trans_data[:, data_obj.attr_cols], fmt='%s', delimiter=',')
-    np.savetxt(f_name + str(file_stamp).replace('.', '', 1) +'_timestamp_data.csv', time_data, fmt='%s', delimiter=',')
-    return lst_res
-    """
-    return f_path, tgt_col, out_txt, trans_data, time_data
+        print("Failed: " + str(error))
 
 
 def main_cli():
@@ -243,19 +118,8 @@ def main_cli():
         print("Basic Usage: TemporalGP -f filename.csv")
         sys.exit('System will exit')
 
-    import time
     # import tracemalloc
-
-    start = time.time()
     # tracemalloc.start()
-    res_text = execute_tgp(cfg.file, cfg.minSup, cfg.tgtCol, cfg.minRep, cfg.minError, cfg.numCores, cfg.allowPara,
+    execute_tgp(cfg.file, cfg.minSup, cfg.tgtCol, cfg.minRep, cfg.minError, cfg.numCores, cfg.allowPara,
                            allow_clustering=cfg.useClusters, eval_mode=cfg.evalMode)
     # snapshot = tracemalloc.take_snapshot()
-    end = time.time()
-
-    wr_text = ("Run-time: " + str(end - start) + " seconds\n")
-    # wr_text += (Profile.get_quick_mem_use(snapshot) + "\n")
-    wr_text += str(res_text)
-    f_name = str('res_tgp' + str(end).replace('.', '', 1) + '.txt')
-    sgp.write_file(wr_text, f_name, True)
-    print(wr_text)
