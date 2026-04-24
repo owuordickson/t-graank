@@ -67,47 +67,47 @@ def main_cli():
     optparser.add_option('-f', '--inputFile',
                          dest='file',
                          help='path to file containing csv',
-                         default=options_gp.file_path,
+                         default=options_gp["file_path"],
                          type='string')
     optparser.add_option('-s', '--minSupport',
                          dest='minSup',
                          help='minimum support value',
-                         default=options_gp.min_sup,
+                         default=options_gp["min_sup"],
                          type='float')
     optparser.add_option('-p', '--allowMultiprocessing',
                          dest='allowPara',
                          help='allow multiprocessing',
-                         default=options_gp.allow_multiprocessing,
+                         default=options_gp["allow_multiprocessing"],
                          type='int')
     optparser.add_option('-x', '--evaluationMode',
                          dest='evalMode',
                          help='run in evaluation mode',
-                         default=options_gp.eval_mode,
+                         default=options_gp["eval_mode"],
                          type='int')
     optparser.add_option('-c', '--cores',
                          dest='numCores',
                          help='number of cores',
-                         default=options_gp.num_cores,
+                         default=options_gp["num_cores"],
                          type='int')
     optparser.add_option('-t', '--targetColumn',
                          dest='tgtCol',
                          help='target column',
-                         default=options_tgp.target_column,
+                         default=options_tgp["target_column"],
                          type='int')
     optparser.add_option('-r', '--minRepresentativity',
                          dest='minRep',
                          help='minimum representativity',
-                         default=options_tgp.min_rep,
+                         default=options_tgp["min_rep"],
                          type='float')
     optparser.add_option('-m', '--minMIError',
                          dest='minError',
                          help='minimum mutual information error',
-                         default=options_tgp.min_mi_error,
+                         default=options_tgp["min_mi_error"],
                          type='float')
     optparser.add_option('-k', '--useClustering',
                          dest='useClusters',
                          help='use clustering method',
-                         default=options_tgp.use_clustering,
+                         default=options_tgp["use_clustering"],
                          type='int')
     (cfg, args) = optparser.parse_args()
     cfg.useClusters = bool(cfg.useClusters)
