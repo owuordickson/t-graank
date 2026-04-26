@@ -1,0 +1,4 @@
+Pattern,Support,Density,Avg. Deviation from Diagonal,Rank Dispersion,Graph Connectivity,Singularity Score
+"MAK (EVI)+, (NRB (EVI)+) +4.0 years",0.632,0.427,6.972,4.543,1,2.636
+"MAK (EVI)-, (KAK (EVI)+) +3.0 years",0.515,0.348,7.034,4.466,1,3.302
+"MAK (EVI)+, (WAJ (EVI)+) +2.0 years",0.684,0.462,6.735,4.365,1,2.997

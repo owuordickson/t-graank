@@ -1,0 +1,4 @@
+Pattern,Support,Density,Avg. Deviation from Diagonal,Rank Dispersion,Graph Connectivity,Singularity Score
+"WAJ (mm)-, (NRB (mm)+) +3.0 years",0.716,0.538,6.904,4.449,1,2.152
+"WAJ (mm)-, (KAK (mm)+) +3.0 years",0.558,0.419,6.755,4.609,1,2.641
+"WAJ (mm)-, (MAK (mm)+) +2.0 years",0.526,0.395,6.91,4.895,1,2.634

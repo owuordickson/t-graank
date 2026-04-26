@@ -1,0 +1,24 @@
+Algorithm: TGradAMI
+Minimum Representation: 0.83
+MI Minimum Error: 0.00
+MI Error: 0.01
+Target Column: 3
+Run-time: 0.595695 seconds
+No. of (dataset) attributes: 5
+No. of (dataset) objects: 23 
+Minimum support: 0.5
+Number of patterns: 3
+
+Attributes:
+0. Date (Jul-Sep)
+1. NRB (mm)
+2. KAK (mm)
+3. MAK (mm)
+4. WAJ (mm)
+
+File: ../datasets/ke_rain_data_2k.csv
+
+Pattern : Support
+['3-', '(1+) +4.0 years'] :  0.661
+['3+', '(2+) +3.0 years'] :  0.591
+['3+', '(4+) +2.0 years'] :  0.55
