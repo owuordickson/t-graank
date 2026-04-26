@@ -1,0 +1,24 @@
+Pattern,Support,Density,Avg. Deviation from Diagonal,Rank Dispersion,Graph Connectivity,Singularity Score
+"NRB (mm)+, (KAK (mm)+) +12.0 months",0.458,0.277,6.014,3.797,1,2.97
+"NRB (mm)+, (KAK (mm)-) +12.0 months",0.542,0.328,6.602,4.338,1,3.084
+"NRB (mm)+, (MAK (mm)+) +5.0 years",0.444,0.269,6.897,4.548,1,3.219
+"NRB (mm)+, (MAK (mm)-) +5.0 years",0.549,0.332,5.917,3.668,1,3.386
+"NRB (mm)+, (WAJ (mm)+) +12.0 months",0.379,0.229,6.034,3.629,1,2.853
+"NRB (mm)+, (WAJ (mm)-) +12.0 months",0.608,0.368,6.538,4.411,1,3.182
+"NRB (mm)+, (MAK (mm)+) +12.0 months, (KAK (mm)+) +12.0 months",0.216,0.13,5.879,4.051,1,3.221
+"NRB (mm)+, (MAK (mm)-) +12.0 months, (KAK (mm)+) +12.0 months",0.235,0.142,6.222,3.56,1,2.508
+"NRB (mm)+, (WAJ (mm)+) +12.0 months, (KAK (mm)+) +12.0 months",0.17,0.103,5.615,3.386,1,2.008
+"NRB (mm)+, (WAJ (mm)-) +12.0 months, (KAK (mm)+) +12.0 months",0.288,0.174,6.25,4.001,1,2.31
+"NRB (mm)+, (MAK (mm)+) +12.0 months, (KAK (mm)-) +12.0 months",0.229,0.138,7.857,4.776,1,2.699
+"NRB (mm)+, (MAK (mm)-) +12.0 months, (KAK (mm)-) +12.0 months",0.314,0.19,5.688,3.731,1,3.076
+"NRB (mm)+, (WAJ (mm)+) +12.0 months, (KAK (mm)-) +12.0 months",0.209,0.126,6.375,3.781,1,3.061
+"NRB (mm)+, (WAJ (mm)-) +12.0 months, (KAK (mm)-) +12.0 months",0.32,0.194,6.796,4.734,1,2.943
+"NRB (mm)+, (MAK (mm)+) +12.0 months, (WAJ (mm)+) +12.0 months",0.176,0.107,6.296,4.017,2,2.541
+"NRB (mm)+, (MAK (mm)+) +12.0 months, (WAJ (mm)-) +12.0 months",0.261,0.158,7.325,4.881,1,2.472
+"NRB (mm)+, (MAK (mm)-) +12.0 months, (WAJ (mm)+) +12.0 months",0.203,0.123,5.806,3.237,1,2.853
+"NRB (mm)+, (MAK (mm)-) +12.0 months, (WAJ (mm)-) +12.0 months",0.34,0.206,6.0,3.932,1,2.94
+"NRB (mm)+, (WAJ (mm)-) +12.0 months, (MAK (mm)+) +12.0 months, (KAK (mm)+) +12.0 months",0.118,0.071,5.611,4.192,1,1.768
+"NRB (mm)+, (MAK (mm)-) +12.0 months, (WAJ (mm)-) +12.0 months, (KAK (mm)+) +12.0 months",0.163,0.099,6.84,3.802,1,2.506
+"NRB (mm)+, (KAK (mm)-) +5.0 years, (WAJ (mm)-) +5.0 years, (MAK (mm)+) +5.0 years",0.144,0.087,8.727,4.956,1,2.814
+"NRB (mm)+, (MAK (mm)-) +12.0 months, (KAK (mm)-) +12.0 months, (WAJ (mm)+) +12.0 months",0.131,0.079,6.35,3.497,1,2.911
+"NRB (mm)+, (MAK (mm)-) +12.0 months, (KAK (mm)-) +12.0 months, (WAJ (mm)-) +12.0 months",0.176,0.107,5.222,3.89,1,2.948

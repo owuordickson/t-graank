@@ -1,0 +1,98 @@
+Pattern,Support,Density,Avg. Deviation from Diagonal,Rank Dispersion,Graph Connectivity,Singularity Score
+"KAK (mm)+, (NRB (mm)+) +12.0 months",0.437,0.399,7.921,4.839,1,2.485
+"KAK (mm)-, (NRB (mm)+) +12.0 months",0.563,0.514,7.469,5.208,1,2.134
+"KAK (mm)+, (MAK (mm)+) +12.0 months",0.429,0.391,8.717,5.435,1,1.492
+"KAK (mm)+, (MAK (mm)-) +12.0 months",0.567,0.518,6.908,4.601,1,1.342
+"KAK (mm)+, (WAJ (mm)+) +12.0 months",0.368,0.336,8.212,5.4,1,2.138
+"KAK (mm)+, (WAJ (mm)-) +12.0 months",0.623,0.569,7.375,4.843,1,1.631
+"KAK (mm)+, (NRB (mm)+) +12.0 months, (MAK (mm)+) +12.0 months",0.225,0.206,8.25,5.061,1,1.863
+"KAK (mm)+, (NRB (mm)+) +12.0 months, (MAK (mm)-) +12.0 months",0.208,0.19,7.667,4.566,1,2.972
+"KAK (mm)+, (NRB (mm)+) +12.0 months, (WAJ (mm)+) +12.0 months",0.195,0.178,8.244,4.985,1,1.865
+"KAK (mm)+, (NRB (mm)+) +12.0 months, (WAJ (mm)-) +12.0 months",0.234,0.213,7.741,4.769,1,2.323
+"KAK (mm)+, (MAK (mm)+) +12.0 months, (WAJ (mm)+) +12.0 months",0.19,0.174,9.477,5.949,2,2.083
+"KAK (mm)+, (MAK (mm)+) +12.0 months, (WAJ (mm)-) +12.0 months",0.234,0.213,8.167,4.928,1,1.897
+"KAK (mm)+, (WAJ (mm)+) +12.0 months, (MAK (mm)-) +12.0 months",0.173,0.158,6.95,4.359,1,1.747
+"KAK (mm)+, (MAK (mm)-) +12.0 months, (WAJ (mm)-) +12.0 months",0.39,0.356,6.9,4.728,1,2.807
+"KAK (mm)+, (NRB (mm)+) +12.0 months, (MAK (mm)+) +12.0 months, (WAJ (mm)+) +12.0 months",0.104,0.095,9.0,5.188,2,1.746
+"KAK (mm)+, (WAJ (mm)-) +12.0 months, (NRB (mm)+) +12.0 months, (MAK (mm)+) +12.0 months",0.117,0.107,7.704,4.92,1,2.319
+"KAK (mm)+, (MAK (mm)-) +12.0 months, (WAJ (mm)-) +12.0 months, (NRB (mm)+) +12.0 months",0.117,0.107,7.778,4.613,1,2.689
+"KAK (mm)+, (NRB (mm)+) +2.0 years",0.39,0.324,7.854,5.097,1,2.723
+"KAK (mm)-, (NRB (mm)+) +2.0 years",0.61,0.506,7.0,4.601,1,2.37
+"KAK (mm)+, (MAK (mm)+) +2.0 years",0.386,0.32,8.753,5.203,1,2.821
+"KAK (mm)+, (MAK (mm)-) +2.0 years",0.61,0.506,6.469,4.335,1,2.448
+"KAK (mm)+, (WAJ (mm)+) +2.0 years",0.49,0.407,7.573,5.004,1,2.84
+"KAK (mm)+, (WAJ (mm)-) +2.0 years",0.5,0.415,7.133,4.66,1,2.774
+"KAK (mm)+, (NRB (mm)+) +2.0 years, (MAK (mm)+) +2.0 years",0.186,0.154,8.564,5.387,1,3.814
+"KAK (mm)+, (NRB (mm)+) +2.0 years, (MAK (mm)-) +2.0 years",0.205,0.17,7.209,4.728,1,2.47
+"KAK (mm)+, (NRB (mm)+) +2.0 years, (WAJ (mm)+) +2.0 years",0.238,0.198,7.8,5.15,1,3.052
+"KAK (mm)+, (NRB (mm)+) +2.0 years, (WAJ (mm)-) +2.0 years",0.148,0.123,8.0,5.08,1,2.691
+"KAK (mm)+, (MAK (mm)+) +2.0 years, (WAJ (mm)+) +2.0 years",0.243,0.202,9.0,5.629,1,3.075
+"KAK (mm)+, (MAK (mm)+) +2.0 years, (WAJ (mm)-) +2.0 years",0.143,0.119,8.333,4.354,1,1.925
+"KAK (mm)+, (WAJ (mm)+) +2.0 years, (MAK (mm)-) +2.0 years",0.248,0.206,6.173,3.817,1,3.824
+"KAK (mm)+, (MAK (mm)-) +2.0 years, (WAJ (mm)-) +2.0 years",0.352,0.292,6.703,4.704,1,3.268
+"KAK (mm)+, (NRB (mm)+) +2.0 years, (MAK (mm)+) +2.0 years, (WAJ (mm)+) +2.0 years",0.138,0.115,8.862,5.519,1,4.651
+"KAK (mm)+, (NRB (mm)+) +3.0 years",0.447,0.336,6.847,4.825,1,2.068
+"KAK (mm)-, (NRB (mm)+) +3.0 years",0.553,0.415,7.124,4.372,1,2.146
+"KAK (mm)+, (MAK (mm)+) +3.0 years",0.542,0.407,7.068,4.712,1,2.403
+"KAK (mm)+, (MAK (mm)-) +3.0 years",0.453,0.34,6.965,4.429,1,2.347
+"KAK (mm)+, (WAJ (mm)+) +3.0 years",0.5,0.375,7.221,4.94,1,2.202
+"KAK (mm)+, (WAJ (mm)-) +3.0 years",0.489,0.368,6.806,4.223,1,2.236
+"KAK (mm)+, (NRB (mm)+) +3.0 years, (MAK (mm)+) +3.0 years",0.3,0.225,6.509,4.787,1,1.833
+"KAK (mm)+, (NRB (mm)+) +3.0 years, (MAK (mm)-) +3.0 years",0.147,0.111,7.536,4.829,1,2.637
+"KAK (mm)+, (NRB (mm)+) +3.0 years, (WAJ (mm)+) +3.0 years",0.274,0.206,6.865,4.989,1,2.094
+"KAK (mm)+, (NRB (mm)+) +3.0 years, (WAJ (mm)-) +3.0 years",0.174,0.13,6.818,4.556,1,2.343
+"KAK (mm)+, (MAK (mm)+) +3.0 years, (WAJ (mm)+) +3.0 years",0.316,0.237,7.45,5.321,1,2.316
+"KAK (mm)+, (MAK (mm)+) +3.0 years, (WAJ (mm)-) +3.0 years",0.221,0.166,6.548,3.672,1,3.11
+"KAK (mm)+, (WAJ (mm)+) +3.0 years, (MAK (mm)-) +3.0 years",0.184,0.138,6.829,4.178,1,1.814
+"KAK (mm)+, (MAK (mm)-) +3.0 years, (WAJ (mm)-) +3.0 years",0.263,0.198,7.1,4.627,1,2.752
+"KAK (mm)+, (NRB (mm)+) +3.0 years, (MAK (mm)+) +3.0 years, (WAJ (mm)+) +3.0 years",0.184,0.138,7.229,5.324,1,1.871
+"KAK (mm)+, (WAJ (mm)-) +3.0 years, (NRB (mm)+) +3.0 years, (MAK (mm)+) +3.0 years",0.116,0.087,5.364,3.484,1,2.678
+"KAK (mm)+, (NRB (mm)+) +4.0 years",0.573,0.387,6.612,4.203,1,2.764
+"KAK (mm)-, (NRB (mm)+) +4.0 years",0.427,0.289,6.74,4.53,1,2.638
+"KAK (mm)+, (MAK (mm)+) +4.0 years",0.532,0.36,6.022,4.014,1,2.768
+"KAK (mm)+, (MAK (mm)-) +4.0 years",0.462,0.312,7.456,4.589,1,2.637
+"KAK (mm)+, (WAJ (mm)+) +4.0 years",0.456,0.308,6.167,4.046,1,3.256
+"KAK (mm)+, (WAJ (mm)-) +4.0 years",0.532,0.36,7.121,4.583,1,3.219
+"KAK (mm)+, (NRB (mm)+) +4.0 years, (MAK (mm)+) +4.0 years",0.374,0.253,6.109,4.187,1,3.169
+"KAK (mm)+, (NRB (mm)+) +4.0 years, (MAK (mm)-) +4.0 years",0.193,0.13,7.697,4.049,1,2.797
+"KAK (mm)+, (NRB (mm)+) +4.0 years, (WAJ (mm)+) +4.0 years",0.322,0.217,6.327,4.108,1,3.417
+"KAK (mm)+, (NRB (mm)+) +4.0 years, (WAJ (mm)-) +4.0 years",0.246,0.166,7.0,4.342,1,2.634
+"KAK (mm)+, (MAK (mm)+) +4.0 years, (WAJ (mm)+) +4.0 years",0.287,0.194,5.857,4.175,1,3.617
+"KAK (mm)+, (MAK (mm)+) +4.0 years, (WAJ (mm)-) +4.0 years",0.246,0.166,6.214,3.808,1,3.181
+"KAK (mm)+, (WAJ (mm)+) +4.0 years, (MAK (mm)-) +4.0 years",0.164,0.111,6.821,3.761,1,3.172
+"KAK (mm)+, (MAK (mm)-) +4.0 years, (WAJ (mm)-) +4.0 years",0.287,0.194,7.898,5.027,1,2.372
+"KAK (mm)+, (NRB (mm)+) +4.0 years, (MAK (mm)+) +4.0 years, (WAJ (mm)+) +4.0 years",0.216,0.146,5.784,4.256,1,4.026
+"KAK (mm)+, (WAJ (mm)-) +4.0 years, (NRB (mm)+) +4.0 years, (MAK (mm)+) +4.0 years",0.158,0.107,6.556,4.049,1,3.023
+"KAK (mm)+, (NRB (mm)+) +5.0 years",0.549,0.332,6.31,3.888,1,3.339
+"KAK (mm)-, (NRB (mm)+) +5.0 years",0.451,0.273,6.362,4.364,1,3.261
+"KAK (mm)+, (MAK (mm)+) +5.0 years",0.49,0.296,6.72,4.269,1,3.358
+"KAK (mm)+, (MAK (mm)-) +5.0 years",0.503,0.304,6.0,3.925,1,3.499
+"KAK (mm)+, (WAJ (mm)+) +5.0 years",0.588,0.356,6.022,4.08,1,3.341
+"KAK (mm)+, (WAJ (mm)-) +5.0 years",0.399,0.241,6.82,4.171,1,3.253
+"KAK (mm)+, (NRB (mm)+) +5.0 years, (MAK (mm)+) +5.0 years",0.32,0.194,6.327,4.147,1,3.372
+"KAK (mm)+, (NRB (mm)+) +5.0 years, (MAK (mm)-) +5.0 years",0.222,0.134,6.382,3.498,1,3.632
+"KAK (mm)+, (NRB (mm)+) +5.0 years, (WAJ (mm)+) +5.0 years",0.353,0.213,5.963,3.863,1,3.452
+"KAK (mm)+, (NRB (mm)+) +5.0 years, (WAJ (mm)-) +5.0 years",0.183,0.111,7.036,3.968,1,2.315
+"KAK (mm)+, (MAK (mm)+) +5.0 years, (WAJ (mm)+) +5.0 years",0.307,0.186,6.34,4.464,1,2.892
+"KAK (mm)+, (MAK (mm)+) +5.0 years, (WAJ (mm)-) +5.0 years",0.176,0.107,7.444,3.881,1,2.8
+"KAK (mm)+, (WAJ (mm)+) +5.0 years, (MAK (mm)-) +5.0 years",0.275,0.166,5.738,3.599,1,3.586
+"KAK (mm)+, (MAK (mm)-) +5.0 years, (WAJ (mm)-) +5.0 years",0.222,0.134,6.324,4.323,1,3.543
+"KAK (mm)+, (NRB (mm)+) +5.0 years, (MAK (mm)+) +5.0 years, (WAJ (mm)+) +5.0 years",0.216,0.13,6.182,4.31,1,3.433
+"KAK (mm)+, (MAK (mm)-) +5.0 years, (NRB (mm)+) +5.0 years, (WAJ (mm)+) +5.0 years",0.131,0.079,5.75,3.015,1,3.011
+"KAK (mm)+, (NRB (mm)+) +6.0 years",0.566,0.304,5.558,3.687,1,3.707
+"KAK (mm)-, (NRB (mm)+) +6.0 years",0.434,0.233,6.576,4.03,1,3.564
+"KAK (mm)+, (MAK (mm)+) +6.0 years",0.507,0.273,5.855,3.54,1,3.333
+"KAK (mm)+, (MAK (mm)-) +6.0 years",0.485,0.261,6.197,4.197,1,3.337
+"KAK (mm)+, (WAJ (mm)+) +6.0 years",0.544,0.292,6.122,3.869,1,3.525
+"KAK (mm)+, (WAJ (mm)-) +6.0 years",0.441,0.237,5.867,3.935,1,3.466
+"KAK (mm)+, (NRB (mm)+) +6.0 years, (MAK (mm)+) +6.0 years",0.331,0.178,5.044,3.313,1,3.376
+"KAK (mm)+, (NRB (mm)+) +6.0 years, (MAK (mm)-) +6.0 years",0.228,0.123,6.387,4.069,1,2.95
+"KAK (mm)+, (NRB (mm)+) +6.0 years, (WAJ (mm)+) +6.0 years",0.338,0.182,5.674,3.642,1,2.913
+"KAK (mm)+, (NRB (mm)+) +6.0 years, (WAJ (mm)-) +6.0 years",0.213,0.115,5.379,3.872,1,3.133
+"KAK (mm)+, (MAK (mm)+) +6.0 years, (WAJ (mm)+) +6.0 years",0.294,0.158,5.925,3.69,1,2.572
+"KAK (mm)+, (MAK (mm)+) +6.0 years, (WAJ (mm)-) +6.0 years",0.206,0.111,5.786,3.374,1,3.315
+"KAK (mm)+, (WAJ (mm)+) +6.0 years, (MAK (mm)-) +6.0 years",0.243,0.13,6.455,4.076,1,2.797
+"KAK (mm)+, (MAK (mm)-) +6.0 years, (WAJ (mm)-) +6.0 years",0.235,0.126,5.938,4.366,1,3.717
+"KAK (mm)+, (NRB (mm)+) +6.0 years, (MAK (mm)+) +6.0 years, (WAJ (mm)+) +6.0 years",0.176,0.095,5.042,3.541,1,2.038
+"KAK (mm)+, (WAJ (mm)-) +6.0 years, (NRB (mm)+) +6.0 years, (MAK (mm)+) +6.0 years",0.147,0.079,5.05,3.106,1,3.561
+"KAK (mm)+, (MAK (mm)-) +6.0 years, (NRB (mm)+) +6.0 years, (WAJ (mm)+) +6.0 years",0.154,0.083,6.524,3.633,1,2.555

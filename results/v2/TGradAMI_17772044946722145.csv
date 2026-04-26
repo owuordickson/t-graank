@@ -1,0 +1,14 @@
+Pattern,Support,Density,Avg. Deviation from Diagonal,Rank Dispersion,Graph Connectivity,Singularity Score
+"WAJ (mm)+, (NRB (mm)+) +3.0 years",0.274,0.206,7.308,4.975,1,1.747
+"WAJ (mm)-, (NRB (mm)+) +3.0 years",0.716,0.538,6.904,4.449,1,2.152
+"WAJ (mm)+, (KAK (mm)+) +3.0 years",0.432,0.324,7.354,4.576,1,2.796
+"WAJ (mm)-, (KAK (mm)+) +3.0 years",0.558,0.419,6.755,4.609,1,2.641
+"WAJ (mm)+, (MAK (mm)+) +2.0 years",0.458,0.344,7.184,4.247,1,2.63
+"WAJ (mm)-, (MAK (mm)+) +2.0 years",0.526,0.395,6.91,4.895,1,2.634
+"WAJ (mm)+, (NRB (mm)+) +3.0 years, (KAK (mm)+) +3.0 years",0.195,0.146,7.649,4.971,1,2.053
+"WAJ (mm)+, (NRB (mm)+) +2.0 years, (MAK (mm)+) +2.0 years",0.132,0.099,9.28,4.879,1,1.826
+"WAJ (mm)-, (NRB (mm)+) +3.0 years, (KAK (mm)+) +3.0 years",0.479,0.36,6.802,4.56,1,2.592
+"WAJ (mm)-, (NRB (mm)+) +2.0 years, (MAK (mm)+) +2.0 years",0.389,0.292,7.378,4.98,1,2.808
+"WAJ (mm)+, (MAK (mm)+) +3.0 years, (KAK (mm)+) +3.0 years",0.205,0.154,8.769,4.022,1,1.942
+"WAJ (mm)-, (MAK (mm)+) +3.0 years, (KAK (mm)+) +3.0 years",0.305,0.229,7.466,4.959,1,2.888
+"WAJ (mm)-, (NRB (mm)+) +3.0 years, (MAK (mm)+) +3.0 years, (KAK (mm)+) +3.0 years",0.268,0.202,7.647,5.048,1,2.997

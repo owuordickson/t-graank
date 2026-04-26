@@ -1,0 +1,15 @@
+Pattern,Support,Density,Avg. Deviation from Diagonal,Rank Dispersion,Graph Connectivity,Singularity Score
+"WAJ (EVI)+, (NRB (EVI)+) +3.0 years",0.526,0.395,7.09,4.434,1,2.124
+"WAJ (EVI)-, (NRB (EVI)+) +3.0 years",0.468,0.352,6.966,4.725,1,2.092
+"WAJ (EVI)+, (KAK (EVI)+) +3.0 years",0.489,0.368,6.237,4.437,1,2.074
+"WAJ (EVI)-, (KAK (EVI)+) +3.0 years",0.505,0.379,7.802,4.573,1,2.058
+"WAJ (EVI)+, (MAK (EVI)+) +2.0 years",0.468,0.352,6.876,4.308,1,2.654
+"WAJ (EVI)-, (MAK (EVI)+) +2.0 years",0.526,0.395,7.17,4.794,1,2.664
+"WAJ (EVI)+, (NRB (EVI)+) +3.0 years, (KAK (EVI)+) +3.0 years",0.3,0.225,6.298,4.361,1,2.412
+"WAJ (EVI)+, (NRB (EVI)+) +2.0 years, (MAK (EVI)+) +2.0 years",0.279,0.209,7.321,4.621,1,2.146
+"WAJ (EVI)-, (NRB (EVI)+) +3.0 years, (KAK (EVI)+) +3.0 years",0.279,0.209,7.528,4.757,1,1.938
+"WAJ (EVI)-, (NRB (EVI)+) +2.0 years, (MAK (EVI)+) +2.0 years",0.279,0.209,7.472,5.247,1,2.014
+"WAJ (EVI)+, (MAK (EVI)+) +3.0 years, (KAK (EVI)+) +3.0 years",0.221,0.166,6.381,4.408,1,2.657
+"WAJ (EVI)-, (MAK (EVI)+) +3.0 years, (KAK (EVI)+) +3.0 years",0.258,0.194,8.265,4.886,1,3.045
+"WAJ (EVI)+, (NRB (EVI)+) +3.0 years, (MAK (EVI)+) +3.0 years, (KAK (EVI)+) +3.0 years",0.158,0.119,6.933,4.753,1,2.458
+"WAJ (EVI)-, (NRB (EVI)+) +3.0 years, (MAK (EVI)+) +3.0 years, (KAK (EVI)+) +3.0 years",0.153,0.115,8.103,5.307,1,2.547

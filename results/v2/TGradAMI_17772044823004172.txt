@@ -1,0 +1,45 @@
+Algorithm: TGradAMI
+Minimum Representation: 0.75
+MI Minimum Error: 0.00
+MI Error: 0.00
+Target Column: 1
+Run-time: 4.037623 seconds
+No. of (dataset) attributes: 5
+No. of (dataset) objects: 23 
+Minimum support: 0.1
+Number of patterns: 24
+
+Attributes:
+0. Date (Jul-Sep)
+1. NRB (EVI)**
+2. KAK (EVI)
+3. MAK (EVI)
+4. WAJ (EVI)
+
+File: ../datasets/ke_evi_data_2k.csv
+
+Pattern : Support
+['1+', '(2+) +12.0 months'] :  0.49
+['1+', '(2-) +12.0 months'] :  0.51
+['1+', '(3+) +5.0 years'] :  0.477
+['1+', '(3-) +5.0 years'] :  0.523
+['1+', '(4+) +12.0 months'] :  0.418
+['1+', '(4-) +12.0 months'] :  0.575
+['1+', '(3+) +12.0 months', '(2+) +12.0 months'] :  0.248
+['1+', '(3-) +12.0 months', '(2+) +12.0 months'] :  0.242
+['1+', '(4+) +12.0 months', '(2+) +12.0 months'] :  0.183
+['1+', '(4-) +12.0 months', '(2+) +12.0 months'] :  0.301
+['1+', '(3+) +12.0 months', '(2-) +12.0 months'] :  0.229
+['1+', '(3-) +12.0 months', '(2-) +12.0 months'] :  0.281
+['1+', '(4+) +12.0 months', '(2-) +12.0 months'] :  0.235
+['1+', '(4-) +12.0 months', '(2-) +12.0 months'] :  0.275
+['1+', '(3+) +12.0 months', '(4+) +12.0 months'] :  0.248
+['1+', '(3+) +12.0 months', '(4-) +12.0 months'] :  0.222
+['1+', '(3-) +12.0 months', '(4+) +12.0 months'] :  0.17
+['1+', '(3-) +12.0 months', '(4-) +12.0 months'] :  0.353
+['1+', '(3+) +12.0 months', '(4+) +12.0 months', '(2+) +12.0 months'] :  0.118
+['1+', '(4-) +12.0 months', '(3+) +12.0 months', '(2+) +12.0 months'] :  0.124
+['1+', '(3-) +12.0 months', '(4-) +12.0 months', '(2+) +12.0 months'] :  0.176
+['1+', '(2-) +12.0 months', '(3+) +12.0 months', '(4+) +12.0 months'] :  0.131
+['1+', '(3-) +12.0 months', '(2-) +12.0 months', '(4+) +12.0 months'] :  0.105
+['1+', '(3-) +12.0 months', '(2-) +12.0 months', '(4-) +12.0 months'] :  0.176

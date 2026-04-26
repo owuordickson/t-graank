@@ -1,0 +1,82 @@
+Pattern,Support,Density,Avg. Deviation from Diagonal,Rank Dispersion,Graph Connectivity,Singularity Score
+"WAJ (EVI)+, (NRB (EVI)+) +12.0 months",0.545,0.498,7.54,5.098,1,1.48
+"WAJ (EVI)-, (NRB (EVI)+) +12.0 months",0.45,0.411,7.885,4.977,1,1.562
+"WAJ (EVI)+, (KAK (EVI)+) +12.0 months",0.511,0.466,6.907,4.746,1,2.273
+"WAJ (EVI)-, (KAK (EVI)+) +12.0 months",0.485,0.443,8.527,5.218,1,2.323
+"WAJ (EVI)+, (MAK (EVI)+) +12.0 months",0.485,0.443,8.036,5.074,1,1.77
+"WAJ (EVI)-, (MAK (EVI)+) +12.0 months",0.511,0.466,7.373,5.0,1,1.815
+"WAJ (EVI)+, (NRB (EVI)+) +12.0 months, (KAK (EVI)+) +12.0 months",0.307,0.281,7.155,5.112,1,2.094
+"WAJ (EVI)+, (NRB (EVI)+) +12.0 months, (MAK (EVI)+) +12.0 months",0.268,0.245,7.645,5.055,1,2.383
+"WAJ (EVI)-, (NRB (EVI)+) +12.0 months, (KAK (EVI)+) +12.0 months",0.247,0.225,9.0,5.344,1,2.342
+"WAJ (EVI)-, (NRB (EVI)+) +12.0 months, (MAK (EVI)+) +12.0 months",0.234,0.213,7.296,4.829,1,2.193
+"WAJ (EVI)+, (MAK (EVI)+) +12.0 months, (KAK (EVI)+) +12.0 months",0.186,0.17,6.814,4.059,2,3.656
+"WAJ (EVI)-, (MAK (EVI)+) +12.0 months, (KAK (EVI)+) +12.0 months",0.186,0.17,8.093,4.739,1,2.238
+"WAJ (EVI)+, (NRB (EVI)+) +12.0 months, (MAK (EVI)+) +12.0 months, (KAK (EVI)+) +12.0 months",0.113,0.103,7.0,4.297,1,3.547
+"WAJ (EVI)-, (NRB (EVI)+) +12.0 months, (MAK (EVI)+) +12.0 months, (KAK (EVI)+) +12.0 months",0.104,0.095,8.25,5.222,1,2.33
+"WAJ (EVI)+, (NRB (EVI)+) +2.0 years",0.605,0.502,7.079,4.622,1,1.886
+"WAJ (EVI)-, (NRB (EVI)+) +2.0 years",0.39,0.324,7.805,5.057,1,1.992
+"WAJ (EVI)+, (KAK (EVI)+) +2.0 years",0.357,0.296,6.893,4.545,1,1.865
+"WAJ (EVI)-, (KAK (EVI)+) +2.0 years",0.638,0.53,7.627,4.933,1,1.818
+"WAJ (EVI)+, (MAK (EVI)+) +2.0 years",0.486,0.403,7.422,4.731,1,2.277
+"WAJ (EVI)-, (MAK (EVI)+) +2.0 years",0.51,0.423,7.308,4.884,1,2.284
+"WAJ (EVI)+, (NRB (EVI)+) +2.0 years, (KAK (EVI)+) +2.0 years",0.257,0.213,6.574,4.437,1,2.582
+"WAJ (EVI)+, (NRB (EVI)+) +2.0 years, (MAK (EVI)+) +2.0 years",0.31,0.257,7.2,4.588,1,2.548
+"WAJ (EVI)-, (NRB (EVI)+) +2.0 years, (KAK (EVI)+) +2.0 years",0.29,0.241,7.836,5.17,1,2.073
+"WAJ (EVI)-, (NRB (EVI)+) +2.0 years, (MAK (EVI)+) +2.0 years",0.214,0.178,7.8,5.145,1,2.309
+"WAJ (EVI)+, (MAK (EVI)+) +2.0 years, (KAK (EVI)+) +2.0 years",0.11,0.091,6.696,3.014,1,1.652
+"WAJ (EVI)-, (MAK (EVI)+) +2.0 years, (KAK (EVI)+) +2.0 years",0.262,0.217,7.618,4.677,1,1.854
+"WAJ (EVI)-, (NRB (EVI)+) +2.0 years, (MAK (EVI)+) +2.0 years, (KAK (EVI)+) +2.0 years",0.152,0.126,7.969,5.028,1,2.186
+"WAJ (EVI)+, (NRB (EVI)+) +3.0 years",0.526,0.395,7.09,4.434,1,2.124
+"WAJ (EVI)-, (NRB (EVI)+) +3.0 years",0.468,0.352,6.966,4.725,1,2.092
+"WAJ (EVI)+, (KAK (EVI)+) +3.0 years",0.489,0.368,6.237,4.437,1,2.074
+"WAJ (EVI)-, (KAK (EVI)+) +3.0 years",0.505,0.379,7.802,4.573,1,2.058
+"WAJ (EVI)+, (MAK (EVI)+) +3.0 years",0.437,0.328,7.241,4.635,1,2.277
+"WAJ (EVI)-, (MAK (EVI)+) +3.0 years",0.558,0.419,6.868,4.518,1,2.32
+"WAJ (EVI)+, (NRB (EVI)+) +3.0 years, (KAK (EVI)+) +3.0 years",0.3,0.225,6.298,4.361,1,2.412
+"WAJ (EVI)+, (NRB (EVI)+) +3.0 years, (MAK (EVI)+) +3.0 years",0.232,0.174,7.364,4.354,1,2.719
+"WAJ (EVI)-, (NRB (EVI)+) +3.0 years, (KAK (EVI)+) +3.0 years",0.279,0.209,7.528,4.757,1,1.938
+"WAJ (EVI)-, (NRB (EVI)+) +3.0 years, (MAK (EVI)+) +3.0 years",0.263,0.198,6.86,4.556,1,2.232
+"WAJ (EVI)+, (MAK (EVI)+) +3.0 years, (KAK (EVI)+) +3.0 years",0.153,0.115,5.724,3.666,2,2.202
+"WAJ (EVI)-, (MAK (EVI)+) +3.0 years, (KAK (EVI)+) +3.0 years",0.221,0.166,7.476,4.107,1,2.11
+"WAJ (EVI)-, (NRB (EVI)+) +3.0 years, (MAK (EVI)+) +3.0 years, (KAK (EVI)+) +3.0 years",0.132,0.099,7.4,4.03,1,2.226
+"WAJ (EVI)+, (NRB (EVI)+) +4.0 years",0.491,0.332,6.631,4.445,1,3.029
+"WAJ (EVI)-, (NRB (EVI)+) +4.0 years",0.503,0.34,6.767,4.228,2,2.964
+"WAJ (EVI)+, (KAK (EVI)+) +4.0 years",0.404,0.273,5.768,4.044,1,2.333
+"WAJ (EVI)-, (KAK (EVI)+) +4.0 years",0.591,0.399,7.337,4.415,1,2.574
+"WAJ (EVI)+, (MAK (EVI)+) +4.0 years",0.602,0.407,6.777,4.564,1,2.956
+"WAJ (EVI)-, (MAK (EVI)+) +4.0 years",0.392,0.265,6.582,3.959,1,2.741
+"WAJ (EVI)+, (NRB (EVI)+) +4.0 years, (KAK (EVI)+) +4.0 years",0.216,0.146,5.27,3.71,1,2.918
+"WAJ (EVI)+, (NRB (EVI)+) +4.0 years, (MAK (EVI)+) +4.0 years",0.327,0.221,7.0,4.747,1,2.113
+"WAJ (EVI)-, (NRB (EVI)+) +4.0 years, (KAK (EVI)+) +4.0 years",0.316,0.213,7.019,4.148,2,2.434
+"WAJ (EVI)-, (NRB (EVI)+) +4.0 years, (MAK (EVI)+) +4.0 years",0.228,0.154,7.077,4.091,1,2.865
+"WAJ (EVI)+, (MAK (EVI)+) +4.0 years, (KAK (EVI)+) +4.0 years",0.211,0.142,5.972,4.167,1,1.425
+"WAJ (EVI)-, (MAK (EVI)+) +4.0 years, (KAK (EVI)+) +4.0 years",0.199,0.134,7.588,3.758,1,3.102
+"WAJ (EVI)+, (NRB (EVI)+) +4.0 years, (MAK (EVI)+) +4.0 years, (KAK (EVI)+) +4.0 years",0.105,0.071,5.111,3.828,1,1.546
+"WAJ (EVI)-, (NRB (EVI)+) +4.0 years, (MAK (EVI)+) +4.0 years, (KAK (EVI)+) +4.0 years",0.146,0.099,7.84,3.781,1,2.906
+"WAJ (EVI)+, (NRB (EVI)+) +5.0 years",0.654,0.395,6.34,4.208,1,2.994
+"WAJ (EVI)-, (NRB (EVI)+) +5.0 years",0.34,0.206,6.423,3.885,1,2.421
+"WAJ (EVI)+, (KAK (EVI)+) +5.0 years",0.451,0.273,5.87,4.025,1,3.638
+"WAJ (EVI)-, (KAK (EVI)+) +5.0 years",0.542,0.328,6.783,4.116,1,3.65
+"WAJ (EVI)+, (MAK (EVI)+) +5.0 years",0.523,0.316,6.312,4.241,1,2.856
+"WAJ (EVI)-, (MAK (EVI)+) +5.0 years",0.471,0.285,6.431,3.936,1,2.753
+"WAJ (EVI)+, (NRB (EVI)+) +5.0 years, (KAK (EVI)+) +5.0 years",0.327,0.198,5.82,4.003,1,3.412
+"WAJ (EVI)+, (NRB (EVI)+) +5.0 years, (MAK (EVI)+) +5.0 years",0.366,0.221,6.536,4.338,1,2.434
+"WAJ (EVI)-, (NRB (EVI)+) +5.0 years, (KAK (EVI)+) +5.0 years",0.216,0.13,6.667,3.747,1,2.191
+"WAJ (EVI)-, (NRB (EVI)+) +5.0 years, (MAK (EVI)+) +5.0 years",0.183,0.111,6.964,3.737,1,1.958
+"WAJ (EVI)+, (MAK (EVI)+) +5.0 years, (KAK (EVI)+) +5.0 years",0.183,0.111,6.036,3.977,1,2.172
+"WAJ (EVI)-, (MAK (EVI)+) +5.0 years, (KAK (EVI)+) +5.0 years",0.203,0.123,7.323,3.587,1,2.401
+"WAJ (EVI)+, (NRB (EVI)+) +5.0 years, (MAK (EVI)+) +5.0 years, (KAK (EVI)+) +5.0 years",0.144,0.087,6.273,3.968,1,2.178
+"WAJ (EVI)+, (NRB (EVI)+) +6.0 years",0.529,0.285,6.431,3.847,1,3.003
+"WAJ (EVI)-, (NRB (EVI)+) +6.0 years",0.463,0.249,5.587,3.832,1,2.966
+"WAJ (EVI)+, (KAK (EVI)+) +6.0 years",0.368,0.198,5.9,4.061,1,2.732
+"WAJ (EVI)-, (KAK (EVI)+) +6.0 years",0.625,0.336,6.118,3.74,1,3.362
+"WAJ (EVI)+, (MAK (EVI)+) +6.0 years",0.654,0.352,6.18,4.134,1,3.632
+"WAJ (EVI)-, (MAK (EVI)+) +6.0 years",0.338,0.182,5.761,3.258,1,3.174
+"WAJ (EVI)+, (NRB (EVI)+) +6.0 years, (KAK (EVI)+) +6.0 years",0.235,0.126,6.469,4.138,1,2.342
+"WAJ (EVI)+, (NRB (EVI)+) +6.0 years, (MAK (EVI)+) +6.0 years",0.368,0.198,6.58,4.04,1,2.832
+"WAJ (EVI)-, (NRB (EVI)+) +6.0 years, (KAK (EVI)+) +6.0 years",0.331,0.178,5.867,3.845,1,2.487
+"WAJ (EVI)-, (NRB (EVI)+) +6.0 years, (MAK (EVI)+) +6.0 years",0.176,0.095,5.458,3.149,1,3.705
+"WAJ (EVI)+, (MAK (EVI)+) +6.0 years, (KAK (EVI)+) +6.0 years",0.213,0.115,6.414,4.327,1,2.547
+"WAJ (EVI)-, (MAK (EVI)+) +6.0 years, (KAK (EVI)+) +6.0 years",0.184,0.099,6.24,2.916,1,1.986
+"WAJ (EVI)+, (NRB (EVI)+) +6.0 years, (MAK (EVI)+) +6.0 years, (KAK (EVI)+) +6.0 years",0.147,0.079,6.7,4.529,1,2.161
+"WAJ (EVI)-, (NRB (EVI)+) +6.0 years, (MAK (EVI)+) +6.0 years, (KAK (EVI)+) +6.0 years",0.11,0.059,6.333,2.599,1,2.496
