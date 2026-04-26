@@ -120,7 +120,7 @@ class TGrad(GRAANK):
             "Minimum Representation": f"{self.min_rep:.2f}",
             "Target Column": f"{self._target_col}",
             "Run-time": f"{duration:.6f} seconds"}
-        self.generate_output_files(out_dict)
+        self.generate_output_files(out_dict, target_col=self.target_col)
 
         out_dict.update({"Patterns": self.display_patterns})
         out: object = json.dumps(out_dict, indent=4)
@@ -223,9 +223,9 @@ class TGrad(GRAANK):
             invalid_count += inv_count
             for gp_set, gi_data in valid_bins_dict.items():
                 if type(self) is TGrad:
-                    t_lag = self.get_fuzzy_time_lag(gi_data.bin_mat, time_delay_data, gi_arr=None, tri_mf_data=tri_mf_data)  # dict
+                    t_lag = self.get_fuzzy_time_lag(gi_data.bin_mat, time_delay_data, gi_arr=None, tri_mf_data=tri_mf_data)
                 else:
-                    t_lag = self.get_fuzzy_time_lag(gi_data.bin_mat, time_delay_data, gi_arr=gp_set, tri_mf_data=tri_mf_data)  # array
+                    t_lag = self.get_fuzzy_time_lag(gi_data.bin_mat, time_delay_data, gi_arr=gp_set, tri_mf_data=tri_mf_data)
 
                 if t_lag.valid:
                     tgp: TGP = TGP()

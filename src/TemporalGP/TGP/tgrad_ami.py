@@ -41,7 +41,6 @@ class TGradAMI(TGrad):
         >>> # print(result['Patterns'])
         >>> print(result_dict)
         """
-
         super(TGradAMI, self).__init__(*args, **kwargs)
         self._error_margin: float = min_error
         self._feature_cols: np.ndarray = np.setdiff1d(self.attr_cols, self.target_col)
@@ -69,7 +68,7 @@ class TGradAMI(TGrad):
         distinguish very small MI values. This is beautiful because if the initial MI is 0, then both will be -1, making it
         the optimal MI with any other -1 in the time-delayed MIs.
 
-        :return: Initial MI and MI for transformed datasets.
+        :return: {column index: transformation step}
         """
 
         # 1. Compute MI for original dataset w.r.t. target-col
@@ -165,13 +164,14 @@ class TGradAMI(TGrad):
         time_data = np.array(time_data)
         return delayed_data, time_data
 
-    def discover_tgp(self, use_clustering: bool = False, eval_mode: bool = False):
+    def discover_tgp(self, use_clustering: bool = False, transformation_steps: dict = None, eval_mode: bool = False):
         """
         A method that applies mutual information concept, clustering, and hill-climbing algorithm to find the best data
         transformation that maintains MI and estimate the best time-delay value of the mined Fuzzy Temporal Gradual
         Patterns (FTGPs).
 
         :param use_clustering: Use a clustering algorithm to estimate the best time-delay value.
+        :param transformation_steps: Data transformation steps (used to override the computed transformation steps).
         :param eval_mode: Run algorithm in evaluation mode.
         :return: List of (FTGPs as DICT object) or (FTGPs and evaluation data as a Python dict) when executed in evaluation mode.
         """
@@ -179,7 +179,14 @@ class TGradAMI(TGrad):
         start = time.time()
         self.clear_gradual_patterns()
         # 1. Compute and find the lowest mutual information
-        optimal_dict, max_step = self.find_best_mutual_info()
+        if transformation_steps is not None:
+            optimal_dict = transformation_steps
+            max_step = 0
+            for _, v in optimal_dict.items():
+                if v > max_step:
+                    max_step = v
+        else:
+            optimal_dict, max_step = self.find_best_mutual_info()
 
         # 2. Create a final (and dynamic) delayed dataset
         delayed_data, time_data = self.gather_delayed_data(optimal_dict, max_step)
@@ -202,6 +209,7 @@ class TGradAMI(TGrad):
                     time_title.append(txt)
             add_dict = {
                 'Patterns': self.display_patterns,
+                'Transformation Steps': optimal_dict,
                 'Time Data': np.vstack((np.array(time_title), time_data.T)),
                 'Transformed Data': np.vstack((np.array(title_row), delayed_data.T if delayed_data is not None else np.array([]))),
             }
@@ -217,7 +225,7 @@ class TGradAMI(TGrad):
             "MI Error": f"{self.mi_error:.2f}",
             "Target Column": f"{self._target_col}",
             "Run-time": f"{duration:.6f} seconds"}
-        self.generate_output_files(out_dict)
+        self.generate_output_files(out_dict, target_col=self.target_col)
 
         out_dict.update(add_dict)
         return out_dict
