@@ -257,3 +257,37 @@ def gp_descriptor_spider_plot(df_list: list[pd.DataFrame], labels: list[str], pa
     ax.legend(loc='upper right', bbox_to_anchor=(1.0, 1.0))
 
     return fig
+
+
+def classify_ftgps(lst_test_data, lst_ground_truth):
+    """"""
+
+    def exists_in(pat, lst):
+        for pat_i in lst:
+            if pat.is_similar_to(pat_i):
+                return True
+        return False
+
+    res_cat_count = {"TP": 0, "FP": 0, "FN": 0, "TN": 0}
+
+    total = 0
+    already_seen = set()
+    for pat1 in lst_test_data:
+        for pat2 in lst_ground_truth:
+            if pat1.is_similar_to(pat2) and pat2 not in already_seen:
+                already_seen.add(pat2)
+                if pat1.support >= 0.5 and pat2.support >= 0.5:
+                    res_cat_count["TP"] += 1
+                    total += 1
+                elif pat1.support >= 0.5 > pat2.support:
+                    res_cat_count["FP"] += 1
+                    total += 1
+                elif pat1.support < 0.5 <= pat2.support:
+                    res_cat_count["FN"] += 1
+                    total += 1
+                elif pat1.support < 0.5 > pat2.support:
+                    res_cat_count["TN"] += 1
+                    total += 1
+    missing = len(lst_test_data) - total
+    res_cat_count["FP"] += missing
+    return res_cat_count
