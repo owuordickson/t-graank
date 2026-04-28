@@ -199,6 +199,7 @@ def gp_descriptor_spider_plot(df_list: list[pd.DataFrame], labels: list[str], pa
     return fig
 
 
+
 def classify_ftgps(lst_test_data, lst_ground_truth) -> dict:
     """
     Classify extracted FTGPS into TP, FP, FN, TN.
@@ -238,3 +239,87 @@ def classify_ftgps(lst_test_data, lst_ground_truth) -> dict:
     missing = len(lst_test_data) - total
     res_cat_count["FP"] += missing
     return res_cat_count
+
+
+
+def gen_distance_plot(lst_tgrad_objs, dtw_data, euc_data) -> plt.Figure:
+    """
+    Generate distance plots for each time-series.
+
+    :param lst_tgrad_objs: List of TGrad objects.
+    :param dtw_data: Dictionary containing DTW distance data.
+    :param euc_data: Dictionary containing Euclidean distance data.
+
+    :return: A matplotlib figure object containing the distance plots.
+    """
+    # Create subplots
+    fig, ax = plt.subplots(4, 2, figsize=(16, 20))
+
+    for i, t_grad in enumerate(lst_tgrad_objs):
+        locations = []
+        for j in t_grad.feature_cols:
+            col = t_grad.titles[j]
+            col = col[:3]
+            locations.append(col)
+        target_col = t_grad.titles[t_grad.target_col][:3]
+        x = np.arange(len(locations))
+        width = 0.36
+
+        columns = ['Data', 'Metric']
+        columns.extend(locations)
+
+        plt_data = []
+        for key, val_dict in dtw_data[i].items():
+            row = [key, "DTW"]
+            for k, v in val_dict.items():
+                row.append(v)
+            plt_data.append(row)
+
+        for key, val_dict in euc_data[i].items():
+            row = [key, "EUC"]
+            for k, v in val_dict.items():
+                row.append(v)
+            plt_data.append(row)
+        plt_df = pd.DataFrame(plt_data, columns=columns)
+
+        # 2. Filter data for specific plots
+        # df_evi = plt_df[plt_df['Data'].str.contains('EVI')]
+        df_euc = plt_df[plt_df['Metric'] == 'EUC']
+        df_dtw = plt_df[plt_df['Metric'] == 'DTW']
+
+        dtw_rain_vals = df_dtw[df_dtw['Data'].str.contains('Orig')][locations].values.flatten()
+        dtw_trans_vals = df_dtw[df_dtw['Data'].str.contains('Transformed')][locations].values.flatten()
+        euc_rain_vals = df_euc[df_euc['Data'].str.contains('Orig')][locations].values.flatten()
+        euc_trans_vals = df_euc[df_euc['Data'].str.contains('Transformed')][locations].values.flatten()
+
+        ## Plot 1: All EUC Data
+        colors = ['#4CAF50', '#F44336', '#FF9800', '#2196F3']  # Green, Red, Orange, Blue
+        ax[i, 0].bar(x - width / 2, euc_rain_vals, width, label='Original Data', color=colors[1])
+        ax[i, 0].bar(x + width / 2, euc_trans_vals, width, label='Transformed Data', color=colors[2])
+        ax[i, 0].set_title('Euclidean Distance (EVI vs Rain Data)')
+        ax[i, 0].set_ylabel(f'{target_col}')
+        # ax[i,0].set_yscale('log') # Use log scale because Rain is much higher than EVI
+        ax[i, 0].set_xticks(x)
+        ax[i, 0].set_xticklabels(locations)
+        ax[i, 0].legend(loc='upper right')
+        ax[i, 0].grid(True, alpha=0.3)
+        ax[i, 0].set_xlabel('Location')
+
+        ## Plot 2: All DTW Metric Data
+        # for _, row in df_dtw.iterrows():
+        # lbl_txt = str(row['Legend']).split('(')[0] + ' Data'
+        # ax[i,1].plot(locations, row[locations], marker='o', label=lbl_txt)
+        #    ax[i,1].bar(locations, row[locations], color=colors)#, label=lbl_txt)
+        ax[i, 1].bar(x - width / 2, dtw_rain_vals, width, label='Original Data', color=colors[0])
+        ax[i, 1].bar(x + width / 2, dtw_trans_vals, width, label='Transformed Data', color=colors[3])
+        ax[i, 1].set_title('DTW Alignment Distance (EVI vs Rain Data)')
+        ax[i, 1].set_ylabel(f'{target_col}')
+        # ax[i,1].set_yscale('log') # Use log scale because Rain is much higher than EVI
+        ax[i, 1].set_xticks(x)
+        ax[i, 1].set_xticklabels(locations)
+        ax[i, 1].legend(loc='upper right')
+        ax[i, 1].grid(True, which="both", ls="-", alpha=0.2)
+        ax[i, 1].set_xlabel('Location')
+
+    fig.tight_layout()
+    return fig
