@@ -11,120 +11,60 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from dtw import dtw
 
-def gen_dtw_data(t_grad_obj, orig_rain_data, orig_evi_data, trans_rain_data, trans_evi_data):
+
+def compute_distance(t_grad_obj, orig_rain_data, orig_evi_data, trans_rain_data, trans_evi_data):
+
 
     tgt_col = t_grad_obj.target_col
     target_col = t_grad_obj.titles[tgt_col][:3]
+    dtw_data = {f"Orig ({target_col})": {}, f"Transformed ({target_col})": {}}
+    euc_data = {f"Orig ({target_col})": {}, f"Transformed ({target_col})": {}}
 
-    dtw_data = {f"Rain ({target_col})": {}, f"Transformed Rain ({target_col})": {}, f"EVI ({target_col})": {},
-                f"Transformed EVI ({target_col})": {}}
+    def compute_dtw_distance(arr_data1, arr_data2, str_key: str = ""):
+        """
+        Compute DTW alignment distance between the target column in one time-series and all other columns in another time-series.
+        """
+        target = arr_data1[1:, tgt_col].astype(float)
+        for i, col in enumerate(t_grad_obj.titles):
+            if i in t_grad_obj.time_cols:
+                continue
+            if i == tgt_col:
+                pass
+            else:
+                query = arr_data2[1:, i].astype(float)
+                alignment = dtw(query, target, keep_internals=True) if target is not None else None
+                if alignment is not None:
+                    align_dist = getattr(alignment, 'distance', np.inf) if alignment else np.inf
+                    dtw_data[str_key].update({col: float(align_dist)})
 
-    target = orig_rain_data[1:, tgt_col].astype(float)
-    for i, col in enumerate(t_grad_obj.titles):
-        if i in t_grad_obj.time_cols:
-            continue
-        if i == tgt_col:
-            pass
-        else:
-            query = orig_rain_data[1:, i].astype(float)
-            alignment = dtw(query, target, keep_internals=True) if target is not None else None
-            if alignment is not None:
-                dtw_data[f"Rain ({target_col})"].update({col: float(alignment.distance)})
+    def compute_euclidean_distance(arr_data1, arr_data2, str_key: str = ""):
+        """
+        Compute Euclidean distance between the target column in one time-series and all other columns in another time-series.
+        """
+        target = arr_data1[1:, tgt_col].astype(float)
+        for i, col in enumerate(t_grad_obj.titles):
+            if i in t_grad_obj.time_cols:
+                continue
+            if i == tgt_col:
+                pass
+            else:
+                query = arr_data2[1:, i].astype(float)
+                distance = np.linalg.norm(target - query) if target is not None else None
+                if distance is not None:
+                    euc_data[str_key].update({col: float(distance)})
 
-    target = trans_rain_data[1:, tgt_col].astype(float)
-    for i, col in enumerate(t_grad_obj.titles):
-        if i in t_grad_obj.time_cols:
-            continue
-        if i == tgt_col:
-            pass
-        else:
-            query = trans_rain_data[1:, i].astype(float)
-            alignment = dtw(query, target, keep_internals=True) if target is not None else None
-            if alignment is not None:
-                dtw_data[f"Transformed Rain ({target_col})"].update({col: float(alignment.distance)})
+    compute_dtw_distance(orig_rain_data, orig_evi_data, str_key=f"Orig ({target_col})")
+    compute_dtw_distance(trans_rain_data, trans_evi_data, str_key=f"Transformed ({target_col})")
+    # compute_dtw_distance(orig_evi_data, str_key=f"EVI ({target_col})")
+    # compute_dtw_distance(trans_evi_data, str_key=f"Transformed EVI ({target_col})")
 
-    target = orig_evi_data[1:, tgt_col].astype(float)
-    for i, col in enumerate(t_grad_obj.titles):
-        if i in t_grad_obj.time_cols:
-            continue
-        if i == tgt_col:
-            pass
-        else:
-            query = orig_evi_data[1:, i].astype(float)
-            alignment = dtw(query, target, keep_internals=True) if target is not None else None
-            if alignment is not None:
-                dtw_data[f"EVI ({target_col})"].update({col: float(alignment.distance)})
+    compute_euclidean_distance(orig_rain_data, orig_evi_data, str_key=f"Orig ({target_col})")
+    compute_euclidean_distance(trans_rain_data, trans_evi_data, str_key=f"Transformed ({target_col})")
+    # compute_euclidean_distance(orig_evi_data, str_key=f"EVI ({target_col})")
+    # compute_euclidean_distance(trans_evi_data, str_key=f"Transformed EVI ({target_col})")
 
-    target = trans_evi_data[1:, tgt_col].astype(float)
-    for i, col in enumerate(t_grad_obj.titles):
-        if i in t_grad_obj.time_cols:
-            continue
-        if i == tgt_col:
-            pass
-        else:
-            query = trans_evi_data[1:, i].astype(float)
-            alignment = dtw(query, target, keep_internals=True) if target is not None else None
-            if alignment is not None:
-                dtw_data[f"Transformed EVI ({target_col})"].update({col: float(alignment.distance)})
-    return dtw_data
+    return dtw_data, euc_data
 
-
-def gen_euc_data(t_grad_obj, orig_rain_data, orig_evi_data, trans_rain_data, trans_evi_data):
-
-    tgt_col = t_grad_obj.target_col
-    target_col = t_grad_obj.titles[tgt_col][:3]
-
-    euc_data = {f"Rain ({target_col})": {}, f"Transformed Rain ({target_col})": {}, f"EVI ({target_col})": {},
-                f"Transformed EVI ({target_col})": {}}
-
-    target = orig_rain_data[1:, tgt_col].astype(float)
-    for i, col in enumerate(t_grad_obj.titles):
-        if i in t_grad_obj.time_cols:
-            continue
-        if i == tgt_col:
-            pass
-        else:
-            query = orig_rain_data[1:, i].astype(float)
-            distance = np.linalg.norm(target - query) if target is not None else None
-            if distance is not None:
-                euc_data[f"Rain ({target_col})"].update({col: float(distance)})
-
-    target = trans_rain_data[1:, tgt_col].astype(float)
-    for i, col in enumerate(t_grad_obj.titles):
-        if i in t_grad_obj.time_cols:
-            continue
-        if i == tgt_col:
-            pass
-        else:
-            query = trans_rain_data[1:, i].astype(float)
-            distance = np.linalg.norm(target - query) if target is not None else None
-            if distance is not None:
-                euc_data[f"Transformed Rain ({target_col})"].update({col: float(distance)})
-
-    target = orig_evi_data[1:, tgt_col].astype(float)
-    for i, col in enumerate(t_grad_obj.titles):
-        if i in t_grad_obj.time_cols:
-            continue
-        if i == tgt_col:
-            pass
-        else:
-            query = orig_evi_data[1:, i].astype(float)
-            distance = np.linalg.norm(target - query) if target is not None else None
-            if distance is not None:
-                euc_data[f"EVI ({target_col})"].update({col: float(distance)})
-
-    target = trans_evi_data[1:, tgt_col].astype(float)
-    for i, col in enumerate(t_grad_obj.titles):
-        if i in t_grad_obj.time_cols:
-            continue
-        if i == tgt_col:
-            pass
-        else:
-            query = trans_evi_data[1:, i].astype(float)
-            distance = np.linalg.norm(target - query) if target is not None else None
-            if distance is not None:
-                euc_data[f"Transformed EVI ({target_col})"].update({col: float(distance)})
-    return euc_data
 
 
 def gp_descriptor_spider_plot(df_list: list[pd.DataFrame], labels: list[str], parameters: list[str], grid_levels: int = 6) -> plt.Figure:
@@ -259,14 +199,21 @@ def gp_descriptor_spider_plot(df_list: list[pd.DataFrame], labels: list[str], pa
     return fig
 
 
-def classify_ftgps(lst_test_data, lst_ground_truth):
-    """"""
+def classify_ftgps(lst_test_data, lst_ground_truth) -> dict:
+    """
+    Classify extracted FTGPS into TP, FP, FN, TN.
 
-    def exists_in(pat, lst):
-        for pat_i in lst:
-            if pat.is_similar_to(pat_i):
-                return True
-        return False
+    :param lst_test_data: List of extracted FTGPS from the test data.
+    :param lst_ground_truth: List of ground truth FTGPS.
+
+    :return: Dictionary containing counts of TP, FP, FN, TN.
+    """
+
+    # def exists_in(pat, lst):
+    #    for pat_i in lst:
+    #        if pat.is_similar_to(pat_i):
+    #            return True
+    #    return False
 
     res_cat_count = {"TP": 0, "FP": 0, "FN": 0, "TN": 0}
 
