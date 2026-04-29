@@ -81,9 +81,9 @@ def gp_descriptor_spider_plot(df_list: list[pd.DataFrame], labels: list[str], pa
     """
 
     # --- Data Processing ---
-    # Extract means and stds for each dataframe provided
     df_avgs = []
     df_stds = []
+    # Extract means and stds for each dataframe provided
     for df in df_list:
         # Filter only for the requested parameters to ensure order
         df_avgs.append(df[parameters].mean())
