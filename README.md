@@ -6,11 +6,16 @@ A python implementation of the <i>Temporal-GRAdual rANKing</i> algorithm. The al
 * D. O. Owuor and A. Laurent, "Enhanced Mining of FTGPs Using Mutual Information and Metaheuristic Technique," 2025 IEEE International Conference on Fuzzy Systems (FUZZ), Reims, France, 2025, pp. 1-6, doi: 10.1109/FUZZ62266.2025.11197674.
 
 
-
 ### List of (important) Files:
 1. README.md (this file)
 2. cli_main.py (for running algorithm manually)
 3. DATASET.csv (a dataset for quick testing)
+
+> [!WARNING]
+> ### REPOSITORY DEPRECATED
+> This project is no longer maintained here. The active development and updated code have moved.
+> 
+> 👉 **Get the updated code here:** [github.com/owuordickson/gp-mining](https://github.com/owuordickson/gp-mining)
 
 ### Installation
 
