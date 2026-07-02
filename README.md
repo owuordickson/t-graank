@@ -3,6 +3,9 @@
 A python implementation of the <i>Temporal-GRAdual rANKing</i> algorithm. The algorithm extends the <i>GRAANK</i> algorithm to the case of temporal gradual tendencies. We have optimized the implementation of the algorithm by: (1) using Numpy functions for operations that are time-consuming and, (2) allowed parallel multiprocessing. The research paper is available via:
 
 * D. Owuor, A. Laurent and J. Orero, "Mining Fuzzy-Temporal Gradual Patterns," 2019 IEEE International Conference on Fuzzy Systems (FUZZ-IEEE), 2019, pp. 1-6, doi: 10.1109/FUZZ-IEEE.2019.8858883.
+* D. O. Owuor and A. Laurent, "Enhanced Mining of FTGPs Using Mutual Information and Metaheuristic Technique," 2025 IEEE International Conference on Fuzzy Systems (FUZZ), Reims, France, 2025, pp. 1-6, doi: 10.1109/FUZZ62266.2025.11197674.
+
+
 
 ### List of (important) Files:
 1. README.md (this file)
