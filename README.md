@@ -8,7 +8,7 @@ A python implementation of the <i>Temporal-GRAdual rANKing</i> algorithm. The al
 
 ### List of (important) Files:
 1. README.md (this file)
-2. cli_main.py (for running algorithm manually)
+2. cli_tgp.py (for running algorithm manually)
 3. DATASET.csv (a dataset for quick testing)
 
 > [!WARNING]
