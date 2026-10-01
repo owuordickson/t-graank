@@ -4,12 +4,12 @@
 # repository for complete details.
 
 import time
+
 import numpy as np
 from sklearn.feature_selection import mutual_info_regression
-
 from so4gp import TGP
-from .t_graank import TGrad
 
+from .t_graank import TGrad
 
 
 class TGradAMI(TGrad):

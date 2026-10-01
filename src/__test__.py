@@ -1,6 +1,5 @@
-from TemporalGP.TGP.tgrad_ami import TGradAMI
 from TemporalGP.TGP.t_graank import TGrad
-
+from TemporalGP.TGP.tgrad_ami import TGradAMI
 
 # f_path = "../datasets/DATASET.csv"
 # f_path = "../datasets/rain_temp2013-2015.csv"

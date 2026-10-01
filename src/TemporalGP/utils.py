@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # SPDX-License-Identifier: GNU GPL v3
 # This file is licensed under the terms of the GNU GPL v3.0
 # See the LICENSE file in the root of this
@@ -6,9 +5,9 @@
 
 
 
+import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-import matplotlib.pyplot as plt
 from dtw import dtw
 
 
@@ -271,14 +270,12 @@ def gen_distance_plot(lst_tgrad_objs, dtw_data, euc_data) -> plt.Figure:
 
         plt_data = []
         for key, val_dict in dtw_data[i].items():
-            row = [key, "DTW"]
-            for k, v in val_dict.items():
-                row.append(v)
+            row = [key, "DTW", *val_dict.values()]
             plt_data.append(row)
 
         for key, val_dict in euc_data[i].items():
             row = [key, "EUC"]
-            for k, v in val_dict.items():
+            for v in val_dict.values():
                 row.append(v)
             plt_data.append(row)
         plt_df = pd.DataFrame(plt_data, columns=columns)

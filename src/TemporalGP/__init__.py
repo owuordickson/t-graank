@@ -21,4 +21,4 @@ __credits__ = "Montpellier University"
 
 
 # Packages available in 'from TemporalGP import *'
-__all__ = ['', '', '']
+__all__ = ['']

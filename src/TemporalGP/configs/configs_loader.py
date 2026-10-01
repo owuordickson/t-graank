@@ -7,8 +7,8 @@
 Loads default configurations from the 'configs.ini' file
 """
 
-import os
 import configparser
+import os
 
 
 def load_configs():

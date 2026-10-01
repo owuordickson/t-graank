@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # SPDX-License-Identifier: GNU GPL v3
 # This file is licensed under the terms of the GNU GPL v3.0
 # See the LICENSE file in the root of this
@@ -90,7 +89,7 @@ def main_cli():
                          help='minimum mutual information error',
                          default=options_tgp["min_mi_error"],
                          type='float')
-    (cfg, args) = optparser.parse_args()
+    (cfg, _args) = optparser.parse_args()
     cfg.evalMode = bool(cfg.evalMode)
 
     if (cfg.file is None) or cfg.file == '':

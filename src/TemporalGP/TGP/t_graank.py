@@ -10,13 +10,13 @@ Algorithm for mining temporal gradual patterns using fuzzy membership functions.
 
 import copy
 import time
+
 import numpy as np
 import pandas as pd
-
-from so4gp import DataGP, TGP
+from so4gp import TGP, DataGP
 from so4gp.algorithms import GRAANK
-from so4gp.gradual_patterns import NO_TIME_LABEL, FatalError
 from so4gp.algorithms.base.graank_alg import OrigGRAANK
+from so4gp.gradual_patterns import NO_TIME_LABEL, FatalError
 
 
 class TGrad(OrigGRAANK):
