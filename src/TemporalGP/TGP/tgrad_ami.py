@@ -7,12 +7,13 @@ import time
 import numpy as np
 from sklearn.feature_selection import mutual_info_regression
 
-from so4gp.algorithms import TGrad
+from so4gp import TGP
+from .t_graank import TGrad
+
 
 
 class TGradAMI(TGrad):
-
-    def __init__(self, *args, min_error: float = 0.0001, **kwargs):
+    def __init__(self, *args, **kwargs):
         """
         Algorithm for estimating time-lag using Average Mutual Information (AMI) and KMeans clustering which is
         extended to mining gradual patterns. The average mutual information I(X; Y) is a measure of the “information”
@@ -26,80 +27,97 @@ class TGradAMI(TGrad):
         Instead of min-representativity value, the algorithm relies on the error-margin between MIs.
 
         :param args: [required] data source path of Pandas DataFrame, [optional] minimum-support, [optional] eq
-        :param kwargs: [required] target-column or attribute or feature, [optional] minimum representativity
-        :param min_error: [optional] minimum Mutual Information error margin.
+        :param kwargs: [optional] minimum representativity, [optional] MF shape, [optional] clustering algorithm,
+        [optional] inference method.
 
-        >>> from so4gp.algorithms import TGradAMI
-        >>> import pandas
-        >>>
-        >>> dummy_data = [["2021-03", 30, 3, 1, 10], ["2021-04", 35, 2, 2, 8], ["2021-05", 40, 4, 2, 7], ["2021-06", 50, 1, 1, 6], ["2021-07", 52, 7, 1, 2]]
-        >>> dummy_df = pandas.DataFrame(dummy_data, columns=['Date', 'Age', 'Salary', 'Cars', 'Expenses'])
-        >>>
-        >>> mine_obj = TGradAMI(dummy_df, min_sup=0.5, target_col=1, min_rep=0.5, min_error=0.1)
-        >>> result_dict = mine_obj.discover_tgp(use_clustering=True, eval_mode=False)
-        >>>
-        >>> # print(result['Patterns'])
-        >>> print(result_dict)
         """
-        super(TGradAMI, self).__init__(*args, **kwargs)
-        self._error_margin: float = min_error
-        self._feature_cols: np.ndarray = np.setdiff1d(self.attr_cols, self.target_col)
+        super().__init__(*args, **kwargs)
         self._mi_error: float = 0
-
-    @property
-    def error_margin(self):
-        return self._error_margin
+        self._transformation_data: dict = {}
 
     @property
     def mi_error(self):
         return self._mi_error
 
     @property
-    def feature_cols(self):
-        return self._feature_cols
+    def transformation_data(self):
+        return self._transformation_data
 
-    def find_best_mutual_info(self):
+    def get_mi_transformation_steps(
+        self, error_margin: float
+    ) -> tuple[dict[int, int], int]:
         """
-        A method that computes the mutual information I(X; Y) of the original dataset and all the transformed datasets
-        w.r.t. Minimum representativity threshold.
+        Estimate the optimal transformation step for each feature using
+        Average Mutual Information (AMI).
 
-        We improve the computation of MI: if the MI of a dataset is 0 (0 indicates NO MI), we replace it with -1 (this
-        encoding allows our algorithm to treat that MI as useless). So now, that allows our algorithm to easily
-        distinguish very small MI values. This is beautiful because if the initial MI is 0, then both will be -1, making it
-        the optimal MI with any other -1 in the time-delayed MIs.
+        For each feature, this method computes the mutual information (MI)
+        between the target attribute and:
 
-        :return: {column index: transformation step}
+        1. The original (untransformed) dataset.
+        2. All candidate time-transformed datasets that satisfy the minimum
+           representativity constraint.
+
+        The optimal transformation is the one whose MI differs from the
+        original dataset by at most the specified error margin. This approach
+        assumes that the best transformation step that preserves the information shared
+        between the feature and the target attribute.
+
+        To simplify comparison during optimization, an MI value of zero
+        (indicating no mutual information) is internally encoded as ``-1``.
+        This sentinel value allows the algorithm to distinguish the absence
+        of mutual information from very small positive MI values while
+        preserving equality comparisons between the original and transformed
+        datasets.
+
+        Args:
+            error_margin:
+                Maximum allowable absolute difference between the mutual
+                information of the original dataset and that of a transformed
+                dataset.
+
+        Returns:
+            A dictionary mapping each feature column index to its selected
+            transformation step (estimated time delay) and the maximum transformation step.
+
+        Notes:
+            Only transformed datasets satisfying the minimum representativity
+            threshold are considered during the search for the optimal time
+            transformation.
         """
+
+        def return_results(steps_data, mi_err, maximum_step):
+            self._mi_error = mi_err
+            self.min_rep = round(((self.row_count - maximum_step) / self.row_count), 5)
+            return steps_data, maximum_step
 
         # 1. Compute MI for original dataset w.r.t. target-col
+        feature_cols = self.attr_cols
         y = np.array(self.full_attr_data[self.target_col], dtype=float).T
-        x_data = np.array(self.full_attr_data[self._feature_cols], dtype=float).T
+        x_data = np.array(self.full_attr_data[feature_cols], dtype=float).T
         init_mi_info = np.array(mutual_info_regression(x_data, y), dtype=float)
 
         # 2. Compute all the MI for every time-delay and compute error
         mi_list = []
         for step in range(1, self.max_step):
             # Compute MI
-            attr_data, _ = self.transform_and_mine(step, return_patterns=False)
+            steps_dict = {int(feature_cols[i]): step for i in range(len(feature_cols))}
+            attr_data, _ = self.transform_data(steps_dict, step)
+            if attr_data is None:
+                return return_results(steps_dict, -1, step)
+
             y = np.array(attr_data[self.target_col], dtype=float).T
-            x_data = np.array(attr_data[self._feature_cols], dtype=float).T
+            x_data = np.array(attr_data[feature_cols], dtype=float).T
             try:
                 mi_vals = np.array(mutual_info_regression(x_data, y), dtype=float)
             except ValueError:
-                optimal_dict = {int(self._feature_cols[i]): step for i in range(len(self._feature_cols))}
-                self._mi_error = -1
-                self.min_rep = round(((self.row_count - step) / self.row_count), 5)
-                return optimal_dict, step
+                return return_results(steps_dict, -1, step)
 
             # Compute MI error
             squared_diff = np.square(np.subtract(mi_vals, init_mi_info))
             mse_arr = np.sqrt(squared_diff)
-            is_mi_preserved = np.all(mse_arr <= self._error_margin)
+            is_mi_preserved = np.all(mse_arr <= error_margin)
             if is_mi_preserved:
-                optimal_dict = {int(self._feature_cols[i]): step for i in range(len(self._feature_cols))}
-                self._mi_error = round(np.min(mse_arr), 5)
-                self.min_rep = round(((self.row_count - step) / self.row_count), 5)
-                return optimal_dict, step
+                return return_results(steps_dict, round(np.min(mse_arr), 5), step)
             mi_list.append(mi_vals)
         mi_info_arr = np.array(mi_list, dtype=float)
 
@@ -114,90 +132,69 @@ class TGradAMI(TGrad):
         max_step = int(np.max(optimal_steps_arr)) + 1
 
         # 5. Integrate feature indices with the computed steps
-        optimal_dict = {int(self._feature_cols[i]): int(optimal_steps_arr[i] + 1) for i in range(len(self._feature_cols))}
+        steps_dict = {
+            int(feature_cols[i]): int(optimal_steps_arr[i] + 1)
+            for i in range(len(feature_cols))
+        }
+        return return_results(steps_dict, round(np.min(mse_arr), 5), max_step)
 
-        self._mi_error = round(np.min(mse_arr), 5)
-        self.min_rep = round(((self.row_count - max_step) / self.row_count), 5)
-        return optimal_dict, max_step
-
-    def gather_delayed_data(self, optimal_dict: dict, max_step: int):
-        """
-        A method that combined attribute data with different data transformations and computes the corresponding
-        time-delay values for each attribute.
-
-        :param optimal_dict: Raw transformed dataset.
-        :param max_step: Largest data transformation step.
-        :return: Combined transformed dataset with corresponding time-delay values.
-        """
-
-        delayed_data: np.ndarray|None = None
-        time_data = []
-        n = self.row_count
-        k = (n - max_step)  # Number of rows created by the largest step-delay
-        for col_index in range(self.col_count):
-            if (col_index == self.target_col) or (col_index in self.time_cols):
-                # date-time column OR target column
-                temp_row = self.full_attr_data[col_index][0: k]
-            else:
-                # other attributes
-                step = optimal_dict[col_index]
-                temp_row = self.full_attr_data[col_index][step: n]
-                _, time_diffs = self.get_time_diffs(step)
-
-                # Get first k items for delayed data
-                temp_row = temp_row[0: k]
-
-                # Get first k items for time-lag data
-                temp_diffs = [(time_diffs[i]) for i in range(k)]
-                time_data.append(temp_diffs)
-
-                # for i in range(k):
-                #    if i in time_dict:
-                #        time_dict[i].append(time_diffs[i])
-                #    else:
-                #        time_dict[i] = [time_diffs[i]]
-                # print(f"{time_diffs}\n")
-                # WHAT ABOUT TIME DIFFERENCE/DELAY? It is different for every step!!!
-            delayed_data = temp_row if (delayed_data is None) \
-                else np.vstack((delayed_data, temp_row))
-
-        time_data = np.array(time_data)
-        return delayed_data, time_data
-
-    def discover_tgp(self, use_clustering: bool = False, transformation_steps: dict = None, eval_mode: bool = False):
+    def discover_tgp_ami(
+        self,
+        target_col: int,
+        search_algorithm: str = "apriori",
+        max_iteration: int|None = None,
+        compute_descriptors: bool = False,
+        transformation_steps: dict | None = None,
+        ignore_time: bool = False,
+        error_margin: float = 0.0001,
+        eval_mode: bool = False,
+    ) -> dict:
         """
         A method that applies mutual information concept, clustering, and hill-climbing algorithm to find the best data
         transformation that maintains MI and estimate the best time-delay value of the mined Fuzzy Temporal Gradual
         Patterns (FTGPs).
 
-        :param use_clustering: Use a clustering algorithm to estimate the best time-delay value.
+        :param target_col: [required] Index of the target attribute/feature/column. Temporal transformations are
+        estimated relative to this attribute.
+        :param search_algorithm: Gradual pattern mining algorithm to apply to the transformed dataset. Supported values
+        are ``apriori``, ``ga``, ``aco``, ``pso``, ``hc``, ``random``, and ``clustergp``. Defaults to ``"apriori"``.
+        :param max_iteration: Maximum number of iterations to run the search algorithm.
+        :param compute_descriptors: If ``True``, compute descriptors for the mined gradual patterns. Defaults to ``False``.
         :param transformation_steps: Data transformation steps (used to override the computed transformation steps).
+        :param ignore_time: Mine TGPs but skip the calculation and estimation of time delay.
+        :param error_margin: [optional] minimum Mutual Information error margin.
         :param eval_mode: Run algorithm in evaluation mode.
+
         :return: List of (FTGPs as DICT object) or (FTGPs and evaluation data as a Python dict) when executed in evaluation mode.
         """
 
         start = time.time()
+        self.target_col = target_col
+        self._search_algorithm = search_algorithm
+        self._algorithm_max_iter = max_iteration
+        self._compute_descriptors = compute_descriptors
         self.clear_gradual_patterns()
-        # 1. Compute and find the lowest mutual information
-        if transformation_steps is not None:
-            optimal_dict = transformation_steps
-            max_step = 0
-            for _, v in optimal_dict.items():
-                if v > max_step:
-                    max_step = v
-        else:
-            optimal_dict, max_step = self.find_best_mutual_info()
 
-        # 2. Create a final (and dynamic) delayed dataset
-        delayed_data, time_data = self.gather_delayed_data(optimal_dict, max_step)
+        # 1. Compute and find the lowest mutual information (based) steps
+        if transformation_steps is None:
+            transformation_steps, max_step = self.get_mi_transformation_steps(
+                error_margin=error_margin
+            )
+        else:
+            max_step: int = 0
+            for v in transformation_steps.values():
+                max_step: int = max(max_step, v)
 
         # 3. Discover temporal-GPs from time-delayed data
-        lst_tgp = self._mine_gps_at_step(time_delay_data=time_data, attr_data=delayed_data, clustering_method=use_clustering)
+        lst_tgp = self._safe_transform_and_mine(
+            transformation_steps, max_step, skip_time=ignore_time
+        )
 
         # 4. Organize FTGPs into a single list
         if lst_tgp:
             for tgp in lst_tgp:
-                self.add_gradual_pattern(tgp)
+                if isinstance(tgp, TGP):
+                    self.add_gradual_pattern(tgp)
 
         # 5. Check if the algorithm is in evaluation mode
         if eval_mode:
@@ -207,25 +204,27 @@ class TGradAMI(TGrad):
                 title_row.append(txt)
                 if (col != self.target_col) and (col not in self.time_cols):
                     time_title.append(txt)
-            add_dict = {
-                'Patterns': self.display_patterns,
-                'Transformation Steps': optimal_dict,
-                'Time Data': np.vstack((np.array(time_title), time_data.T)),
-                'Transformed Data': np.vstack((np.array(title_row), delayed_data.T if delayed_data is not None else np.array([]))),
+            transformed_data, time_data = self.transform_data(transformation_steps, max_step)
+            str_time_data = {"".join(self.titles[k]): v for k, v in time_data.items()}
+            self._transformation_data = {
+                "Patterns": self.display_patterns,
+                "Transformation Steps": transformation_steps,
+                'Time Data': str_time_data,
+                'Transformed Data': np.vstack(
+                    (np.array(title_row), transformed_data.T if transformed_data is not None else np.array([]))),
             }
-        else:
-            add_dict = {"Patterns": self.display_patterns}
 
         duration = time.time() - start
         out_dict: dict[str, str | list | np.ndarray | None | dict] = {
             "Algorithm": "TGradAMI",
             # "Memory Usage (MiB)": f{mem_use)}",
+            "GP Search Algorithm": f"{self._search_algorithm}",
+            "Maximum Iteration for Search Algorithm": f"{self._algorithm_max_iter}",
             "Minimum Representation": f"{self.min_rep:.2f}",
-            "MI Minimum Error": f"{self.error_margin:.2f}",
+            "MI Minimum Error": f"{error_margin:.2f}",
             "MI Error": f"{self.mi_error:.2f}",
-            "Target Column": f"{self._target_col}",
-            "Run-time": f"{duration:.6f} seconds"}
-        self.generate_output_files(out_dict, target_col=self.target_col)
-
-        out_dict.update(add_dict)
+            "Target Column": f"{self.target_col}",
+            "Run-time": f"{duration:.6f} seconds",
+        }
+        out_dict.update({"Patterns": self.display_patterns})
         return out_dict

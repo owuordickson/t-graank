@@ -36,7 +36,7 @@ classifiers = [
 
 [project.urls]
 Homepage = "https://github.com/owuordickson/tgraank"
-Documentation = "http://tgraank.readthedocs.io"
+Documentation = "https://tgraank.readthedocs.io"
 Repository = "https://github.com/owuordickson/tgraank.git"
 "Bug Tracker" = "https://github.com/owuordickson/tgraank/issues"
 Changelog = "https://github.com/owuordickson/tgraank/blob/main/CHANGELOG.md"

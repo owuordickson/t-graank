@@ -16,7 +16,10 @@ mi_err_margin = 0.0001
 eval_mode = True
 clustering_method = False
 
-t_grad = TGradAMI(f_path, min_sup, eq, target_col=tgt_col, min_rep=min_rep, min_error=mi_err_margin)
-#t_grad = TGrad(f_path, min_sup, eq, target_col=tgt_col, min_rep=min_rep)
-eval_dict = t_grad.discover_tgp()
+t_grad = TGradAMI(f_path, min_sup, eq, min_rep=min_rep)
+eval_dict = t_grad.discover_tgp_ami(target_col=tgt_col, error_margin=mi_err_margin)
+print(eval_dict)
+
+t_grad = TGrad(f_path, min_sup, eq, min_rep=min_rep)
+eval_dict = t_grad.discover_tgp(target_col=tgt_col)
 print(eval_dict)

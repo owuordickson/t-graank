@@ -33,6 +33,7 @@ def compute_distance(t_grad_obj, orig_rain_data, orig_evi_data, trans_rain_data,
             else:
                 query = arr_data2[1:, i].astype(float)
                 alignment = dtw(query, target, keep_internals=True) if target is not None else None
+                # alignment = dtw(query, target) if target is not None else None
                 if alignment is not None:
                     align_dist = getattr(alignment, 'distance', np.inf) if alignment else np.inf
                     dtw_data[str_key].update({col: float(align_dist)})
@@ -236,8 +237,8 @@ def classify_ftgps(lst_test_data, lst_ground_truth) -> dict:
                 elif pat1.support < 0.5 > pat2.support:
                     res_cat_count["TN"] += 1
                     total += 1
-    missing = len(lst_test_data) - total
-    res_cat_count["FP"] += missing
+    #missing = len(lst_test_data) - total
+    #res_cat_count["FP"] += missing
     return res_cat_count
 
 
@@ -257,7 +258,7 @@ def gen_distance_plot(lst_tgrad_objs, dtw_data, euc_data) -> plt.Figure:
 
     for i, t_grad in enumerate(lst_tgrad_objs):
         locations = []
-        for j in t_grad.feature_cols:
+        for j in t_grad.attr_cols:
             col = t_grad.titles[j]
             col = col[:3]
             locations.append(col)

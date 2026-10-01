@@ -9,17 +9,15 @@ Entry points that allow users to execute GUI or Cli programs.
 """
 
 import sys
-import json
 from optparse import OptionParser
-import so4gp as sgp
 
 from .configs.configs_loader import load_configs
 from .TGP.t_graank import TGrad
 from .TGP.tgrad_ami import TGradAMI
 
 
-def execute_tgp(f_path: str, min_sup: float, tgt_col: int, min_rep: float, min_error: float, num_cores: int,
-                allow_mp: bool, eq: bool=False, allow_clustering: bool=False, eval_mode=False, algorithm: int=0):
+def execute_tgp(f_path: str, min_sup: float, tgt_col: int, min_rep: float, min_error: float,
+                eq: bool=False, eval_mode=False, algorithm: int=0):
     """
     Executes T-GRAANK algorithm using the user-specified configuration options
 
@@ -28,25 +26,18 @@ def execute_tgp(f_path: str, min_sup: float, tgt_col: int, min_rep: float, min_e
     :param min_sup: minimum support threshold
     :param min_rep: minimum representativity threshold
     :param min_error: minimum mutual information error threshold
-    :param num_cores: number of available cores
-    :param allow_mp: allow multiprocessing
     :param eq: to assign equal values as valid
-    :param allow_clustering: using clustering method to estimate time delays
     :param eval_mode: run in 'evaluation/testing' mode
     :param algorithm: algorithm to use (T-Grad or TGradAMI)
     :return: results in string format
     """
     try:
-        if num_cores <= 1:
-            num_cores = sgp.get_num_cores()
-
         if algorithm == 0:
-            t_grad = TGrad(f_path, min_sup, eq, target_col=tgt_col, min_rep=min_rep)
-            res = t_grad.discover_tgp(parallel=allow_mp, num_cores=num_cores)
-            res_dict = json.loads(res)
+            t_grad = TGrad(f_path, min_sup, eq, min_rep=min_rep)
+            res_dict = t_grad.discover_tgp(target_col=tgt_col)
         elif algorithm == 1:
-            t_grad = TGradAMI(f_path, min_sup, eq, target_col=tgt_col, min_rep=min_rep, min_error=min_error)
-            res_dict = t_grad.discover_tgp(use_clustering=allow_clustering, eval_mode=eval_mode)
+            t_grad = TGradAMI(f_path, min_sup, eq, min_rep=min_rep)
+            res_dict = t_grad.discover_tgp_ami(target_col=tgt_col, error_margin=min_error, eval_mode=eval_mode)
         else:
             return "Invalid algorithm specified"
 
@@ -74,11 +65,6 @@ def main_cli():
                          help='minimum support value',
                          default=options_gp["min_sup"],
                          type='float')
-    optparser.add_option('-p', '--allowMultiprocessing',
-                         dest='allowPara',
-                         help='allow multiprocessing',
-                         default=options_gp["allow_multiprocessing"],
-                         type='int')
     optparser.add_option('-x', '--evaluationMode',
                          dest='evalMode',
                          help='run in evaluation mode',
@@ -104,13 +90,7 @@ def main_cli():
                          help='minimum mutual information error',
                          default=options_tgp["min_mi_error"],
                          type='float')
-    optparser.add_option('-k', '--useClustering',
-                         dest='useClusters',
-                         help='use clustering method',
-                         default=options_tgp["use_clustering"],
-                         type='int')
     (cfg, args) = optparser.parse_args()
-    cfg.useClusters = bool(cfg.useClusters)
     cfg.evalMode = bool(cfg.evalMode)
 
     if (cfg.file is None) or cfg.file == '':
@@ -120,6 +100,5 @@ def main_cli():
 
     # import tracemalloc
     # tracemalloc.start()
-    execute_tgp(cfg.file, cfg.minSup, cfg.tgtCol, cfg.minRep, cfg.minError, cfg.numCores, cfg.allowPara,
-                           allow_clustering=cfg.useClusters, eval_mode=cfg.evalMode)
+    execute_tgp(cfg.file, cfg.minSup, cfg.tgtCol, cfg.minRep, cfg.minError, eval_mode=cfg.evalMode, algorithm=0)
     # snapshot = tracemalloc.take_snapshot()
