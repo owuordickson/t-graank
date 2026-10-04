@@ -200,46 +200,6 @@ def gp_descriptor_spider_plot(df_list: list[pd.DataFrame], labels: list[str], pa
 
 
 
-def classify_ftgps_old(lst_test_data, lst_ground_truth) -> dict:
-    """
-    Classify extracted FTGPS into TP, FP, FN, TN.
-
-    :param lst_test_data: List of extracted FTGPS from the test data.
-    :param lst_ground_truth: List of ground truth FTGPS.
-
-    :return: Dictionary containing counts of TP, FP, FN, TN.
-    """
-
-    res_cat_count = {"TP": 0, "FP": 0, "FN": 0, "TN": 0}
-
-    total = 0
-    already_seen = set()
-    for pat1 in lst_test_data:
-        for pat2 in lst_ground_truth:
-            if pat1.is_similar_to(pat2) and pat2 not in already_seen:
-                already_seen.add(pat2)
-                if pat1.support >= 0.5 and pat2.support >= 0.5:
-                    res_cat_count["TP"] += 1
-                    total += 1
-                elif pat1.support >= 0.5 > pat2.support:
-                    res_cat_count["FP"] += 1
-                    total += 1
-                elif pat1.support < 0.5 <= pat2.support:
-                    res_cat_count["FN"] += 1
-                    total += 1
-                elif pat1.support < 0.5 > pat2.support:
-                    res_cat_count["TN"] += 1
-                    total += 1
-    missing_pats = set(lst_test_data) - already_seen
-    for pat in missing_pats:
-        if pat.support >= 0.5:
-            res_cat_count["FP"] += 1
-        else:
-            res_cat_count["TN"] += 1
-    return res_cat_count
-
-
-
 def classify_ftgps(lst_test_data, lst_ground_truth,threshold=0.5) -> dict:
     """
     Classify FTGPs by comparing a test dataset against a reference dataset.
