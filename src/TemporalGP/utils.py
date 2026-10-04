@@ -200,7 +200,7 @@ def gp_descriptor_spider_plot(df_list: list[pd.DataFrame], labels: list[str], pa
 
 
 
-def classify_ftgps(lst_test_data, lst_ground_truth) -> dict:
+def classify_ftgps_old(lst_test_data, lst_ground_truth) -> dict:
     """
     Classify extracted FTGPS into TP, FP, FN, TN.
 
@@ -209,12 +209,6 @@ def classify_ftgps(lst_test_data, lst_ground_truth) -> dict:
 
     :return: Dictionary containing counts of TP, FP, FN, TN.
     """
-
-    # def exists_in(pat, lst):
-    #    for pat_i in lst:
-    #        if pat.is_similar_to(pat_i):
-    #            return True
-    #    return False
 
     res_cat_count = {"TP": 0, "FP": 0, "FN": 0, "TN": 0}
 
@@ -236,9 +230,114 @@ def classify_ftgps(lst_test_data, lst_ground_truth) -> dict:
                 elif pat1.support < 0.5 > pat2.support:
                     res_cat_count["TN"] += 1
                     total += 1
-    #missing = len(lst_test_data) - total
-    #res_cat_count["FP"] += missing
+    missing_pats = set(lst_test_data) - already_seen
+    for pat in missing_pats:
+        if pat.support >= 0.5:
+            res_cat_count["FP"] += 1
+        else:
+            res_cat_count["TN"] += 1
     return res_cat_count
+
+
+
+def classify_ftgps(lst_test_data, lst_ground_truth,threshold=0.5) -> dict:
+    """
+    Classify FTGPs by comparing a test dataset against a reference dataset.
+
+    Each FTGP is classified according to whether its support is above or
+    below the specified threshold in the test and reference datasets.
+
+    A pattern that is absent from one dataset is assigned support = 0
+    in that dataset.
+
+    Pattern matching is performed using ``is_similar_to()`` and each
+    pattern is matched at most once.
+
+    Parameters
+    ----------
+    lst_test_data : list
+        FTGPs extracted from the test dataset.
+
+    lst_ground_truth : list
+        FTGPs extracted from the reference (proxy ground-truth) dataset.
+
+    threshold : float, default=0.5
+        Support threshold used to distinguish supported and unsupported
+        FTGPs.
+
+    Returns
+    -------
+    dict
+        Counts of TP, FP, FN, and TN.
+    """
+
+    confusion_matrix_counts = {"TP": 0, "FP": 0, "FN": 0, "TN": 0}
+
+    # Track which patterns have already been matched.
+    matched_test = set()
+    matched_ground_truth = set()
+
+    # ------------------------------------------------------------
+    # Step 1: Match test FTGPs to reference FTGPs.
+    # ------------------------------------------------------------
+    for i, test_pat in enumerate(lst_test_data):
+
+        for j, gt_pat in enumerate(lst_ground_truth):
+
+            if i in matched_test or j in matched_ground_truth:
+                continue
+
+            if test_pat.is_similar_to(gt_pat):
+
+                test_support = test_pat.support
+                gt_support = gt_pat.support
+
+                if test_support >= threshold and gt_support >= threshold:
+                    confusion_matrix_counts["TP"] += 1
+
+                elif test_support >= threshold > gt_support:
+                    confusion_matrix_counts["FP"] += 1
+
+                elif test_support < threshold <= gt_support:
+                    confusion_matrix_counts["FN"] += 1
+
+                else:
+                    confusion_matrix_counts["TN"] += 1
+
+                matched_test.add(i)
+                matched_ground_truth.add(j)
+
+                break
+
+    # ------------------------------------------------------------
+    # Step 2: Handle test FTGPs with no corresponding reference FTGP.
+    # Their reference support is therefore zero.
+    # ------------------------------------------------------------
+    for i, test_pat in enumerate(lst_test_data):
+
+        if i in matched_test:
+            continue
+
+        if test_pat.support >= threshold:
+            confusion_matrix_counts["FP"] += 1
+        else:
+            confusion_matrix_counts["TN"] += 1
+
+    # ------------------------------------------------------------
+    # Step 3: Handle reference FTGPs with no corresponding test FTGP.
+    # Their test support is therefore zero.
+    # ------------------------------------------------------------
+    for j, gt_pat in enumerate(lst_ground_truth):
+
+        if j in matched_ground_truth:
+            continue
+
+        if gt_pat.support >= threshold:
+            confusion_matrix_counts["FN"] += 1
+        else:
+            confusion_matrix_counts["TN"] += 1
+
+    return confusion_matrix_counts
 
 
 
